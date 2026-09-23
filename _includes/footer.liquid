@@ -90,10 +90,16 @@
   SOGLIA 2+ VOCI (2026-09-21): jekyll-toc genera sempre il box, anche con 1 solo titolo o 0
   (box vuoto) — non ha un'opzione "minimo N heading". Lo script sotto nasconde il box quando
   ha meno di 2 <li> nel <ul id="toc">, cosi' compare solo se ha senso mostrarlo.
+  STILE NEUTRO (2026-09-22): tolto il tema "pergamena" (bordo/sfondo giallo-oro, texture rumore)
+  perche' non coerente col resto del sito. Ora bordo grigio chiaro sottile e sfondo bianco, in
+  linea con le altre card del sito (vedi .srv-home-card in _pages/home.md: stesso bordo
+  rgba(0,0,0,.12) e stesso sfondo). Applicato prima su crazyweb4test (commit 959d57e), replicato
+  qui su crazyweb4 il 22/09/2026 su richiesta in chat ("stesso sito, replicalo"). Non rimettere
+  i colori gialli senza che venga richiesto di nuovo.
 {% endcomment %}
 <style>
-#table-of-contents{position:relative;display:inline-block;width:fit-content;max-width:100%;min-width:180px;margin:1.6rem 0 2.2rem;padding:1.3rem 1.4rem 1rem;border:1.5px solid #cdb163;border-radius:16px;background-color:#fbf3d5;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .34 0 0 0 0 .1 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"),linear-gradient(160deg,#fdf7df 0%,#f7ebc3 100%);box-shadow:0 1px 2px rgba(120,90,20,.10),0 8px 24px -12px rgba(120,90,20,.28)}
-#table-of-contents::before{content:"Indice";position:absolute;top:0;left:1.2rem;transform:translateY(-50%);padding:.1rem .8rem;border:1.5px solid #cdb163;border-radius:999px;background:#f3e3a6;font-size:.85rem;font-weight:700;letter-spacing:.04em;line-height:1.4;color:#6b5514}
+#table-of-contents{position:relative;display:inline-block;width:fit-content;max-width:100%;min-width:180px;margin:1.6rem 0 2.2rem;padding:1.3rem 1.4rem 1rem;border:1px solid rgba(0,0,0,.12);border-radius:12px;background-color:#fff;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+#table-of-contents::before{content:"Indice";position:absolute;top:0;left:1.2rem;transform:translateY(-50%);padding:.1rem .8rem;border:1px solid rgba(0,0,0,.12);border-radius:999px;background:#fff;font-size:.85rem;font-weight:700;letter-spacing:.04em;line-height:1.4;color:inherit}
 #table-of-contents ul{list-style:none;margin:0;padding:0}
 #table-of-contents li{margin:0}
 #table-of-contents a{display:block;padding:.2rem 0;line-height:1.35}
@@ -103,9 +109,9 @@
 #table-of-contents+hr{display:none}
 html{scroll-behavior:smooth}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
-html[data-theme="dark"] #table-of-contents{border-color:#6b5a2a;background-color:#2b2618;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .9 0 0 0 0 .6 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"),linear-gradient(160deg,#2f2a1a 0%,#262215 100%);box-shadow:0 8px 24px -12px rgba(0,0,0,.6)}
-html[data-theme="dark"] #table-of-contents::before{border-color:#6b5a2a;background:#3a3220;color:#e0c26a}
-@media (max-width:576px){#table-of-contents{padding:1.2rem 1rem .9rem;border-radius:14px}}
+html[data-theme="dark"] #table-of-contents{border-color:rgba(255,255,255,.15);background-color:rgba(255,255,255,.05);box-shadow:none}
+html[data-theme="dark"] #table-of-contents::before{border-color:rgba(255,255,255,.15);background:var(--global-bg-color);color:inherit}
+@media (max-width:576px){#table-of-contents{padding:1.2rem 1rem .9rem;border-radius:12px}}
 /* toc_style: side (da _config.yml). Regole adattate da al-folio-distill.css (d-article d-contents): colonna a sinistra, sticky, filo verticale. Sotto 1024px torna il box. */
 @media (min-width:1025px){
 html[data-toc-style="side"] #table-of-contents{position:fixed;top:5.5rem;left:max(1rem,calc((100vw - 1140px)/2 - 15rem));display:block;width:14rem;max-height:calc(100vh - 7rem);overflow:auto;min-width:0;margin:0;padding:0 1.2rem 0 0;border:0;border-right:1px solid var(--global-divider-color);border-radius:0;background:none;box-shadow:none}

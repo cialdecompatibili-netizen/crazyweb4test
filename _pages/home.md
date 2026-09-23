@@ -34,6 +34,22 @@ latest_posts:
 html[data-theme=dark] .rete-box .marte{opacity:.66;box-shadow:0 0 34px 10px rgba(150,150,160,.07)}
 @media (max-width:600px){.rete-box .marte{--mt:17vw}}
 /* ===== MARTE END (css) ===== */
+
+/* ===== SERVIZI HOME (nuova sezione, sotto il box costellazione) =====
+   Semplice griglia di 6 card che riprendono i PRIMI 6 servizi di _pages/servizi.md,
+   con link "Vedi tutti i servizi" verso /servizi/. Nessun altro blocco esistente toccato.
+   Per aggiungere/rimuovere una card: duplica/elimina un .srv-home-card qui sotto e nell'HTML. */
+.srv-home{margin:2.5rem 0}
+.srv-home h2{text-align:center;margin-bottom:1.4rem}
+.srv-home-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:900px;margin:0 auto}
+.srv-home-card{padding:16px 18px;border:1px solid rgba(0,0,0,.12);border-radius:12px;background:#fffdf5;text-align:left}
+.srv-home-card b{display:block;margin-bottom:4px}
+.srv-home-card small{opacity:.65;display:block}
+html[data-theme="dark"] .srv-home-card{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.15)}
+.srv-home-more{text-align:center;margin-top:1.6rem}
+.srv-home-more a{display:inline-block;padding:.55rem 1.4rem;border-radius:999px;border:1px solid rgba(0,0,0,.2);text-decoration:none;font-weight:600}
+html[data-theme="dark"] .srv-home-more a{border-color:rgba(255,255,255,.3)}
+@media (max-width:700px){.srv-home-grid{grid-template-columns:1fr}}
 </style>
 
 <div class="rete-box" id="rete-box" markdown="1">
@@ -51,6 +67,25 @@ Un team unico di professionisti coordina ogni fase, dalla strategia al risultato
 **Vuoi far crescere il tuo business?** Scrivici su WhatsApp o richiedi un preventivo: costruiamo insieme la soluzione giusta per te.
 
 </div>
+
+<!-- ===== SERVIZI HOME START =====
+     6 servizi principali presi da _pages/servizi.md, tenuti sincronizzati a mano qui.
+     Se cambi i servizi principali in /servizi/, aggiorna anche questi 6. ===== -->
+<div class="srv-home">
+  <h2>I nostri servizi</h2>
+  <div class="srv-home-grid">
+    <div class="srv-home-card"><b>Siti web aziendali e portali</b><small>Sviluppo su misura</small></div>
+    <div class="srv-home-card"><b>Sviluppo eCommerce</b><small>Shopify, WooCommerce, Magento, PrestaShop</small></div>
+    <div class="srv-home-card"><b>Consulenza SEO</b><small>Audit e strategia di visibilità</small></div>
+    <div class="srv-home-card"><b>Google Ads</b><small>Search, Shopping, Display, YouTube, PMax</small></div>
+    <div class="srv-home-card"><b>Social media marketing</b><small>Gestione e contenuti</small></div>
+    <div class="srv-home-card"><b>Brand identity</b><small>Design e UI/UX</small></div>
+  </div>
+  <div class="srv-home-more">
+    <a href="{{ '/servizi/' | relative_url }}">Vedi tutti i servizi</a>
+  </div>
+</div>
+<!-- ===== SERVIZI HOME END ===== -->
 
 <script>
 /* ===== MARTE START (js) =====
