@@ -21,7 +21,7 @@ html[data-theme="dark"] .srv-t td{background:rgba(255,255,255,.05);border-color:
 <table class="srv-t"><tr>
 <td><a href="{{ '/blog/2026/web-marketing-strategico/' | relative_url }}"><b>Web marketing strategico</b><small>Analisi target e concorrenti</small></a></td>
 <td><a href="{{ '/blog/2026/consulenza-ecommerce/' | relative_url }}"><b>Consulenza eCommerce</b></a></td>
-<td><b>Lead generation</b><small>Marketing + CRM</small></td>
+<td><a href="{{ '/blog/2026/lead-generation/' | relative_url }}"><b>Lead generation</b><small>Marketing + CRM</small></a></td>
 </tr><tr>
 <td><b>Web analytics e CRO</b></td>
 <td><b>Reputazione online</b></td>
