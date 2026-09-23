@@ -16,8 +16,8 @@ html[data-theme="dark"] .srv-t td{background:rgba(255,255,255,.05);border-color:
 
 ## Strategia e consulenza
 <table class="srv-t"><tr>
-<td><b>Web marketing strategico</b><small>Analisi target e concorrenti</small></td>
-<td><b>Consulenza eCommerce</b></td>
+<td><a href="{{ '/blog/2026/web-marketing-strategico/' | relative_url }}"><b>Web marketing strategico</b><small>Analisi target e concorrenti</small></a></td>
+<td><a href="{{ '/blog/2026/consulenza-ecommerce/' | relative_url }}"><b>Consulenza eCommerce</b></a></td>
 <td><b>Lead generation</b><small>Marketing + CRM</small></td>
 </tr><tr>
 <td><b>Web analytics e CRO</b></td>
