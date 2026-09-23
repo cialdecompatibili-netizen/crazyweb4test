@@ -31,7 +31,7 @@ html[data-theme="dark"] .srv-t td{background:rgba(255,255,255,.05);border-color:
 
 ## SEO, GEO e visibilità
 <table class="srv-t"><tr>
-<td><b>Consulenza SEO</b></td>
+<td><a href="{{ '/blog/2026/consulenza-seo/' | relative_url }}"><b>Consulenza SEO</b></a></td>
 <td><b>Audit SEO del sito</b></td>
 <td><b>SEO per aziende</b></td>
 </tr><tr>

@@ -42,7 +42,7 @@ html[data-theme=dark] .rete-box .marte{opacity:.66;box-shadow:0 0 34px 10px rgba
 .srv-home{margin:2.5rem 0}
 .srv-home h2{text-align:center;margin-bottom:1.4rem}
 .srv-home-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:900px;margin:0 auto}
-.srv-home-card{padding:16px 18px;border:1px solid rgba(0,0,0,.12);border-radius:12px;background:#fffdf5;text-align:left}
+.srv-home-card{display:block;color:inherit;text-decoration:none;padding:16px 18px;border:1px solid rgba(0,0,0,.12);border-radius:12px;background:#fffdf5;text-align:left}
 .srv-home-card b{display:block;margin-bottom:4px}
 .srv-home-card small{opacity:.65;display:block}
 html[data-theme="dark"] .srv-home-card{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.15)}
@@ -76,7 +76,7 @@ Un team unico di professionisti coordina ogni fase, dalla strategia al risultato
   <div class="srv-home-grid">
     <div class="srv-home-card"><b>Siti web aziendali e portali</b><small>Sviluppo su misura</small></div>
     <div class="srv-home-card"><b>Sviluppo eCommerce</b><small>Shopify, WooCommerce, Magento, PrestaShop</small></div>
-    <div class="srv-home-card"><b>Consulenza SEO</b><small>Audit e strategia di visibilità</small></div>
+    <a class="srv-home-card" href="{{ '/blog/2026/consulenza-seo/' | relative_url }}"><b>Consulenza SEO</b><small>Audit e strategia di visibilità</small></a>
     <div class="srv-home-card"><b>Google Ads</b><small>Search, Shopping, Display, YouTube, PMax</small></div>
     <div class="srv-home-card"><b>Social media marketing</b><small>Gestione e contenuti</small></div>
     <div class="srv-home-card"><b>Brand identity</b><small>Design e UI/UX</small></div>
