@@ -74,12 +74,12 @@ Un team unico di professionisti coordina ogni fase, dalla strategia al risultato
 <div class="srv-home">
   <h2>I nostri servizi</h2>
   <div class="srv-home-grid">
-    <div class="srv-home-card"><b>Siti web aziendali e portali</b><small>Sviluppo su misura</small></div>
-    <div class="srv-home-card"><b>Sviluppo eCommerce</b><small>Shopify, WooCommerce, Magento, PrestaShop</small></div>
+    <a class="srv-home-card" href="{{ '/blog/2026/siti-web-aziendali-e-portali/' | relative_url }}"><b>Siti web aziendali e portali</b><small>Sviluppo su misura</small></a>
+    <a class="srv-home-card" href="{{ '/blog/2026/sviluppo-ecommerce/' | relative_url }}"><b>Sviluppo eCommerce</b><small>Shopify, WooCommerce, Magento, PrestaShop</small></a>
     <a class="srv-home-card" href="{{ '/blog/2026/consulenza-seo/' | relative_url }}"><b>Consulenza SEO</b><small>Audit e strategia di visibilità</small></a>
-    <div class="srv-home-card"><b>Google Ads</b><small>Search, Shopping, Display, YouTube, PMax</small></div>
-    <div class="srv-home-card"><b>Social media marketing</b><small>Gestione e contenuti</small></div>
-    <div class="srv-home-card"><b>Brand identity</b><small>Design e UI/UX</small></div>
+    <a class="srv-home-card" href="{{ '/blog/2026/google-ads/' | relative_url }}"><b>Google Ads</b><small>Search, Shopping, Display, YouTube, PMax</small></a>
+    <a class="srv-home-card" href="{{ '/blog/2026/social-media-marketing/' | relative_url }}"><b>Social media marketing</b><small>Gestione e contenuti</small></a>
+    <a class="srv-home-card" href="{{ '/blog/2026/brand-identity/' | relative_url }}"><b>Brand identity</b><small>Design e UI/UX</small></a>
   </div>
   <div class="srv-home-more">
     <a href="{{ '/servizi/' | relative_url }}">Vedi tutti i servizi</a>
