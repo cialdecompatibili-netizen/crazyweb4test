@@ -15,7 +15,7 @@
 <span class="n">slider</span>
 </code></pre></div> </div> <div class="language-python highlighter-rouge"> <div class="highlight"><pre class="highlight"><code><span class="n">mo</span><span class="p">.</span><span class="nf">md</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">The first </span><span class="si">{</span><span class="n">slider</span><span class="p">.</span><span class="n">value</span><span class="si">}</span><span class="s"> squares: </span><span class="si">{</span><span class="p">[</span><span class="n">i</span><span class="o">**</span><span class="mi">2</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">slider</span><span class="p">.</span><span class="n">value</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
 </code></pre></div> </div> </div> <p>Until the runtime has moved those blocks into place the container stays hidden, so readers never see the raw source flash before it becomes a notebook.</p> <h2 id="embedding-a-hosted-notebook">Embedding a hosted notebook</h2> <p>If you already publish a notebook — on <code class="language-plaintext highlighter-rouge">marimo.app</code> or your own WASM host — embed it instead:</p> <div class="language-liquid highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">{%</span><span class="w"> </span><span class="nt">al_marimo_embed</span><span class="w"> </span><span class="na">src</span><span class="o">=</span><span class="s2">"https://marimo.app/l/your-notebook"</span><span class="w"> </span><span class="na">height</span><span class="o">=</span><span class="s2">"700px"</span><span class="w"> </span><span class="na">caption</span><span class="o">=</span><span class="s2">"Sampling demo"</span><span class="w"> </span><span class="cp">%}</span>
-</code></pre></div></div> <p>The frame is sandboxed <strong>without</strong> <code class="language-plaintext highlighter-rouge">allow-same-origin</code>, so the embedded notebook cannot reach this page’s storage or cookies.</p> <h2 id="a-note-on-what-this-loads">A note on what this loads</h2> <p>The <code class="language-plaintext highlighter-rouge">marimo-snippets</code> runtime is vendored into the plugin at a pinned version and served from your own site, rather than pulled from a CDN — so no third-party origin executes script in your readers’ pages. Running a notebook does contact marimo’s host, which is worth knowing before you opt a page in.</p> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/" target="_blank" rel="noopener noreferrer">Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2" target="_blank" rel="noopener noreferrer">Displaying External Posts on Your al-folio Blog</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/crazyweb4test/blog/2026/web-marketing-strategico/">Web marketing strategico</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/crazyweb4test/blog/2026/lead-generation/">Lead generation</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/crazyweb4test/blog/2026/consulenza-seo/">Consulenza SEO</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/crazyweb4test/blog/2026/consulenza-ecommerce/">Consulenza eCommerce</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/crazyweb4test/blog/2026/servizix/">Servizix</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/crazyweb4test/blog/2026/fabrizio/">fabrizio</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/crazyweb4test/blog/2026/oooo/">oooo</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/crazyweb4test/blog/2026/enola/">enola</a> </li> </ul> </div> </div> <footer class="fixed-bottom" role="contentinfo"> <div class="container mt-0"> © Copyright 2026 Crazy Web . Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>. Photos from <a href="https://unsplash.com" target="_blank" rel="external nofollow noopener">Unsplash</a>. </div> </footer> <style>
+</code></pre></div></div> <p>The frame is sandboxed <strong>without</strong> <code class="language-plaintext highlighter-rouge">allow-same-origin</code>, so the embedded notebook cannot reach this page’s storage or cookies.</p> <h2 id="a-note-on-what-this-loads">A note on what this loads</h2> <p>The <code class="language-plaintext highlighter-rouge">marimo-snippets</code> runtime is vendored into the plugin at a pinned version and served from your own site, rather than pulled from a CDN — so no third-party origin executes script in your readers’ pages. Running a notebook does contact marimo’s host, which is worth knowing before you opt a page in.</p> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/" target="_blank" rel="noopener noreferrer">Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2" target="_blank" rel="noopener noreferrer">Displaying External Posts on Your al-folio Blog</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/crazyweb4test/blog/2026/workflow-automation/">Workflow automation</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/crazyweb4test/blog/2026/web-marketing-strategico/">Web marketing strategico</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/crazyweb4test/blog/2026/web-design/">Web design</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/crazyweb4test/blog/2026/web-analytics-e-cro/">Web analytics e CRO</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/crazyweb4test/blog/2026/visual-ai-su-larga-scala/">Visual AI su larga scala</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/crazyweb4test/blog/2026/video-marketing/">Video marketing</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/crazyweb4test/blog/2026/video-ai-short-form/">Video AI short-form</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/crazyweb4test/blog/2026/ui-ux-design/">UI/UX design</a> </li> </ul> </div> </div> <footer class="fixed-bottom" role="contentinfo"> <div class="container mt-0"> © Copyright 2026 Crazy Web . Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>. Photos from <a href="https://unsplash.com" target="_blank" rel="external nofollow noopener">Unsplash</a>. </div> </footer> <style>
   :root { --footer-h: 40px; }
   #whatsapp-demo-btn {
     position: fixed;
@@ -199,7 +199,18 @@ ninja.data = [{
               handler: () => {
                 window.location.href = "/crazyweb4test/servizi/";
               },
-            },{id: "post-web-marketing-strategico",
+            },{id: "post-workflow-automation",
+        
+          title: "Workflow automation",
+        
+        description: "Automazione dei processi aziendali con strumenti come n8n e Make.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/workflow-automation/";
+          
+        },
+      },{id: "post-web-marketing-strategico",
         
           title: "Web marketing strategico",
         
@@ -208,6 +219,358 @@ ninja.data = [{
         handler: () => {
           
             window.location.href = "/crazyweb4test/blog/2026/web-marketing-strategico/";
+          
+        },
+      },{id: "post-web-design",
+        
+          title: "Web design",
+        
+        description: "Progettazione grafica di siti web efficaci e coerenti col brand.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/web-design/";
+          
+        },
+      },{id: "post-web-analytics-e-cro",
+        
+          title: "Web analytics e CRO",
+        
+        description: "Analisi dei dati e ottimizzazione del tasso di conversione del sito.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/web-analytics-e-cro/";
+          
+        },
+      },{id: "post-visual-ai-su-larga-scala",
+        
+          title: "Visual AI su larga scala",
+        
+        description: "Produzione di contenuti visivi con AI su larga scala.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/visual-ai-su-larga-scala/";
+          
+        },
+      },{id: "post-video-marketing",
+        
+          title: "Video marketing",
+        
+        description: "Produzione di video per comunicare il tuo brand e i tuoi prodotti.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/video-marketing/";
+          
+        },
+      },{id: "post-video-ai-short-form",
+        
+          title: "Video AI short-form",
+        
+        description: "Produzione di video brevi generati con AI per Reel, TikTok e Shorts.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/video-ai-short-form/";
+          
+        },
+      },{id: "post-ui-ux-design",
+        
+          title: "UI/UX design",
+        
+        description: "Progettazione dell'esperienza e dell'interfaccia utente.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/ui-ux-design/";
+          
+        },
+      },{id: "post-tiktok-ads",
+        
+          title: "TikTok Ads",
+        
+        description: "Campagne pubblicitarie su TikTok.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/tiktok-ads/";
+          
+        },
+      },{id: "post-sviluppo-su-misura",
+        
+          title: "Sviluppo su misura",
+        
+        description: "Sviluppo di soluzioni web personalizzate.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/sviluppo-su-misura/";
+          
+        },
+      },{id: "post-sviluppo-ecommerce",
+        
+          title: "Sviluppo eCommerce",
+        
+        description: "Sviluppo eCommerce su Shopify, WooCommerce, Magento e PrestaShop.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/sviluppo-ecommerce/";
+          
+        },
+      },{id: "post-social-media-marketing",
+        
+          title: "Social media marketing",
+        
+        description: "Gestione strategica dei canali social del tuo brand.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/social-media-marketing/";
+          
+        },
+      },{id: "post-social-ads-per-ecommerce",
+        
+          title: "Social ads per eCommerce",
+        
+        description: "Advertising sui social pensato per vendere prodotti online.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/social-ads-per-ecommerce/";
+          
+        },
+      },{id: "post-sito-multilingua",
+        
+          title: "Sito multilingua",
+        
+        description: "Realizzazione di siti in piu' lingue.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/sito-multilingua/";
+          
+        },
+      },{id: "post-siti-web-aziendali-e-portali",
+        
+          title: "Siti web aziendali e portali",
+        
+        description: "Realizzazione di siti web aziendali e portali su misura.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/siti-web-aziendali-e-portali/";
+          
+        },
+      },{id: "post-siti-mobile-e-web-app",
+        
+          title: "Siti mobile e web app",
+        
+        description: "Sviluppo di siti responsive e web app.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/siti-mobile-e-web-app/";
+          
+        },
+      },{id: "post-seo-per-ecommerce",
+        
+          title: "SEO per eCommerce",
+        
+        description: "Ottimizzazione SEO specifica per negozi online e schede prodotto.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/seo-per-ecommerce/";
+          
+        },
+      },{id: "post-seo-per-aziende",
+        
+          title: "SEO per aziende",
+        
+        description: "Percorsi SEO pensati per le esigenze di aziende strutturate.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/seo-per-aziende/";
+          
+        },
+      },{id: "post-seo-copywriting",
+        
+          title: "SEO copywriting",
+        
+        description: "Testi ottimizzati per i motori di ricerca e per chi legge.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/seo-copywriting/";
+          
+        },
+      },{id: "post-seo-ai-driven",
+        
+          title: "SEO AI-driven",
+        
+        description: "Strategie SEO che integrano strumenti e processi basati su AI.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/seo-ai-driven/";
+          
+        },
+      },{id: "post-restyling-del-sito",
+        
+          title: "Restyling del sito",
+        
+        description: "Rinnovamento grafico e funzionale di un sito esistente.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/restyling-del-sito/";
+          
+        },
+      },{id: "post-reputazione-online",
+        
+          title: "Reputazione online",
+        
+        description: "Monitoraggio e gestione della reputazione online del tuo brand.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/reputazione-online/";
+          
+        },
+      },{id: "post-pulizia-malware-e-delisting",
+        
+          title: "Pulizia malware e delisting",
+        
+        description: "Rimozione di malware e recupero della reputazione presso i motori di ricerca.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/pulizia-malware-e-delisting/";
+          
+        },
+      },{id: "post-ppc-per-ecommerce",
+        
+          title: "PPC per eCommerce",
+        
+        description: "Campagne a pagamento pensate per negozi online.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/ppc-per-ecommerce/";
+          
+        },
+      },{id: "post-podcast",
+        
+          title: "Podcast",
+        
+        description: "Produzione e strategia di un podcast per il tuo brand.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/podcast/";
+          
+        },
+      },{id: "post-personalizzazione-1-to-1",
+        
+          title: "Personalizzazione 1-to-1",
+        
+        description: "Esperienze personalizzate per ogni singolo utente o cliente.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/personalizzazione-1-to-1/";
+          
+        },
+      },{id: "post-meta-ads",
+        
+          title: "Meta Ads",
+        
+        description: "Campagne pubblicitarie su Facebook e Instagram.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/meta-ads/";
+          
+        },
+      },{id: "post-marketing-turistico",
+        
+          title: "Marketing turistico",
+        
+        description: "Marketing digitale per hotel, OTA e tour operator.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/marketing-turistico/";
+          
+        },
+      },{id: "post-marketing-per-professionisti",
+        
+          title: "Marketing per professionisti",
+        
+        description: "Marketing digitale pensato per studi e liberi professionisti.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/marketing-per-professionisti/";
+          
+        },
+      },{id: "post-manutenzione-e-infrastruttura",
+        
+          title: "Manutenzione e infrastruttura",
+        
+        description: "Manutenzione continuativa e gestione dell'infrastruttura del sito.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/manutenzione-e-infrastruttura/";
+          
+        },
+      },{id: "post-local-seo-google-my-business",
+        
+          title: "Local SEO / Google My Business",
+        
+        description: "Ottimizzazione della presenza locale su Google per attirare clienti vicini.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/local-seo-google-my-business/";
+          
+        },
+      },{id: "post-linkedin-ads",
+        
+          title: "LinkedIn Ads",
+        
+        description: "Campagne pubblicitarie B2B su LinkedIn.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/linkedin-ads/";
+          
+        },
+      },{id: "post-link-building-e-digital-pr",
+        
+          title: "Link building e Digital PR",
+        
+        description: "Acquisizione di link e visibilita' editoriale di qualita'.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/link-building-e-digital-pr/";
+          
+        },
+      },{id: "post-lead-scoring-con-ai",
+        
+          title: "Lead scoring con AI",
+        
+        description: "Valutazione automatica della qualita' dei lead tramite AI.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/lead-scoring-con-ai/";
           
         },
       },{id: "post-lead-generation",
@@ -219,6 +582,182 @@ ninja.data = [{
         handler: () => {
           
             window.location.href = "/crazyweb4test/blog/2026/lead-generation/";
+          
+        },
+      },{id: "post-landing-page-e-funnel",
+        
+          title: "Landing page e funnel",
+        
+        description: "Landing page e funnel pensati per convertire i visitatori.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/landing-page-e-funnel/";
+          
+        },
+      },{id: "post-infografica-e-grafica-animata",
+        
+          title: "Infografica e grafica animata",
+        
+        description: "Contenuti visivi e animati per comunicare dati e concetti.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/infografica-e-grafica-animata/";
+          
+        },
+      },{id: "post-influencer-marketing",
+        
+          title: "Influencer marketing",
+        
+        description: "Collaborazioni con creator per aumentare visibilita' e credibilita'.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/influencer-marketing/";
+          
+        },
+      },{id: "post-grafica-per-social",
+        
+          title: "Grafica per social",
+        
+        description: "Grafica coordinata per i tuoi profili social.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/grafica-per-social/";
+          
+        },
+      },{id: "post-google-ads",
+        
+          title: "Google Ads",
+        
+        description: "Campagne Search, Shopping, Display, YouTube e PMax su Google Ads.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/google-ads/";
+          
+        },
+      },{id: "post-gestionali-e-intranet",
+        
+          title: "Gestionali e intranet",
+        
+        description: "Sviluppo di gestionali e intranet, anche con ERP e AI.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/gestionali-e-intranet/";
+          
+        },
+      },{id: "post-geo",
+        
+          title: "GEO",
+        
+        description: "Ottimizzazione della visibilita' su ChatGPT, Gemini e Perplexity.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/geo/";
+          
+        },
+      },{id: "post-geo-audit-e-strategy",
+        
+          title: "GEO Audit e Strategy",
+        
+        description: "Audit e strategia per la visibilita' sui motori di risposta AI.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/geo-audit-e-strategy/";
+          
+        },
+      },{id: "post-frontend-editing",
+        
+          title: "Frontend editing",
+        
+        description: "Modifiche e interventi sul frontend del sito.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/frontend-editing/";
+          
+        },
+      },{id: "post-email-marketing",
+        
+          title: "Email marketing",
+        
+        description: "DEM, newsletter e automation via email per fidelizzare i clienti.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/email-marketing/";
+          
+        },
+      },{id: "post-email-e-crm-automation",
+        
+          title: "Email e CRM automation",
+        
+        description: "Automazione dei flussi email e del CRM.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/email-e-crm-automation/";
+          
+        },
+      },{id: "post-data-strategy",
+        
+          title: "Data strategy",
+        
+        description: "Strategia per raccogliere, organizzare e usare i dati della tua azienda.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/data-strategy/";
+          
+        },
+      },{id: "post-dashboard-e-business-intelligence",
+        
+          title: "Dashboard e business intelligence",
+        
+        description: "Dashboard su misura per monitorare in tempo reale i dati chiave della tua attivita'.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/dashboard-e-business-intelligence/";
+          
+        },
+      },{id: "post-cro-con-ai",
+        
+          title: "CRO con AI",
+        
+        description: "Ottimizzazione del tasso di conversione con strumenti di AI.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/cro-con-ai/";
+          
+        },
+      },{id: "post-copy-multilingua-con-ai",
+        
+          title: "Copy multilingua con AI",
+        
+        description: "Produzione di testi in piu' lingue con l'ausilio dell'AI.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/copy-multilingua-con-ai/";
+          
+        },
+      },{id: "post-content-creation-e-marketing",
+        
+          title: "Content creation e marketing",
+        
+        description: "Creazione di contenuti e strategia editoriale per i tuoi canali.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/content-creation-e-marketing/";
           
         },
       },{id: "post-consulenza-seo",
@@ -241,6 +780,182 @@ ninja.data = [{
         handler: () => {
           
             window.location.href = "/crazyweb4test/blog/2026/consulenza-ecommerce/";
+          
+        },
+      },{id: "post-cms-custom",
+        
+          title: "CMS custom",
+        
+        description: "Sviluppo di sistemi di gestione contenuti su misura.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/cms-custom/";
+          
+        },
+      },{id: "post-chatbot-e-assistenti-virtuali",
+        
+          title: "Chatbot e assistenti virtuali",
+        
+        description: "Sviluppo di chatbot e assistenti virtuali.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/chatbot-e-assistenti-virtuali/";
+          
+        },
+      },{id: "post-brand-voice-ai",
+        
+          title: "Brand voice AI",
+        
+        description: "Definizione e applicazione di una voce del brand coerente tramite AI.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/brand-voice-ai/";
+          
+        },
+      },{id: "post-brand-identity",
+        
+          title: "Brand identity",
+        
+        description: "Costruzione dell'identita' visiva e valoriale del tuo brand.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/brand-identity/";
+          
+        },
+      },{id: "post-blog",
+        
+          title: "Blog",
+        
+        description: "Realizzazione e gestione di un blog aziendale.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/blog/";
+          
+        },
+      },{id: "post-audit-seo-del-sito",
+        
+          title: "Audit SEO del sito",
+        
+        description: "Analisi tecnica e strategica completa dello stato SEO del tuo sito.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/audit-seo-del-sito/";
+          
+        },
+      },{id: "post-app-mobile",
+        
+          title: "App mobile",
+        
+        description: "Sviluppo di app mobile per iOS e Android.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/app-mobile/";
+          
+        },
+      },{id: "post-analisi-predittiva-e-reporting-ai",
+        
+          title: "Analisi predittiva e reporting AI",
+        
+        description: "Report e previsioni basate su AI per anticipare l'andamento del business.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/analisi-predittiva-e-reporting-ai/";
+          
+        },
+      },{id: "post-analisi-competitiva-con-ai",
+        
+          title: "Analisi competitiva con AI",
+        
+        description: "Analisi dei concorrenti automatizzata con strumenti di intelligenza artificiale.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/analisi-competitiva-con-ai/";
+          
+        },
+      },{id: "post-amazon-seo",
+        
+          title: "Amazon SEO",
+        
+        description: "Ottimizzazione delle schede prodotto per la ricerca interna di Amazon.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/amazon-seo/";
+          
+        },
+      },{id: "post-ai-search",
+        
+          title: "AI Search",
+        
+        description: "Ottimizzazione della presenza su TikTok, Amazon e YouTube come motori di ricerca.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/ai-search/";
+          
+        },
+      },{id: "post-ai-commerce",
+        
+          title: "AI Commerce",
+        
+        description: "Applicazione dell'AI ai processi di vendita online.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/ai-commerce/";
+          
+        },
+      },{id: "post-agenti-ai-vocali",
+        
+          title: "Agenti AI vocali",
+        
+        description: "Agenti AI per interazioni vocali con i clienti.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/agenti-ai-vocali/";
+          
+        },
+      },{id: "post-agenti-ai-per-vendite",
+        
+          title: "Agenti AI per vendite",
+        
+        description: "Agenti AI dedicati al supporto delle vendite.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/agenti-ai-per-vendite/";
+          
+        },
+      },{id: "post-agenti-ai-per-aziende",
+        
+          title: "Agenti AI per aziende",
+        
+        description: "Agenti AI su misura per i processi della tua azienda.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/agenti-ai-per-aziende/";
+          
+        },
+      },{id: "post-agenti-ai-customer-service",
+        
+          title: "Agenti AI customer service",
+        
+        description: "Agenti AI per l'assistenza clienti.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/crazyweb4test/blog/2026/agenti-ai-customer-service/";
           
         },
       },{id: "post-servizix",
