@@ -20,12 +20,14 @@ html[data-theme="dark"] .cs-btn.pri{background:#fff;color:#111;border-color:#fff
 .cs-num div{text-align:center;padding:18px 10px;border:1px solid rgba(0,0,0,.12);border-radius:12px;background:#fffdf5}
 .cs-num b{display:block;font-size:1.7rem;line-height:1.1;margin-bottom:4px}
 .cs-num small{opacity:.7}
+.cs-nota{text-align:center;font-size:.8rem;opacity:.6;margin-top:-1rem}
 .cs-sec{margin:3rem 0}
 .cs-sec > h2{text-align:center;margin-bottom:.4rem}
 .cs-sub{text-align:center;max-width:680px;margin:0 auto 1.6rem;opacity:.75}
 .cs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:960px;margin:0 auto}
-.cs-grid.due{grid-template-columns:repeat(2,1fr)}
-.cs-card{padding:18px 20px;border:1px solid rgba(0,0,0,.12);border-radius:12px;background:#fffdf5;text-align:left}
+.cs-grid.c2{grid-template-columns:repeat(2,1fr)}
+.cs-grid.c4{grid-template-columns:repeat(4,1fr)}
+.cs-card{display:block;padding:18px 20px;border:1px solid rgba(0,0,0,.12);border-radius:12px;background:#fffdf5;text-align:left;color:inherit;text-decoration:none}
 .cs-card b{display:block;margin-bottom:6px}
 .cs-card p{margin:0;font-size:.93rem;line-height:1.5;opacity:.85}
 .cs-step{position:relative;padding-top:34px}
@@ -34,7 +36,7 @@ html[data-theme="dark"] .cs-btn.pri{background:#fff;color:#111;border-color:#fff
 .cs-final h2{margin-top:0}
 .cs-final p{max-width:620px;margin:0 auto 1rem}
 html[data-theme="dark"] .cs-num div,html[data-theme="dark"] .cs-card,html[data-theme="dark"] .cs-final{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.15)}
-@media (max-width:760px){.cs-num{grid-template-columns:repeat(2,1fr)}.cs-grid,.cs-grid.due{grid-template-columns:1fr}}
+@media (max-width:760px){.cs-num{grid-template-columns:repeat(2,1fr)}.cs-grid,.cs-grid.c2,.cs-grid.c4{grid-template-columns:1fr}}
 </style>
 
 <div class="cs-hero">
@@ -53,7 +55,7 @@ html[data-theme="dark"] .cs-num div,html[data-theme="dark"] .cs-card,html[data-t
   <div><b>1° incontro</b><small>di consulenza gratuito</small></div>
   <div><b>Privato e PA</b><small>esperienza con entrambi</small></div>
 </div>
-<p style="text-align:center;font-size:.8rem;opacity:.6;margin-top:-1rem">*Festivi esclusi.</p>
+<p class="cs-nota">*Festivi esclusi.</p>
 
 <div class="cs-sec">
   <h2>Come lavoriamo</h2>
@@ -70,18 +72,18 @@ html[data-theme="dark"] .cs-num div,html[data-theme="dark"] .cs-card,html[data-t
   <h2>Cosa facciamo</h2>
   <p class="cs-sub">Tutto ciò che serve per essere trovati, scelti e ricordati online.</p>
   <div class="cs-grid">
-    <a class="cs-card" href="{{ '/servizi/' | relative_url }}" style="text-decoration:none;color:inherit"><b>Siti e piattaforme</b><p>Siti aziendali, portali e applicativi sviluppati sulle esigenze reali del tuo business.</p></a>
-    <a class="cs-card" href="{{ '/servizi/' | relative_url }}" style="text-decoration:none;color:inherit"><b>E-commerce</b><p>Negozi online pensati per vendere, dalla scelta della piattaforma alla crescita.</p></a>
-    <a class="cs-card" href="{{ '/servizi/' | relative_url }}" style="text-decoration:none;color:inherit"><b>Web marketing</b><p>SEO, campagne e social per portare le persone giuste sul tuo sito.</p></a>
-    <a class="cs-card" href="{{ '/servizi/' | relative_url }}" style="text-decoration:none;color:inherit"><b>Brand identity</b><p>Un'immagine coerente e riconoscibile, dal logo all'esperienza d'uso.</p></a>
-    <a class="cs-card" href="{{ '/servizi/' | relative_url }}" style="text-decoration:none;color:inherit"><b>Comunicazione</b><p>Contenuti e messaggi che raccontano chi sei a chi conta davvero.</p></a>
-    <a class="cs-card" href="{{ '/servizi/' | relative_url }}" style="text-decoration:none;color:inherit"><b>Consulenza</b><p>Analisi e strategia per decidere dove investire, prima di spendere.</p></a>
+    <a class="cs-card" href="{{ '/servizi/' | relative_url }}"><b>Siti e piattaforme</b><p>Siti aziendali, portali e applicativi sviluppati sulle esigenze reali del tuo business.</p></a>
+    <a class="cs-card" href="{{ '/servizi/' | relative_url }}"><b>E-commerce</b><p>Negozi online pensati per vendere, dalla scelta della piattaforma alla crescita.</p></a>
+    <a class="cs-card" href="{{ '/servizi/' | relative_url }}"><b>Web marketing</b><p>SEO, campagne e social per portare le persone giuste sul tuo sito.</p></a>
+    <a class="cs-card" href="{{ '/servizi/' | relative_url }}"><b>Brand identity</b><p>Un'immagine coerente e riconoscibile, dal logo all'esperienza d'uso.</p></a>
+    <a class="cs-card" href="{{ '/servizi/' | relative_url }}"><b>Comunicazione</b><p>Contenuti e messaggi che raccontano chi sei a chi conta davvero.</p></a>
+    <a class="cs-card" href="{{ '/servizi/' | relative_url }}"><b>Consulenza</b><p>Analisi e strategia per decidere dove investire, prima di spendere.</p></a>
   </div>
 </div>
 
 <div class="cs-sec">
   <h2>Perché scegliere noi</h2>
-  <div class="cs-grid due">
+  <div class="cs-grid c2">
     <div class="cs-card"><b>Analisi su misura</b><p>Ogni progetto nasce dal tuo business e dai tuoi obiettivi, non da un modello standard.</p></div>
     <div class="cs-card"><b>Creatività e concretezza</b><p>Idee che si vedono e numeri che si leggono: puntiamo a risultati misurabili.</p></div>
     <div class="cs-card"><b>Un solo interlocutore</b><p>Dalla strategia al risultato, un team coordinato che risponde di tutto il progetto.</p></div>
