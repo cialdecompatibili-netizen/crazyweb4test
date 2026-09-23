@@ -4,6 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 @AGENTS.md
 
+## Questo progetto (crazyweb4test)
+
+- **Repo GitHub:** `cialdecompatibili-netizen/crazyweb4test` (ambiente di TEST). Produzione: repo `crazyweb4`.
+- **Sito live:** https://cialdecompatibili-netizen.github.io/crazyweb4test/ (Pages, Source: GitHub Actions). Baseurl `/crazyweb4test`.
+- **Cartella locale:** `C:\Users\mirco\Desktop\crazyweb4test_new` (nome provvisorio, da rinominare in `crazyweb4test_local`).
+- **Origine:** copia di `crazyweb4` (locale in `C:\Users\mirco\Desktop\crazyweb4`), con solo `baseurl` cambiato. Non lavorare su `crazyweb4`.
+- **Allineamento:** `powershell -File C:\Users\mirco\Desktop\clona_test.ps1` (fetch di crazyweb4, copia, baseurl, commit, push). Esclude `.git`, `node_modules`, `_site`, `.jekyll-cache`, `automazioni/` (contiene `.env`) e i file guida `CLAUDE.md`/`AGENTS.md`.
+- **Contenuti del sito:** pagina `/servizi/` (9 sezioni, card senza link), menu Agenzia (Blog, Chi siamo, Servizi), sezione servizi in home.
+- **Backup vecchio:** `crazyweb4test_local_VECCHIA_backup` (stesso remote, NON pushare da lì): ha menu js-yaml, `SERVIZI.md`, `automazioni/` e 69 link ai post-servizio, da portare se servono.
 `AGENTS.md` (imported above) is the **authoritative** agent entry point: change routing, the stop sign for gem-owned paths, the three silent failure modes, and the validated command set. Keep it short and ecosystem-neutral. Cross-repo architecture — the wrapper/tag/gem delegation table, feature gating, the v1 config contract, local overrides — lives in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md); area-to-gem ownership lives in [`docs/BOUNDARIES.md`](docs/BOUNDARIES.md).
 
 **Read those three before editing anything.** Everything below is Claude-specific or longer-form operational detail that does not belong in the short entry point. Do not restate facts from those files here — link to them.
@@ -12,8 +21,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 bundle install                                # ruby gems
-bundle exec jekyll serve                      # dev server → http://localhost:4000/al-folio/  (NOTE baseurl)
-bundle exec jekyll build --baseurl /al-folio  # production-style build to _site/
+bundle exec jekyll serve                      # dev server → http://localhost:4000/crazyweb4test/  (NOTE baseurl)
+bundle exec jekyll build --baseurl /crazyweb4test  # production-style build to _site/
 bash test/integration_distill.sh              # run ONE integration test (any of the seven in test/)
 npm run test:visual:update                    # refresh playwright snapshots after intentional UI change
 bundle exec al-folio upgrade apply --safe     # deterministic codemods (font-weight-* → font-*, remote→local URLs)
@@ -29,7 +38,7 @@ bundle exec al-folio upgrade overrides diff <path>    # then `overrides accept <
 
 ## Docker serving model (v1-specific)
 
-`docker compose up -d` bind-mounts the repo to `/srv/jekyll` and runs `bin/entry_point.sh`, which serves with `--force_polling --destination /tmp/_site`. The build output deliberately goes to **container-local `/tmp/_site`, not the bind-mounted `_site`** — writing `_site` back across the host bind mount caused write deadlocks. The container also `inotifywait`s `_config.yml` and restarts Jekyll on change (config edits aren't hot-reloaded by `--watch`). Verify with the `/al-folio` baseurl: `curl -fsS http://127.0.0.1:8080/al-folio/`. `docker-compose-slim.yml` pulls a prebuilt `:slim` image instead of building locally.
+`docker compose up -d` bind-mounts the repo to `/srv/jekyll` and runs `bin/entry_point.sh`, which serves with `--force_polling --destination /tmp/_site`. The build output deliberately goes to **container-local `/tmp/_site`, not the bind-mounted `_site`** — writing `_site` back across the host bind mount caused write deadlocks. The container also `inotifywait`s `_config.yml` and restarts Jekyll on change (config edits aren't hot-reloaded by `--watch`). Verify with the `/crazyweb4test` baseurl: `curl -fsS http://127.0.0.1:8080/crazyweb4test/`. `docker-compose-slim.yml` pulls a prebuilt `:slim` image instead of building locally.
 
 ## CI gates and the style contract
 
