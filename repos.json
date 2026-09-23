@@ -1,0 +1,29 @@
+{
+  "_nota": "Unica fonte di verita' per pubblica_servizi.py. Per un nuovo repo basta aggiungere un blocco qui: niente da cambiare nel codice. 'dir' relativa alla cartella padre di questo progetto (o assoluta).",
+  "default": "test",
+  "repos": {
+    "test": {
+      "dir": ".",
+      "remoto": "cialdecompatibili-netizen/crazyweb4test",
+      "baseurl": "/crazyweb4test",
+      "etichetta": "TEST",
+      "protetto": false
+    },
+    "prod": {
+      "dir": "../crazyweb4",
+      "remoto": "cialdecompatibili-netizen/crazyweb4",
+      "baseurl": "/crazyweb4",
+      "etichetta": "PROD",
+      "protetto": true
+    }
+  },
+  "sito": {
+    "posts_dir": "_posts",
+    "servizi_page": "_pages/servizi.md",
+    "home_page": "_pages/home.md",
+    "permalink_post": "/blog/{anno}/{slug}/",
+    "backup_dir_nome": "_backup_test",
+    "css_classe_tabella": "srv-t",
+    "css_classe_home": "srv-home-card"
+  }
+}
