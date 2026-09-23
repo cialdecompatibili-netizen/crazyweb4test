@@ -19,3 +19,7 @@ vendor
 # Python bytecode from bin/ helper scripts
 __pycache__/
 *.pyc
+
+# Credenziali automazioni (mai su git)
+automazioni/.env
+.env
