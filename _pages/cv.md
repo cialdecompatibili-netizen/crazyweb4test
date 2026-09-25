@@ -7,7 +7,7 @@ published: false
 nav_order: 5
 cv_pdf: /assets/pdf/example_pdf.pdf # you can also use external links here
 cv_format: rendercv # options: rendercv, jsonresume
-description: This is a description of the page. You can modify it in '_pages/cv.md'. You can also change or remove the top pdf download button.
+description: Questa è la descrizione della pagina. Puoi modificarla in '_pages/cv.md'. Puoi anche cambiare o rimuovere il pulsante di download PDF in alto.
 toc:
   sidebar: left
 ---
