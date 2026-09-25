@@ -6,13 +6,12 @@ description: membri del laboratorio o del gruppo
 nav: false
 
 profiles:
-  # if you want to include more than one profile, just replicate the following block
-  # and create one content file for each profile inside _pages/
+  # se vuoi includere più di un profilo, basta replicare il blocco seguente
+  # e creare un file di contenuto per ogni profilo dentro _pages/
   - align: right
     content: about_einstein.md
-    image_circular: false # crops the image to make it circular
+    image_circular: false # ritaglia l'immagine per renderla circolare
   - align: left
     content: about_einstein.md
-    image_circular: false # crops the image to make it circular
+    image_circular: false # ritaglia l'immagine per renderla circolare
 ---
-
