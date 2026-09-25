@@ -17,7 +17,7 @@ latest_posts:
   enabled: true
   scrollable: true # adds a vertical scroll bar if there are more than 3 new posts items
   limit: 3 # leave blank to include all the blog posts
-seo_title: "CrazyWeb4Test | Web Agency a Roma dal 2013 – Siti, E-commerce, Marketing"
+seo_title: "CrazyWeb4Test | Smart Web Agency"
 seo_description: "Web agency a Roma dal 2013: siti web, e-commerce, SEO, Google Ads e brand identity su misura per imprenditori, start up e PA. Prima consulenza gratuita, risposta entro 24 ore."
 ---
 
