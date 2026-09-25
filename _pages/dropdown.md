@@ -1,20 +1,19 @@
 ---
 layout: page
-title: submenus
+title: sottomenu
 nav: true
 nav_order: 8
 dropdown: true
 children:
-  - title: Bookshelf
+  - title: Libreria
     permalink: /books/
   - title: divider
   - title: Blog
     permalink: /blog/
   - title: divider
-  - title: People
+  - title: Persone
     permalink: /people/
   - title: divider
   - title: Servizi
     permalink: /servizi/
 ---
-
