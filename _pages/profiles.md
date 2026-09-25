@@ -1,8 +1,8 @@
 ---
 layout: profiles
 permalink: /people/
-title: people
-description: members of the lab or group
+title: persone
+description: membri del laboratorio o del gruppo
 nav: false
 
 profiles:
