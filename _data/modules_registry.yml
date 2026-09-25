@@ -24,7 +24,7 @@
     },
     "sito-offline": {
       "name": "Sito Offline",
-      "enabled": true,
+      "enabled": false,
       "hooks": {},
       "config_fields": [
         {
