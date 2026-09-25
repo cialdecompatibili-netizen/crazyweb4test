@@ -1,8 +1,7 @@
 ---
 layout: page
 title: sottomenu
-nav: true
-nav_order: 8
+nav: false
 dropdown: true
 children:
   - title: Libreria
@@ -17,3 +16,4 @@ children:
   - title: Servizi
     permalink: /servizi/
 ---
+
