@@ -1,6 +1,15 @@
 <div class="news">
   {% if site.news != blank %}
     {% assign news_size = site.news | size %}
+    {% comment %}
+      PUNTO CRITICO: "include.limit" e' il parametro passato alla chiamata dell'include (es.
+      "{% include news.liquid limit=true %}" da about.liquid), NON il campo page.announcements.limit
+      qui sotto (nome simile, cosa diversa!). Serve a distinguere le due chiamate a questo stesso
+      file: about.liquid/home.md la richiamano con "limit=true" per rispettare il numero massimo
+      impostato nel front matter, mentre _pages/news.md la richiama senza parametro ("{% include
+      news.liquid %}") per mostrare SEMPRE la lista completa nella pagina dedicata alle notizie,
+      qualunque sia il valore di page.announcements.limit.
+    {% endcomment %}
     <div
       class="table-responsive"
       {% if include.limit and page.announcements.scrollable and news_size > 3 %}
