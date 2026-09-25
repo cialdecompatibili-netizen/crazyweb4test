@@ -1,3 +1,9 @@
+{% comment %}
+  PUNTO CRITICO: "site.related_posts" NON e' una variabile standard di Jekyll: viene calcolata e
+  iniettata da un generator del plugin al_folio_core (attivato da related_blog_posts.enabled in
+  _config.yml), gia' filtrata/ordinata per rilevanza rispetto al post corrente. Il "limit" qui
+  taglia solo QUANTI risultati mostrare (max_related), non fa la ricerca di similarita'.
+{% endcomment %}
 {% assign related_posts = site.related_posts | limit: site.related_blog_posts.max_related %}
 {% if related_posts != empty %}
   {% if page.layout == 'post' %}
