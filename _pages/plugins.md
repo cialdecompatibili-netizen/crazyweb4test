@@ -1,39 +1,39 @@
 ---
 layout: page
-title: plugins
+title: plugin
 permalink: /plugins/
 nav: false
-description: featured and bundled plugin ecosystem catalog for al-folio v1.x
+description: catalogo dell'ecosistema plugin in evidenza e inclusi per al-folio v1.x
 ---
 
-`al-folio` `v1.x` is a starter with plugin-owned runtime features.
-This page lists plugins recognized in the ecosystem catalog (`_data/featured_plugins.yml`).
+`al-folio` `v1.x` è uno starter con funzionalità runtime gestite dai plugin.
+Questa pagina elenca i plugin riconosciuti nel catalogo dell'ecosistema (`_data/featured_plugins.yml`).
 
-## Naming convention
+## Convenzione dei nomi
 
-- Theme-coupled plugins:
-  - repo: `al-folio-<feature>`
-  - gem/plugin id: `al_folio_<feature>`
-- Reusable plugins:
-  - repo: `al-<feature>` or neutral name
-  - gem/plugin id aligned with plugin namespace
+- Plugin legati al tema:
+  - repo: `al-folio-<funzionalità>`
+  - id gem/plugin: `al_folio_<funzionalità>`
+- Plugin riutilizzabili:
+  - repo: `al-<funzionalità>` o nome neutro
+  - id gem/plugin allineato al namespace del plugin
 
-Third-party non-`al-*` plugins are also eligible for featuring.
+Anche i plugin di terze parti non `al-*` possono essere messi in evidenza.
 
-## Bundled plugins
+## Plugin inclusi
 
 {% assign bundled_plugins = site.data.featured_plugins | where: "status", "bundled" %}
 
 <table>
   <thead>
     <tr>
-      <th>Name</th>
+      <th>Nome</th>
       <th>Gem</th>
-      <th>Plugin ID</th>
-      <th>Compatibility</th>
-      <th>Owner</th>
+      <th>ID Plugin</th>
+      <th>Compatibilità</th>
+      <th>Proprietario</th>
       <th>Demo</th>
-      <th>Notes</th>
+      <th>Note</th>
     </tr>
   </thead>
   <tbody>
@@ -51,24 +51,24 @@ Third-party non-`al-*` plugins are also eligible for featuring.
   </tbody>
 </table>
 
-## Featured-only plugins
+## Plugin solo in evidenza
 
 {% assign featured_only_plugins = site.data.featured_plugins | where: "status", "featured" %}
 {% if featured_only_plugins.size == 0 %}
-There are no featured-only entries yet.
-Open a **Plugin Feature Proposal** issue if you want your plugin considered.
+Non ci sono ancora voci solo in evidenza.
+Apri una issue **Plugin Feature Proposal** se vuoi proporre il tuo plugin.
 {% else %}
 
 <table>
   <thead>
     <tr>
-      <th>Name</th>
+      <th>Nome</th>
       <th>Gem</th>
-      <th>Plugin ID</th>
-      <th>Compatibility</th>
-      <th>Owner</th>
+      <th>ID Plugin</th>
+      <th>Compatibilità</th>
+      <th>Proprietario</th>
       <th>Demo</th>
-      <th>Notes</th>
+      <th>Note</th>
     </tr>
   </thead>
   <tbody>
@@ -87,11 +87,11 @@ Open a **Plugin Feature Proposal** issue if you want your plugin considered.
 </table>
 {% endif %}
 
-## Proposing a plugin for featuring
+## Proporre un plugin da mettere in evidenza
 
-1. Open a **Plugin Feature Proposal** issue in this repo.
-2. Provide plugin metadata (repo URL, gem name, plugin id, compatibility, demo path, maintainer contact).
-3. Open a PR updating `_data/featured_plugins.yml`.
-4. If requesting default starter bundling, include `Gemfile` and `_config.yml` wiring updates in the same PR.
+1. Apri una issue **Plugin Feature Proposal** in questo repo.
+2. Fornisci i metadati del plugin (URL repo, nome gem, id plugin, compatibilità, percorso demo, contatto del maintainer).
+3. Apri una PR aggiornando `_data/featured_plugins.yml`.
+4. Se richiedi l'inclusione di default nello starter, includi nella stessa PR gli aggiornamenti a `Gemfile` e `_config.yml`.
 
-Featuring and bundling are separate maintainer decisions.
+Mettere in evidenza e includere sono decisioni separate dei maintainer.
