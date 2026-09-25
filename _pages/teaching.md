@@ -1,15 +1,15 @@
 ---
 layout: page
 permalink: /teaching/
-title: teaching
-description: Course materials, schedules, and resources for classes taught.
+title: didattica
+description: Materiali dei corsi, orari e risorse per le lezioni tenute.
 nav: false
 published: false
 nav_order: 6
 calendar: true
 ---
 
-This page displays a collection of courses with detailed schedules, materials, and resources. You can organize your courses by years, terms, or topics.
+Questa pagina mostra una raccolta di corsi con orari, materiali e risorse dettagliate. Puoi organizzare i tuoi corsi per anno, semestre o argomento.
 
 {% include calendar.liquid calendar_id='test@gmail.com' timezone='Asia/Shanghai' %}
 
