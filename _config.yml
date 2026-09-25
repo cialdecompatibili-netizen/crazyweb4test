@@ -237,6 +237,10 @@ kramdown:
       start_line: 1
 
 # Includes & excludes
+# "include" forza Jekyll a processare _pages anche se il nome inizia con underscore
+# (Jekyll ignora di default le cartelle/file che iniziano con "_", tranne quelle che
+# gestisce lui stesso tipo _layouts, _includes, _posts). Senza questa riga, _pages
+# non verrebbe mai costruita: sparirebbero home, chi-siamo, servizi, ecc.
 include: ["_pages"]
 exclude:
   - AGENTS.md
@@ -253,6 +257,8 @@ exclude:
   - lighthouse_results/
   - package.json
   - package-lock.json
+  # Pagina demo del tema (about_einstein.md) tenuta nel repo come riferimento/esempio ma
+  # esclusa singolarmente dalla build: non deve comparire online nel sito reale.
   - _pages/about_einstein.md
   - purgecss.config.js
   - README.md
@@ -265,6 +271,11 @@ keep_files:
   - .nojekyll
 
 # Use al_folio_core as the theme runtime; local files can still override theme files.
+# MECCANISMO OVERRIDE: Jekyll cerca prima un file con lo stesso path dentro il repo
+# (es. _includes/header.liquid) e solo se non lo trova usa quello del gem del tema.
+# Per questo gli override locali in _includes/_layouts "vincono" sempre su quelli
+# del gem, senza bisogno di toccare il gem stesso. Vedi commenti nei singoli file
+# _includes/*.liquid per sapere quali sono stati personalizzati e perche'.
 theme: al_folio_core
 
 # Plug-ins
@@ -342,6 +353,8 @@ jekyll-minifier:
   # breaking every spacing/positioning utility (e.g. .fixed-top -> broken navbar). Disable it.
   compress_css: false
   # JS minification is delegated to jekyll-terser (compress_javascript above is false).
+  # robots.txt escluso dalla minificazione perche' non e' JS/HTML/CSS: minificarlo
+  # rischierebbe di comprimere/alterare le direttive che i motori di ricerca leggono.
   exclude: ["robots.txt"]
 
 # -----------------------------------------------------------------------------
