@@ -4,6 +4,13 @@ layout: default
 {% assign year = page.date | date: '%Y' %}
 {% assign tags = page.tags | join: '' %}
 {% assign categories = page.categories | join: '' %}
+{% comment %}
+  PUNTO CRITICO: "url_beginning" controlla se la pagina corrente sta sotto "/blog/" (i primi 6
+  caratteri dell'URL). Serve perche' questo stesso layout "post" viene riusato anche per le
+  collection "books", "news" e "teachings" (vedi _config.yml collections), che NON hanno le
+  pagine di archivio /blog/<anno>/, /blog/tag/... : senza questo controllo, un libro o una notizia
+  linkerebbe a un archivio blog inesistente invece di mostrare solo il testo semplice.
+{% endcomment %}
 {% assign url_beginning = page.url | slice: 0, 6 %}
 
 {% if page._styles %}
@@ -19,6 +26,12 @@ layout: default
     <p class="post-meta">
       Creato il {{ page.date | date: '%d %B %Y' }}
       {% if page.author %}da {{ page.author }}{% endif %}
+      {% comment %}
+        PUNTO CRITICO: "last_date" prova prima last_modified_at (standard Jekyll, es. da un
+        plugin git-based) e solo se assente usa last_updated (campo custom nel front matter).
+        Il doppio fallback evita di dover scegliere un unico nome campo per sempre: qualsiasi
+        post puo' usare l'uno o l'altro e la data "ultimo aggiornamento" compare comunque.
+      {% endcomment %}
       {% assign last_date = page.last_modified_at | default: page.last_updated %}
       {% if last_date %}, ultimo aggiornamento il {{ last_date | date: '%d %B %Y' }}{% endif %}
       {% if page.meta %}• {{ page.meta }}{% endif %}
@@ -60,6 +73,12 @@ layout: default
   </header>
 
   <article class="post-content">
+    {% comment %}
+      PUNTO CRITICO: "page.toc.beginning" viene impostato true automaticamente per TUTTI i post
+      da _config.yml (blocco "defaults" con type: "posts"): questo e' il gancio che lo legge e
+      stampa l'indice. Un singolo post puo' disattivarlo mettendo "toc: false" nel proprio front
+      matter, che ha sempre la precedenza sul default globale.
+    {% endcomment %}
     {% if page.toc and page.toc.beginning %}
       <div id="table-of-contents">
         {% toc %}
