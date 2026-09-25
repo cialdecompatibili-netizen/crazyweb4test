@@ -9,6 +9,13 @@
     >
       <table class="table table-sm table-borderless">
         {% assign latest_posts = site.posts %}
+        {% comment %}
+          PUNTO CRITICO: "if page.latest_posts.limit" tratta 0 come falso (Liquid considera 0
+          "truthy" in realta', ma un limit non impostato e' nil, non 0), quindi impostare
+          esplicitamente "limit: 0" nel front matter NON nasconde la lista: fa scattare il ramo
+          else e mostra TUTTI i post. Per non mostrare nulla va disattivata l'intera sezione con
+          "latest_posts.enabled: false" nella pagina, non con un limite a zero.
+        {% endcomment %}
         {% if page.latest_posts.limit %}
           {% assign latest_posts_limit = page.latest_posts.limit %}
         {% else %}
