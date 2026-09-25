@@ -11,8 +11,8 @@ pagination:
   sort_field: date
   sort_reverse: true
   trail:
-    before: 1 # The number of links before the current page
-    after: 3 # The number of links after the current page
+    before: 1 # Numero di link prima della pagina corrente
+    after: 3 # Numero di link dopo la pagina corrente
 ---
 
 <div class="post">
@@ -178,7 +178,7 @@ pagination:
 </div>
 
   <div class="col-sm-3">
-    <img class="card-img" src="{{ post.thumbnail | relative_url }}" style="object-fit: cover; height: 90%" alt="image">
+    <img class="card-img" src="{{ post.thumbnail | relative_url }}" style="object-fit: cover; height: 90%" alt="immagine">
   </div>
 </div>
 {% endif %}
