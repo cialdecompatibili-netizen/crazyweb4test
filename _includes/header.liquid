@@ -7,6 +7,12 @@
         Prima era nascosto sulla home con "page.permalink != '/'" (comportamento di default di al-folio).
       {% endcomment %}
       {% if true %}
+        {% comment %}
+          PUNTO CRITICO: "if true" e' voluto, non un residuo di debug. E' il modo piu' semplice
+          per "spegnere" la condizione originale del gem (page.permalink != '/') senza cancellare
+          la struttura if/elsif sotto, cosi' il branch elsif (icone social) resta raggiungibile
+          se in futuro si rimette una condizione reale al posto di "true".
+        {% endcomment %}
         <a class="navbar-brand title font-weight-lighter" href="{{ site.baseurl }}/">
           {% if site.title == 'blank' %}
             {% if site.first_name %}
@@ -93,6 +99,12 @@
                   </div>
                 </li>
               {% else %}
+                {% comment %}
+                  PUNTO CRITICO: "parent_link" toglie "index.html" dal permalink della voce di menu
+                  per confrontarlo con page.url (che non contiene mai index.html). Senza questa
+                  rimozione, una pagina tipo "/blog/index.html" non risulterebbe mai "attiva" quando
+                  si visita "/blog/", perche' il confronto "contains" fallirebbe sulla stringa esatta.
+                {% endcomment %}
                 {% assign parent_link = p.permalink | remove: 'index.html' %}
                 {% if p.permalink == '/' %}
                   {% assign is_active = false %}
@@ -105,6 +117,12 @@
                   {%- if p.permalink contains '://' -%}
                     {%- assign url = p.permalink -%}
                   {%- elsif p.permalink contains '/blog/' -%}
+                    {% comment %}
+                      PUNTO CRITICO: qualsiasi voce di menu il cui permalink contenga "/blog/" (es.
+                      "/blog/page/2/" per via della paginazione, o l'URL di un singolo articolo) viene
+                      forzata a puntare sempre a "/blog/" (l'indice). Evita che una voce nel menu
+                      finisca per linkare a una pagina interna del blog invece che alla lista articoli.
+                    {% endcomment %}
                     {%- assign url = '/blog/' -%}
                   {%- else -%}
                     {%- assign url = p.url -%}
