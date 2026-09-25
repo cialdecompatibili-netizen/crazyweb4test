@@ -2,14 +2,18 @@
 {%- comment -%}
   OVERRIDE locale di al_folio_core/_layouts/default.liquid (2026-09-25).
   UNICA differenza dall'originale del gem: il blocco "SITO OFFLINE" subito dopo <body>.
-  Se site.site_offline e' true (impostato in _config.yml), la pagina mostra SOLO il
-  messaggio di manutenzione (nessun header/menu/contenuto/footer) per QUALSIASI
-  visitatore, amministratore compreso: non e' un'anteprima privata, e' un blocco totale
-  prima del lancio. Per riattivare il sito: rimettere site_offline: false in _config.yml.
+  Il flag NON sta in _config.yml (richiederebbe modificare un file a mano): viene dal modulo
+  "sito-offline" (modules_source/sito-offline/), gestito dall'admin in Moduli > Configura.
+  Valore letto da site.data.modules['sito-offline'].offline (file _data/modules/sito-offline.yml,
+  scritto da A.mdConfigSave). Se true, la pagina mostra SOLO il messaggio di manutenzione
+  (site.data.modules['sito-offline'].messaggio, con un default se vuoto) - nessun
+  header/menu/contenuto/footer - per QUALSIASI visitatore, amministratore compreso: non e'
+  un'anteprima privata, e' un blocco totale prima del lancio.
   Il resto del file e' identico all'originale della gem al_folio_core (v1.0.15): se la
   gem aggiorna questo layout, questo override smette di ricevere gli aggiornamenti finche'
   non viene risincronizzato a mano.
 {%- endcomment -%}
+{%- assign offline_cfg = site.data.modules['sito-offline'] -%}
 {%- comment -%}
   al_rtl owns the language and direction attributes when it is installed, because
   `dir` has to sit on <html> for the browser's bidi handling, CSS logical
@@ -45,12 +49,12 @@
 
   <!-- Body -->
   <body class="{% if site.navbar_fixed %}fixed-top-nav{% endif %} {% unless site.footer_fixed %}sticky-bottom-footer{% endunless %}">
-    {% if site.site_offline %}
+    {% if offline_cfg.offline == 'true' or offline_cfg.offline == true %}
       <!-- SITO OFFLINE: blocco totale prima del lancio, vedi commento in cima al file -->
       <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;font-family:sans-serif;">
         <h1 style="font-size:1.8rem;margin-bottom:0.5rem;">Sito in arrivo</h1>
-        <p style="font-size:1rem;color:#666;max-width:420px;">
-          Stiamo preparando il lancio. Torna a trovarci a breve.
+        <p style="font-size:1rem;color:#666;max-width:420px;white-space:pre-line;">
+          {{ offline_cfg.messaggio | default: "Stiamo preparando il lancio. Torna a trovarci a breve." }}
         </p>
       </div>
     {% else %}
