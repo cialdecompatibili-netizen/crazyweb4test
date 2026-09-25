@@ -1,8 +1,9 @@
 ---
 layout: page
 title: contatti
-nav: false
+nav: true
 permalink: /contatti/
+nav_order: 20
 ---
 
 contatti
