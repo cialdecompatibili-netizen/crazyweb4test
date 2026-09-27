@@ -384,18 +384,24 @@ Creato il 2026-09-20 copiando crazyweb3 senza la cronologia git (un solo commit 
 - Si cambia da admin > Impostazioni (select). Applicato da `_includes/footer.liquid`: il JS imposta `data-toc-style` su `<html>` e il CSS `html[data-toc-style=side]` sovrascrive il box. Regole adattate da `al-folio-distill.css` (d-article d-contents).
 - Il TOC resta quello di jekyll-toc (`#table-of-contents`), nessun layout Distill.
 
-### Testi pagina archivio categoria (titolo + descrizione)
+### Testi pagina archivio categoria (titolo + descrizione, PER CATEGORIA)
 - Sessione 2026-09-28. Le pagine `/blog/category/<nome>/` (generate da jekyll-archives) avevano il testo
   fisso in inglese "an archive of posts in this category" scritto dentro il layout della GEM
   `al_folio_core-1.0.15` (`_layouts/archive.liquid`): non modificabile da nessun file del repo.
 - Creato override locale `_layouts/archive.liquid` (Jekyll da' priorita' al file del repo su quello
   della gem, stesso meccanismo di `_includes/header.liquid`, sez. 4b). Cambiato SOLO il ramo
   `page.type == 'categories'`; i rami `year`/`tags` sono rimasti identici alla gem.
-- Due nuove chiavi in `_config.yml`: `archive_category_title` e `archive_category_desc` (stringhe
-  vuote di default = testo automatico in italiano, nessuna pagina si rompe se non compilate).
-  `%s` nel titolo viene sostituito col nome della categoria (filtro Liquid `replace`).
-- Editabili da admin > Impostazioni (`admin-media.js`, `A.views.settings`/`A.cfgSave`, aggiunti alla
-  lista `CFG_SAVE` come toc_style).
+- **Prima versione (scartata):** due chiavi globali in `_config.yml`, un solo testo per TUTTE le
+  categorie. Sostituita perche' Mirco voleva un testo diverso per ogni categoria.
+- **Versione attuale:** `_data/category_meta.yml`, una voce per nome categoria (`title`/`desc`,
+  entrambi tra virgolette doppie). Il layout legge `site.data.category_meta[page.title]` (page.title
+  nell'archivio categoria = nome esatto della categoria) con `| default:` per il fallback italiano
+  se la categoria non ha voce o ha campi vuoti: nessuna pagina si rompe.
+- Editabile da admin > Categorie articoli: bottone **Modifica** (accanto a Rinomina/Elimina) apre un
+  form con i due campi e salva con un `putFile` su `_data/category_meta.yml` (`admin-categories.js`,
+  `A.catEdit`/`A.cmSave`). Il file si legge/scrive con regex mirate (`cmParse`/`cmStringify`), non un
+  parser YAML generico: la struttura e' fissa e semplice (solo `title`/`desc` per voce, sempre tra
+  virgolette doppie). Se in futuro serve altro nel file, introdurre un parser vero.
 - **Se aggiorni la gem al_folio_core:** confronta `_layouts/archive.liquid` (repo) col nuovo file
   della gem, come gia' si fa per `header.liquid` — altrimenti si perdono correzioni della gem.
 

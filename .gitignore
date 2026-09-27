@@ -23,3 +23,6 @@ __pycache__/
 # Credenziali automazioni (mai su git)
 automazioni/.env
 .env
+
+# Chat/appunti privati (mai su git)
+chat_*.md

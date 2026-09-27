@@ -39,6 +39,37 @@
   /* Un nome valido e' UNA parola (niente spazi: il campo e' separato da spazi), con caratteri semplici. */
   function clean(n) { return String(n || '').trim().toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, ''); }
 
+  /* ---- Titolo/descrizione per categoria (_data/category_meta.yml) ----
+     File YAML semplicissimo e prevedibile (una voce per categoria, due sotto-chiavi fisse title/desc,
+     sempre tra virgolette doppie): per questo si legge/scrive con regex mirate invece di un parser YAML
+     generico (zero librerie, zero build, come il resto dell'admin). Se in futuro servissero altre
+     sotto-chiavi o valori con ": nel testo, va introdotto un parser vero: qui NON gestiamo escaping oltre
+     alle virgolette doppie (yq() di admin.js copre lo stesso caso per il front matter dei post).
+     Struttura per voce:
+       nome-categoria:
+         title: "..."
+         desc: "..."
+  */
+  function cmParse(t) {
+    var out = {}, re = /^([a-z0-9_-]+):\r?\n[ \t]+title:[ \t]*"((?:[^"\\]|\\.)*)"\r?\n[ \t]+desc:[ \t]*"((?:[^"\\]|\\.)*)"/gm, m;
+    while ((m = re.exec(t))) out[m[1]] = { title: m[2].replace(/\\"/g, '"'), desc: m[3].replace(/\\"/g, '"') };
+    return out;
+  }
+  function cmStringify(map) {
+    var h = '# Titolo e descrizione personalizzati per ogni categoria di articoli, mostrati nella pagina\n' +
+      '# /blog/category/<nome>/ (generata da jekyll-archives). Letto da _layouts/archive.liquid come\n' +
+      '# site.data.category_meta[page.title] (page.title = nome esatto della categoria, es. "servizi").\n' +
+      '# Editabile da admin > Categorie articoli (bottone "Modifica" accanto a Rinomina/Elimina).\n' +
+      '# Una categoria senza voce qui (o con campi vuoti) usa il testo automatico di default: nessuna\n' +
+      '# pagina si rompe. Vedi admin/claude.md.\n';
+    Object.keys(map).sort().forEach(function (n) {
+      var v = map[n];
+      if (!v.title && !v.desc) return; // niente da dire su questa categoria: non scrivere una voce vuota
+      h += n + ':\n  title: "' + String(v.title || '').replace(/"/g, '\\"') + '"\n  desc: "' + String(v.desc || '').replace(/"/g, '\\"') + '"\n';
+    });
+    return h;
+  }
+
   A.views.cats = function () {
     return load().then(function () {
       var c = counts(), names = Object.keys(c).sort();
@@ -46,6 +77,7 @@
       if (!names.length) h += '<div class="it"><span>Nessuna categoria usata.</span></div>';
       names.forEach(function (n) {
         h += '<div class="it"><span>' + esc(n) + '<small>' + c[n] + ' articol' + (c[n] === 1 ? 'o' : 'i') + '</small></span>' +
+          '<button class="btn sm" onclick="A.catEdit(\'' + esc(n) + '\')">Modifica</button>' +
           '<button class="btn sm" onclick="A.catRen(\'' + esc(n) + '\')">Rinomina</button>' +
           '<button class="btn sm danger" onclick="A.catDel(\'' + esc(n) + '\')">Elimina</button></div>';
       });
@@ -81,5 +113,32 @@
     if (!ch.length) return;
     if (!confirm('Togliere la categoria "' + n + '" da ' + ch.length + ' articol' + (ch.length === 1 ? 'o' : 'i') + '?\nGli articoli non vengono cancellati, perdono solo questa categoria.')) return;
     return A.commitFiles(ch, 'admin: elimina categoria ' + n).then(function () { A.toast('Categoria eliminata'); A.go('cats'); });
+  });
+
+  /* Vista "Modifica": titolo e descrizione mostrati nella pagina pubblica della categoria
+     (/blog/category/<n>/). A.cmSave rilegge da solo lo sha corrente al momento del salvataggio
+     (l'utente puo' restare aperto sul form a lungo prima di premere Salva): niente sha passato
+     qui, per non rischiare di usarne uno vecchio (409/422, vedi admin.js putFile). */
+  var CM_FILE = '_data/category_meta.yml';
+  A.catEdit = A.wrap(function (n) {
+    return A.getFile(CM_FILE).then(function (f) { return cmParse(f.text); },
+      function (e) { if (e.status === 404) return {}; throw e; }
+    ).then(function (map) {
+      var v = map[n] || { title: '', desc: '' };
+      var h = '<h2>Modifica categoria: ' + esc(n) + '</h2><div class="card">' +
+        '<p><small>Testo mostrato quando si apre la pagina di questa categoria (es. /blog/category/' + esc(n) + '/). Lascia vuoto per usare il testo automatico.</small></p>' +
+        '<label>Titolo</label><input id="cm_title" value="' + esc(v.title) + '" placeholder="vuoto = ' + esc(n) + '">' +
+        '<label>Descrizione</label><input id="cm_desc" value="' + esc(v.desc) + '" placeholder="vuoto = elenco degli articoli in questa categoria">' +
+        '<p><button class="btn primary" onclick="A.cmSave(\'' + esc(n) + '\')">Salva</button> <button class="btn" onclick="A.go(\'cats\')">Annulla</button></p></div>';
+      M().innerHTML = h;
+    });
+  });
+  A.cmSave = A.wrap(function (n) {
+    return A.getFile(CM_FILE).then(function (f) { return { sha: f.sha, map: cmParse(f.text) }; },
+      function (e) { if (e.status === 404) return { sha: '', map: {} }; throw e; }
+    ).then(function (r) {
+      r.map[n] = { title: A.$('cm_title').value.trim(), desc: A.$('cm_desc').value.trim() };
+      return A.putFile(CM_FILE, cmStringify(r.map), r.sha, 'admin: testo categoria ' + n);
+    }).then(function () { A.toast('Salvato'); A.go('cats'); });
   });
 })(A);

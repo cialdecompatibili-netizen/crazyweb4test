@@ -137,6 +137,21 @@
               {% endif %}
             {% endif %}
           {% endfor %}
+          {% comment %}
+            Voci-LINK del menu (gestite da /admin/ > Menu). Vivono in _data/menu_links.yml: NON sono pagine,
+            quindi non hanno permalink proprio e non possono collidere con nessuna pagina. Piu voci possono
+            puntare allo stesso URL. "url" interno (/servizi/) passa da relative_url, esterno (https://) no.
+          {% endcomment %}
+          {% assign menu_links = site.data.menu_links | sort: 'order' %}
+          {% for ml in menu_links %}
+            {% if ml.url and ml.title %}
+              <li class="nav-item">
+                <a class="nav-link" href="{% if ml.url contains '://' %}{{ ml.url }}{% else %}{{ ml.url | relative_url }}{% endif %}"{% if ml.blank %} target="_blank" rel="noopener"{% endif %}>
+                  {{- ml.title -}}
+                </a>
+              </li>
+            {% endif %}
+          {% endfor %}
           {% if site.search_enabled %}
             <!-- Search -->
             <li class="nav-item">

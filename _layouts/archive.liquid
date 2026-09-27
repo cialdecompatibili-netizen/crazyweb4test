@@ -4,21 +4,23 @@ layout: default
 {% comment %}
 OVERRIDE locale di _layouts/archive.liquid (originale: gem al_folio_core-1.0.15, stesso path:
 Jekyll da' priorita' ai file del repo su quelli della gem, vedi admin/claude.md sez. 4b).
-COSA CAMBIA: SOLO il ramo "categories" (titolo e descrizione), reso modificabile da
-admin > Impostazioni invece che fisso in inglese ("an archive of posts in this category").
-I rami "year" e "tags" sono IDENTICI all'originale della gem, non toccarli senza motivo.
+COSA CAMBIA: SOLO il ramo "categories" (titolo e descrizione), reso modificabile PER CATEGORIA
+da admin > Categorie articoli (bottone Modifica) invece che fisso in inglese uguale per tutte
+("an archive of posts in this category"). I rami "year" e "tags" sono IDENTICI all'originale
+della gem, non toccarli senza motivo.
 Se aggiorni la gem al_folio_core: confronta questo file col nuovo archive.liquid della gem
 (diff) e riporta qui eventuali correzioni, altrimenti si perdono (come header.liquid, sez. 4b).
-site.archive_category_title/site.archive_category_desc vengono da _config.yml (stringhe vuote
-di default): con "!= blank" il layout funziona anche prima che l'utente li compili.
+Dati: _data/category_meta.yml, una voce per nome categoria (page.title = nome esatto). Con
+"| default:" il layout funziona anche per una categoria senza voce nel file (testo automatico).
 {% endcomment %}
+{% assign cm = site.data.category_meta[page.title] %}
 <div class="post">
   <header class="post-header">
     {% if page.type == 'categories' %}
       <h1 class="post-title"><i class="fa-solid fa-tag fa-sm"></i>
-        {% if site.archive_category_title != blank %}{{ site.archive_category_title | replace: '%s', page.title }}{% else %}{{ page.title }}{% endif %}
+        {{ cm.title | default: page.title }}
       </h1>
-      <p class="post-description">{% if site.archive_category_desc != blank %}{{ site.archive_category_desc }}{% else %}elenco degli articoli in questa categoria{% endif %}</p>
+      <p class="post-description">{{ cm.desc | default: "elenco degli articoli in questa categoria" }}</p>
     {% elsif page.type == 'year' %}
       <h1 class="post-title"><i class="fa-solid fa-calendar fa-sm"></i> {{ page.date | date: '%Y' }}</h1>
       <p class="post-description">an archive of {{ page.collection_name }} from this year</p>

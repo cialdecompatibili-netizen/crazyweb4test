@@ -2,9 +2,39 @@
 (function (A) {
   var $ = A.$, esc = A.esc, M = function () { return A.main(); };
   var PG = []; // {name, sha, fm, body, title, nav, order, dropdown, permalink}
+  var LK = [], LKSHA = ''; // voci-link da _data/menu_links.yml: [{title, url, order, blank}]
+  var LKP = '_data/menu_links.yml';
+
+  /* lkParse/lkYaml: il file e' scritto SOLO da qui, con un formato fisso (una voce = 4 righe, valori sempre tra
+     virgolette doppie). Parsing manuale come kids(): se qualcuno lo edita a mano cambiando forma, le righe non
+     riconosciute vengono ignorate (mai errori a caso). "[]" = nessuna voce. */
+  function lkUnq(v) { return String(v || '').trim().replace(/^"|"$/g, '').replace(/\\"/g, '"').replace(/\\\\/g, '\\'); }
+  function lkParse(t) {
+    var out = [], cur = null;
+    String(t || '').split(/\r?\n/).forEach(function (ln) {
+      var m = ln.match(/^- title:\s*(.*)$/);
+      if (m) { cur = { title: lkUnq(m[1]), url: '', order: 50, blank: false }; out.push(cur); return; }
+      if (!cur) return;
+      m = ln.match(/^\s+(url|order|blank):\s*(.*)$/);
+      if (!m) return;
+      if (m[1] === 'url') cur.url = lkUnq(m[2]);
+      else if (m[1] === 'order') cur.order = parseFloat(m[2]) || 50;
+      else cur.blank = /^true$/i.test(m[2].trim());
+    });
+    return out;
+  }
+  function lkQ(v) { return '"' + String(v).replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"'; }
+  function lkYaml(a) {
+    var head = '# Voci-link del menu (gestite da /admin/ > Menu). Non sono pagine: nessun permalink, nessuna collisione.\n';
+    if (!a.length) return head + '[]\n';
+    return head + a.map(function (k) { return '- title: ' + lkQ(k.title) + '\n  url: ' + lkQ(k.url) + '\n  order: ' + k.order + '\n  blank: ' + (k.blank ? 'true' : 'false'); }).join('\n') + '\n';
+  }
+  function lkLoad() {
+    return A.getFile(LKP).then(function (f) { LK = lkParse(f.text); LKSHA = f.sha; }, function () { LK = []; LKSHA = ''; });
+  }
 
   function load() {
-    return A.getDir('_pages').then(function (l) {
+    return lkLoad().then(function () { return A.getDir('_pages'); }).then(function (l) {
       l = l.filter(function (f) { return f.type === 'file' && /\.md$/.test(f.name); });
       return Promise.all(l.map(function (f) { return A.getFile('_pages/' + f.name); }));
     }).then(function (fs) {
@@ -161,7 +191,11 @@
         off.forEach(function (p) { h += '<div class="it"><span>' + esc(p.title || p.name) + '<small>' + esc(p.permalink) + '</small></span><button class="btn sm" onclick="A.mnOn(\'' + esc(p.name) + '\')">Aggiungi al menu</button></div>'; });
         h += '</div></div>';
       }
-      h += '<div class="card"><h3>Nuova voce di menu</h3><p>Crea una nuova pagina e la aggiunge subito al menu principale (non dropdown).</p><input id="mv_t" placeholder="Titolo voce"><input id="mv_p" placeholder="/percorso/ (permalink)"><p><button class="btn" onclick="A.mvNew()">Crea voce</button></p></div>';
+      h += '<div class="card"><h3>Voci link personalizzate</h3><p>Voci di menu che puntano a un URL qualsiasi (pagina del sito o link esterno). Non creano pagine: puoi avere piu voci verso la stessa destinazione senza conflitti.</p><div id="lk">';
+      LK.forEach(function (k) {
+        h += '<div class="mrow l"><input class="l_t" value="' + esc(k.title) + '"><input class="l_u" value="' + esc(k.url) + '" placeholder="/percorso/ o https://"><input class="l_o" type="number" value="' + esc(String(k.order)) + '"><label style="white-space:nowrap"><input class="l_b" type="checkbox"' + (k.blank ? ' checked' : '') + '> nuova scheda</label><button class="btn sm danger" onclick="this.parentNode.remove()">x</button></div>';
+      });
+      h += '</div><p><button class="btn sm" onclick="A.lkAdd()">+ Voce link</button> <button class="btn primary" onclick="A.lkSave()">Salva voci link</button></p></div>';
       h += '<div class="card"><h3>Nuovo submenu</h3><p>Crea un dropdown vuoto, poi aggiungi le voci.</p><input id="dd_t" placeholder="Titolo dropdown"><p><button class="btn" onclick="A.ddNew()">Crea submenu</button></p></div>';
       M().innerHTML = h;
     });
@@ -183,13 +217,29 @@
   A.mnOn = A.wrap(function (n) { return setNav(n, true).then(function () { A.toast('Aggiunto (ordine 20, modificalo)'); A.go('menu'); }); });
 
   /* mvNew: crea una NUOVA pagina gia' nel menu. Il permalink deve iniziare e finire con '/' (lo forzo) e non deve gia' esistere: due pagine con lo stesso permalink si sovrascrivono in build e una sparisce. Il nome file deriva dal titolo (slugify + '_'), quindi due titoli uguali sovrascrivono lo stesso file. */
-  A.mvNew = A.wrap(function () {
-    var t = ($('mv_t').value || '').trim(); if (!t) return A.toast('Titolo obbligatorio', true);
-    var perm = ($('mv_p').value || '').trim() || '/' + A.slugify(t) + '/';
-    if (perm.charAt(0) !== '/') perm = '/' + perm;
-    if (perm.charAt(perm.length - 1) !== '/') perm += '/';
-    var fm = 'layout: page\ntitle: ' + A.yq(t) + '\npermalink: ' + perm + '\nnav: true\nnav_order: 20';
-    return A.putFile('_pages/' + A.slugify(t).replace(/-/g, '_') + '.md', '---\n' + fm + '\n---\n', '', 'admin: nuova voce menu ' + t).then(function () { A.toast('Creata (ordine 20, modificalo)'); A.go('menu'); });
+  /* mvNew: DISATTIVATO. Creava un file pagina con quel permalink: due voci verso lo stesso URL = due pagine con lo
+     stesso permalink, una sostituiva l'altra e la pagina restava vuota. Ora le voci di menu personalizzate sono
+     "voci link" (lkAdd/lkSave): righe in _data/menu_links.yml, non pagine, quindi zero collisioni. */
+  A.mvNew = function () { A.toast('Usa "Voci link personalizzate"', true); };
+
+  /* lkAdd: aggiunge una riga vuota nell'editor (nulla viene salvato finche non premi "Salva voci link"). */
+  A.lkAdd = function () {
+    var d = document.createElement('div'); d.className = 'mrow l';
+    d.innerHTML = '<input class="l_t" placeholder="Titolo"><input class="l_u" placeholder="/percorso/ o https://"><input class="l_o" type="number" value="50"><label style="white-space:nowrap"><input class="l_b" type="checkbox"> nuova scheda</label><button class="btn sm danger" onclick="this.parentNode.remove()">x</button>';
+    $('lk').appendChild(d);
+  };
+  /* lkSave: riscrive TUTTO il file dati in un solo commit (una PUT, sha letto in load()). Le righe senza titolo o
+     senza url vengono scartate. Un url interno deve iniziare con '/' (lo forzo); esterno = contiene '://'.
+     Nessun controllo "permalink gia usato": e' voluto, piu voci possono puntare alla stessa pagina. */
+  A.lkSave = A.wrap(function () {
+    var out = [];
+    Array.prototype.forEach.call(document.querySelectorAll('#lk > .mrow'), function (r) {
+      var t = r.querySelector('.l_t').value.trim(), u = r.querySelector('.l_u').value.trim();
+      if (!t || !u) return;
+      if (u.indexOf('://') < 0 && u.charAt(0) !== '/') u = '/' + u;
+      out.push({ title: t, url: u, order: parseFloat(r.querySelector('.l_o').value) || 50, blank: r.querySelector('.l_b').checked });
+    });
+    return A.putFile(LKP, lkYaml(out), LKSHA, 'admin: voci link menu').then(function () { A.toast('Voci link salvate'); A.go('menu'); });
   });
 
   /* ddNew: crea un submenu = pagina con 'dropdown: true' + 'children:' iniziale con un solo 'divider' (deve esistere almeno la chiave children, altrimenti il template non trova la lista). [DEDOTTO dalla gem al_folio_core / header.liquid, NON documentato in CUSTOMIZE.md]. Riverificare se si aggiorna la gem. */
