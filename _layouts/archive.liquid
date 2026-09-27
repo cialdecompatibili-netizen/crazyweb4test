@@ -1,0 +1,51 @@
+---
+layout: default
+---
+{% comment %}
+OVERRIDE locale di _layouts/archive.liquid (originale: gem al_folio_core-1.0.15, stesso path:
+Jekyll da' priorita' ai file del repo su quelli della gem, vedi admin/claude.md sez. 4b).
+COSA CAMBIA: SOLO il ramo "categories" (titolo e descrizione), reso modificabile da
+admin > Impostazioni invece che fisso in inglese ("an archive of posts in this category").
+I rami "year" e "tags" sono IDENTICI all'originale della gem, non toccarli senza motivo.
+Se aggiorni la gem al_folio_core: confronta questo file col nuovo archive.liquid della gem
+(diff) e riporta qui eventuali correzioni, altrimenti si perdono (come header.liquid, sez. 4b).
+site.archive_category_title/site.archive_category_desc vengono da _config.yml (stringhe vuote
+di default): con "!= blank" il layout funziona anche prima che l'utente li compili.
+{% endcomment %}
+<div class="post">
+  <header class="post-header">
+    {% if page.type == 'categories' %}
+      <h1 class="post-title"><i class="fa-solid fa-tag fa-sm"></i>
+        {% if site.archive_category_title != blank %}{{ site.archive_category_title | replace: '%s', page.title }}{% else %}{{ page.title }}{% endif %}
+      </h1>
+      <p class="post-description">{% if site.archive_category_desc != blank %}{{ site.archive_category_desc }}{% else %}elenco degli articoli in questa categoria{% endif %}</p>
+    {% elsif page.type == 'year' %}
+      <h1 class="post-title"><i class="fa-solid fa-calendar fa-sm"></i> {{ page.date | date: '%Y' }}</h1>
+      <p class="post-description">an archive of {{ page.collection_name }} from this year</p>
+    {% elsif page.type == 'tags' %}
+      <h1 class="post-title"><i class="fa-solid fa-hashtag fa-sm"></i> {{ page.title }}</h1>
+      <p class="post-description">an archive of {{ page.collection_name }} with this tag</p>
+    {% endif %}
+  </header>
+
+  <article class="archive">
+    <div class="table-responsive">
+      <table class="table table-sm table-borderless">
+        {% for document in page.documents %}
+          <tr>
+            <th scope="row">{{ document.date | date: '%b %d, %Y' }}</th>
+            <td>
+              {% if document.redirect == blank %}
+                <a class="post-link" href="{{ document.url | relative_url }}">{{ document.title }}</a>
+              {% elsif document.redirect contains '://' %}
+                <a class="post-link" href="{{ document.redirect }}" target="_blank">{{ document.title }}</a>
+              {% else %}
+                <a class="post-link" href="{{ document.redirect | relative_url }}">{{ document.title }}</a>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </article>
+</div>

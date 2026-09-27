@@ -379,6 +379,12 @@ jekyll-archives:
   books:
     enabled: [year, tags, categories] # enables year, tag and category archives (remove if you need to disable one of them).
 
+# Testi della pagina archivio categoria (es. /blog/category/servizi/). Letti da _layouts/archive.liquid
+# (override locale del layout della gem al_folio_core, che aveva questo testo scritto fisso in inglese).
+# Editabili da admin > Impostazioni. Se vuoti, il layout usa un default in italiano (nessuna pagina rotta).
+archive_category_title: "" # es. "Categoria: %s" (%s = nome categoria, sostituito dal layout). Vuoto = titolo automatico col solo nome categoria
+archive_category_desc: "" # testo sotto il titolo nella pagina categoria. Vuoto = "elenco degli articoli in questa categoria"
+
 display_tags: ["formatting", "images", "links", "math", "code", "blockquotes"] # these tags will be displayed on the front page of your blog
 display_categories: ["external-services"] # these categories will be displayed on the front page of your blog
 # barra tag/categorie del blog ora AUTOMATICA (blog.md): i display_* sopra non servono piu'. Numero massimo di tag mostrati:
