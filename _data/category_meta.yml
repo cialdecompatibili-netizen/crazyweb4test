@@ -4,3 +4,6 @@
 # Editabile da admin > Categorie articoli (bottone "Modifica" accanto a Rinomina/Elimina).
 # Una categoria senza voce qui (o con campi vuoti) usa il testo automatico di default: nessuna
 # pagina si rompe. Vedi admin/claude.md.
+servizi:
+  title: ""
+  desc: "Una guida pratica ai servizi che offriamo: soluzioni concrete, spiegate senza fronzoli, per aiutarti a capire subito di cosa hai bisogno e come possiamo darti una mano."
