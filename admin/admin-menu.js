@@ -64,7 +64,8 @@
      Front matter grezzo (es. dal box "Front matter (YAML)" della vista Pagine) con un'indentazione
      diversa, con "- title:" e "permalink:" sulla stessa riga, o con virgolette diverse, rompe
      silenziosamente questo parser: kids() torna un array vuoto o incompleto, senza errori. */
-  function kids(fm) { // legge children: [{title, permalink}]
+  function kids(fm) { return kids0(fm).filter(function (k) { return k.title !== 'divider'; }); } /* divisori NON mostrati: li mette kidsYaml */
+  function kids0(fm) { // legge children: [{title, permalink}]
     var out = [], m = fm.match(/^children:\s*\r?\n((?:[ \t]+.*\r?\n?)*)/m);
     if (!m) return out;
     m[1].split(/\r?\n/).forEach(function (ln) {
@@ -77,6 +78,8 @@
   }
   /* kidsYaml: SCRIVE il blocco children: con l'identazione esatta che kids() sa rileggere (2 spazi per '- title', 4 per 'permalink'). Se cambi l'identazione qui devi cambiare anche il regex di kids(), e viceversa. children/dropdown: [DEDOTTO dalla gem al_folio_core, NON documentato in docs/CUSTOMIZE.md - vedi commento in cima a kids()]. Il permalink e' scritto SENZA yq(): va bene per percorsi ('/books/') e URL ('https://x.it/a', i due punti non seguiti da spazio sono validi in YAML). Rompe il YAML un permalink con ': ' (due punti + spazio) o con ' #'. Il template tratta come link esterno solo cio' che contiene '://' (header.liquid, riga con child.permalink contains '://'), tutto il resto passa da relative_url. [DEDOTTO dalla gem al_folio_core, NON documentato in CUSTOMIZE.md] */
   function kidsYaml(arr) {
+    arr = arr.filter(function (k) { return k.title && k.title !== 'divider'; });
+    if (!arr.length) arr = [{ title: 'divider' }]; /* children: deve esistere */ if (arr.length > 1) arr.splice(1, 0, { title: 'divider' }); /* DIVISORE AUTOMATICO: dopo la 1a voce, mai in coda */
     return 'children:\n' + arr.map(function (k) {
       return k.title === 'divider' ? '  - title: divider' : '  - title: ' + A.yq(k.title) + '\n    permalink: ' + k.permalink;
     }).join('\n');
@@ -186,7 +189,7 @@
           kids(p.fm).forEach(function (k) {
             h += '<div class="mrow k"><input class="k_t" value="' + esc(k.title) + '"><input class="k_p" value="' + esc(k.permalink) + '" placeholder="/percorso/ o https://"><span></span><button class="btn sm danger" onclick="this.parentNode.remove()">x</button></div>';
           });
-          h += '<button class="btn sm" onclick="A.kAdd(this)">+ Voce submenu</button><button class="btn sm" onclick="A.kAdd(this,1)">+ Divisore</button></div>';
+          h += '<button class="btn sm" onclick="A.kAdd(this)">+ Voce submenu</button></div>';
         }
       });
       h += '</div><p><button class="btn primary" onclick="A.mnSave()">Salva menu</button></p></div>';
@@ -267,7 +270,7 @@
           Array.prototype.forEach.call(box.querySelectorAll('.k'), function (k) {
             ks.push({ title: k.querySelector('.k_t').value.trim(), permalink: k.querySelector('.k_p').value.trim() });
           });
-          ks = ks.filter(function (k) { return k.title === 'divider' || (k.title && k.permalink); });
+          ks = ks.filter(function (k) { return k.title && k.title !== 'divider' && k.permalink; });
           fm = fm.replace(/^children:\s*\r?\n(?:[ \t]+.*\r?\n?)*/m, '').replace(/\n+$/, '') + '\n' + kidsYaml(ks);
         }
         if (fm !== p.fm) jobs.push({ n: n, p: p, fm: fm });
