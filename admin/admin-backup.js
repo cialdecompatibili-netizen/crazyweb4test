@@ -34,15 +34,25 @@
     return chain;
   }
 
+  /* Ordine dell'elenco: dal piu' recente. Momento = ora del clic se e' nel nome (backup-AAAA-MM-GG-HHMM, anche -wip- e -pre-ripristino),
+     altrimenti data dell'ultimo commit del backup (vecchi nomi col contatore: -1, -2...). Prima si ordinava per nome, e il contatore
+     finiva in mezzo agli orari. */
+  function when(b) {
+    var m = /(\d{4})-(\d{2})-(\d{2})-(\d{2})(\d{2})(?!\d)/.exec(b.name);
+    if (m) return new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]).getTime();
+    var t = new Date((INFO[b.sha] || {}).when || 0).getTime();
+    return isNaN(t) ? 0 : t;
+  }
+
   A.views.backup = function () {
     return A.api('GET', '').then(function (repo) {
       BRN = repo.default_branch || 'main';
       return Promise.all([headSha(), A.api('GET', '/git/matching-refs/heads/backup-?per_page=100')]);
     }).then(function (rs) {
       var head = rs[0];
-      LIST = rs[1].map(function (r) { return { name: r.ref.replace('refs/heads/', ''), sha: r.object.sha }; })
-        .sort(function (a, b) { return a.name < b.name ? 1 : -1; });
+      LIST = rs[1].map(function (r) { return { name: r.ref.replace('refs/heads/', ''), sha: r.object.sha }; });
       return loadInfo(LIST).then(function () {
+      LIST.sort(function (a, b) { var d = when(b) - when(a); return d || (a.name < b.name ? 1 : -1); });
       var rows = LIST.map(function (b, i) {
         var same = b.sha === head, inf = INFO[b.sha] || {}, parts = [fmt(inf.when), b.sha.slice(0, 7)];
         if (same) parts.push('identico allo stato attuale'); if (inf.msg) parts.push(inf.msg);
