@@ -26,6 +26,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Read those three before editing anything.** Everything below is Claude-specific or longer-form operational detail that does not belong in the short entry point. Do not restate facts from those files here — link to them.
 
+## Punti critici (linea guida)
+
+Scritti il 03/10/2026 dopo lo studio del progetto. Leggerli prima di toccare URL, layout, script o allineamento con PROD.
+
+1. **`clona_test.ps1` SOVRASCRIVE il lavoro del test.** Copia tutto `crazyweb4` (PROD) dentro questa cartella (robocopy `/E`, esclude solo `.git`, `node_modules`, `_site`, `.jekyll-cache`, `automazioni`, `CLAUDE.md`, `AGENTS.md`): `_config.yml`, `_plugins/permalink_da_categoria.rb`, `_layouts/post.liquid`, `repos.json`, `_pages/home.md`, `_pages/servizi.md`, `pubblica_servizi.py` tornerebbero alla versione PROD e i servizi uscirebbero di nuovo su `/blog/servizi/`. NON lanciarlo senza prima fare checkpoint/backup e senza portare le stesse modifiche su PROD (o escludere quei file).
+2. **Tre posti devono dire la stessa cosa sull'URL dei servizi:** `_config.yml > permalink_per_categoria` (la vera regola), `repos.json > sito.permalink_servizio` (usato da `pubblica_servizi.py` per le card) e l'etichetta commit in `admin/admin-views.js` (`doPut`, controlla `cs === 'servizi'` a mano). Se cambi uno, cambia gli altri due: oggi non c'e' nessun controllo automatico.
+3. **`permalink:` nel front matter vince su tutto** e il post esce dal sistema: niente regola per categoria, niente redirect dai vecchi URL. Non scriverlo mai, ne' a mano ne' da script.
+4. **Layout post (`_layouts/post.liquid`):** il blocco `url_beginning` decide se anno/categoria/tag sono link. La riga `page.collection == 'posts'` e' quella che li tiene cliccabili con URL `/servizi/`. Se un aggiornamento del tema (o `clona_test.ps1`) riporta il layout originale, i link spariscono senza nessun errore.
+5. **Redirect = pagine HTML** (meta refresh + canonical + noindex), non 301: GitHub Pages non permette di piu'. Funzionano per le persone e per i link salvati, ma non trasferiscono il posizionamento come un 301. Si generano a ogni build solo per le categorie con regola in `permalink_per_categoria`: se togli o cambi una regola, cambiano anche i redirect.
+6. **Collisioni di URL:** un servizio nuovo con slug uguale a una pagina esistente sotto `/servizi/` (o un post di un'altra categoria con lo stesso nome) produce due pagine sullo stesso indirizzo: Jekyll ne pubblica una sola e se ne accorge al massimo con un avviso nel log di build. Controllare lo slug prima di creare.
+7. **Push in parallelo con il pannello admin:** l'admin committa su `main` mentre lavori. Il push puo' essere rifiutato (non-fast-forward): `git pull --rebase origin main` e poi push. Non fare mai `--force` su `main` se non per un ripristino voluto da checkpoint.
+8. **Quasi nessun controllo automatico:** in `.github/workflows` e' attivo solo `deploy.yml`; tutti gli altri (unit-tests, prettier, style-contract, link rotti, visual regression) sono `.disabled`. Quindi nessuno ti avvisa se rompi qualcosa: la verifica e' la build locale (`bundle exec jekyll build -d $env:TEMP\_site_check`, ~110s) e il controllo degli URL online dopo il deploy. Riabilitare i gate potrebbe segnalare plugin e layout custom come fuori dal 'style contract' di al-folio.
+9. **Tempi di deploy:** run 'Deploy site' ~1-1,5 min + 'pages build and deployment' ~45 s. Verificare online dopo circa 2-3 minuti dal push. Piu' push ravvicinati cancellano le run precedenti (normale, conta l'ultima).
+10. **Solo TEST:** plugin, regola `/servizi/`, layout e admin NON sono su PROD (`crazyweb4`). Portarli solo dopo il via di Mirco, tutti insieme, con build locale e backup prima.
+11. **Modifiche ai file:** i file del sito sono in CRLF e UTF-8. Cambiare testo con script Python in binario (preservando gli a-capo), mai riscrivere interi file con editor che li convertono. Usare modifiche mirate, non rewrite.
+12. **Prima di ogni sessione:** checkpoint `checkpoint-YYYY-MM-DD` (regola gia' sopra). Dopo modifiche grosse: build locale, push, verifica URL online, backup `backup-YYYY-MM-DD-N` + zip nella cartella `backup_crazyweb4test_new`.
+
 ## Daily dev loop
 
 ```bash
