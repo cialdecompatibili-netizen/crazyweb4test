@@ -116,3 +116,5 @@ Other gates:
 - Pulsante 'Leggi tutto' nella toolbar (mdMore in admin-views.js, anche pgToolbar in admin-menu.js): inserisce <!--more--> come blocco protetto (regola in mdRender, riga sul Liquid). Uno solo per testo.
 
 26. **IMMAGINE NEL TESTO (pulsante Img dell'editor).** Apre il selettore foto (carica o scegli da assets/img) con Sinistra/Centro/Destra e testo alternativo, e inserisce {% raw %}{% include immagine.liquid src alt align %}{% endraw %} (mdImg in admin-views.js, A.imgPick con opts in admin-media.js). Il sito la disegna con _includes/immagine.liquid (float max 45% su desktop, tutta larghezza sotto 576px). Non e' stata verificata una build con l'include: se una pagina non lo mostra, controllare quel file.
+
+27. **BLOCCHI PROTETTI NELL'EDITOR VISUALE (immagine, galleria, tabella, Leggi tutto).** Ogni blocco ha tre pulsanti: matita (modifica sorgente), X (elimina, con conferma: mdRawDel) e maniglia a due puntini (trascina: visDnD, drag nativo, riga blu dove cade). draggable e' attivo solo mentre si tiene la maniglia. Tutto in admin-views.js + regole .mddel/.mddrag/.dnd-* in admin.css. Non provato nel browser, solo sintassi.

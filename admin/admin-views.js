@@ -34,6 +34,8 @@
     else inner = '<code class="mdliqb">' + esc(raw) + '</code>';
     return '<div class="mdraw mdraw-' + kind + '" data-kind="' + kind + '" data-raw="' + attr(raw) + '" contenteditable="false">' +
       '<button type="button" class="mdedit" title="Modifica sorgente del blocco" onclick="mdRawEdit(this)">&#9998;</button>' +
+      '<button type="button" class="mdedit mddel" title="Elimina blocco" onclick="mdRawDel(this)">&#10005;</button>' +
+      '<span class="mdedit mddrag" title="Trascina per spostare il blocco">&#8942;&#8942;</span>' +
       '<div class="mdraw-view">' + inner + '</div></div>';
   }
   /* {% ... %} e {{ ... }} dentro l'HTML/paragrafo: chip non modificabili (raw in data-raw) */
@@ -220,12 +222,42 @@
       blk.parentNode.replaceChild(tmp.firstChild, blk); visSync();
     }
   };
+  /* Elimina un blocco protetto (immagine, galleria, tabella, Leggi tutto...) con conferma. Se il testo resta vuoto rimette un paragrafo per poter scrivere. */
+  window.mdRawDel = function (btn) {
+    var blk = btn.closest('.mdraw'), p = mdPrev; if (!blk || !p) return;
+    if (!confirm('Eliminare questo blocco dal testo?')) return;
+    blk.remove(); if (!p.firstChild) p.innerHTML = '<p><br></p>'; visSync();
+  };
+  /* Trascinare i blocchi protetti: si prende la maniglia (due puntini) e si lascia sopra o sotto un altro elemento (riga blu = dove finisce).
+     Drag nativo del browser, nessuna libreria. draggable e' attivo solo mentre si tiene la maniglia, cosi' il testo normale non si trascina per sbaglio. */
+  function visDnD(p) {
+    var drag = null, ind = null;
+    function top(n) { while (n && n.parentNode !== p) n = n.parentNode; return n; }
+    function clr() { if (ind) { ind.classList.remove('dnd-before', 'dnd-after'); ind = null; } }
+    function end() { clr(); if (drag) drag.removeAttribute('draggable'); drag = null; }
+    p.addEventListener('mousedown', function (e) { var h = e.target.closest && e.target.closest('.mddrag'), b = h && h.closest('.mdraw'); if (b) b.setAttribute('draggable', 'true'); });
+    p.addEventListener('mouseup', function () { if (!drag) Array.prototype.forEach.call(p.querySelectorAll('.mdraw[draggable]'), function (b) { b.removeAttribute('draggable'); }); });
+    p.addEventListener('dragstart', function (e) {
+      var b = e.target.closest && e.target.closest('.mdraw'); if (!b || b.getAttribute('draggable') !== 'true') return;
+      drag = b; e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', ''); } catch (x) {}
+    });
+    p.addEventListener('dragover', function (e) {
+      if (!drag) return; e.preventDefault(); var t = top(e.target); clr(); if (!t || t === drag) return;
+      var r = t.getBoundingClientRect(); ind = t; ind.classList.add(e.clientY < r.top + r.height / 2 ? 'dnd-before' : 'dnd-after');
+    });
+    p.addEventListener('drop', function (e) {
+      if (!drag) return; e.preventDefault(); var t = top(e.target);
+      if (t && t !== drag) { var bf = e.clientY < t.getBoundingClientRect().top + t.offsetHeight / 2; p.insertBefore(drag, bf ? t : t.nextSibling); }
+      end(); visSync();
+    });
+    p.addEventListener('dragend', end);
+  }
   function visActive() { var p = $('mdPrev'); return p && p.style.display === 'block'; }
   function visOpen() {
     var t = $('body'), p = $('mdPrev'), b = $('mdPrevBtn'); if (!t || !p) return;
     p.innerHTML = window.mdRender(t.value) || '<p><br></p>';
     p.setAttribute('contenteditable', 'true'); p.setAttribute('spellcheck', 'true');
-    if (!p._mdInit) { p._mdInit = 1; p.addEventListener('input', visSync); p.addEventListener('keydown', visKey); p.addEventListener('paste', visPaste); }
+    if (!p._mdInit) { p._mdInit = 1; p.addEventListener('input', visSync); p.addEventListener('keydown', visKey); p.addEventListener('paste', visPaste); visDnD(p); }
     p.style.minHeight = Math.max(t.offsetHeight, 240) + 'px';
     t.style.display = 'none'; p.style.display = 'block';
     if (b) { b.textContent = 'Sorgente'; b.classList.add('primary'); }
