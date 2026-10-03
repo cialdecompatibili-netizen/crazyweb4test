@@ -446,7 +446,13 @@
     return doPut(name);
     function doPut(nm) {
       var txt = '---\n' + fm.replace(/\n+$/, '') + '\n---\n\n' + $('body').value.replace(/^\n+/, '');
-      return A.putFile(C[key].dir + '/' + nm, txt, cur.sha, 'admin: ' + (cur.sha ? 'aggiorna ' : 'crea ') + nm).then(function () {
+      /* Messaggio commit = nome della run in Actions. Per i post usa l'URL reale (/blog/<categoria>/<articolo>/, come il plugin permalink_da_categoria), non il nome file con la data. */
+      var lbl = nm;
+      if (key === 'posts') {
+        var c0 = (A.fmGet(fm, 'categories') || A.fmGet(fm, 'category')).replace(/[\[\]]/g, '').split(/[ ,]+/).filter(Boolean)[0];
+        lbl = '/blog/' + (c0 ? A.slugify(c0) + '/' : '') + nm.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace(/\.md$/, '') + '/';
+      }
+      return A.putFile(C[key].dir + '/' + nm, txt, cur.sha, 'admin: ' + (cur.sha ? 'aggiorna ' : 'crea ') + lbl).then(function () {
         A.toast('Salvato: pubblicazione in corso'); A.go(key);
       });
     }
