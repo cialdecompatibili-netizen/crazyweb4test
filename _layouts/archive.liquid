@@ -20,13 +20,13 @@ Dati: _data/category_meta.yml, una voce per nome categoria (page.title = nome es
       <h1 class="post-title"><i class="fa-solid fa-tag fa-sm"></i>
         {{ cm.title | default: page.title }}
       </h1>
-      <p class="post-description">{{ cm.desc | default: "elenco degli articoli in questa categoria" }}</p>
+      <p class="post-description">{{ cm.desc | default: "Elenco degli articoli in questa categoria" }}</p>
     {% elsif page.type == 'year' %}
       <h1 class="post-title"><i class="fa-solid fa-calendar fa-sm"></i> {{ page.date | date: '%Y' }}</h1>
-      <p class="post-description">archivio degli articoli di quest'anno</p>
+      <p class="post-description">Archivio degli articoli di quest'anno</p>
     {% elsif page.type == 'tags' %}
       <h1 class="post-title"><i class="fa-solid fa-hashtag fa-sm"></i> {{ page.title }}</h1>
-      <p class="post-description">archivio degli articoli con questo tag</p>
+      <p class="post-description">Archivio degli articoli con questo tag</p>
     {% endif %}
   </header>
 
