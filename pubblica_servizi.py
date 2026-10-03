@@ -93,6 +93,8 @@ def anno_post(slug):
 def url(anno, slug):
     # URL pubblico del servizio: se repos.json ha "permalink_servizio" (es. /servizi/{slug}/)
     # vale quello, altrimenti il permalink standard dei post (/blog/{anno}/{slug}/).
+    # ATTENZIONE: deve coincidere con permalink_per_categoria > servizi in _config.yml (l'URL vero lo decide il plugin
+    # _plugins/permalink_da_categoria.rb, questo valore serve solo per scrivere i link nelle card). Se divergono, le card puntano a pagine che non esistono.
     fmt = SITO.get("permalink_servizio") or SITO["permalink_post"]
     return "{{ '%s' | relative_url }}" % fmt.format(anno=anno, slug=slug)
 
