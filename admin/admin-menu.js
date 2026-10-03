@@ -79,7 +79,7 @@
   /* kidsYaml: SCRIVE il blocco children: con l'identazione esatta che kids() sa rileggere (2 spazi per '- title', 4 per 'permalink'). Se cambi l'identazione qui devi cambiare anche il regex di kids(), e viceversa. children/dropdown: [DEDOTTO dalla gem al_folio_core, NON documentato in docs/CUSTOMIZE.md - vedi commento in cima a kids()]. Il permalink e' scritto SENZA yq(): va bene per percorsi ('/books/') e URL ('https://x.it/a', i due punti non seguiti da spazio sono validi in YAML). Rompe il YAML un permalink con ': ' (due punti + spazio) o con ' #'. Il template tratta come link esterno solo cio' che contiene '://' (header.liquid, riga con child.permalink contains '://'), tutto il resto passa da relative_url. [DEDOTTO dalla gem al_folio_core, NON documentato in CUSTOMIZE.md] */
   function kidsYaml(arr) {
     arr = arr.filter(function (k) { return k.title && k.title !== 'divider'; });
-    if (!arr.length) arr = [{ title: 'divider' }]; /* children: deve esistere */ if (arr.length > 1) arr.splice(1, 0, { title: 'divider' }); /* DIVISORE AUTOMATICO: dopo la 1a voce, mai in coda */
+    if (!arr.length) arr = [{ title: 'divider' }]; /* children: deve esistere */ if (arr.length > 1) arr = arr.reduce(function (o, k, i) { if (i) o.push({ title: 'divider' }); o.push(k); return o; }, []); /* DIVISORE AUTOMATICO: tra una voce e la successiva, mai dopo l'ultima */
     return 'children:\n' + arr.map(function (k) {
       return k.title === 'divider' ? '  - title: divider' : '  - title: ' + A.yq(k.title) + '\n    permalink: ' + k.permalink;
     }).join('\n');
