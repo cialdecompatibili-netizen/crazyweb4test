@@ -46,11 +46,11 @@
   });
 
   /* ---- Impostazioni: solo campi semplici di _config.yml, edit chirurgico riga per riga ---- */
-  /* Come WordPress: solo cio' che serve. Titolo, Descrizione (motto), Lingua; poi Lettura (articoli per pagina, indice).
+  /* Come WordPress: solo cio' che serve. Titolo, Descrizione (ripiego SEO), Lingua; poi Lettura (articoli per pagina, indice).
      NON in admin (restano in _config.yml): nome/cognome/nota contatti (logica da sito personale), parole chiave (i motori le ignorano),
      testo footer, url e baseurl (li ricava deploy.yml dal repo: un clone funziona da solo, vedi CLAUDE.md).
      Titolo: vuoto = automatico dal nome del repo/baseurl (plugin _plugins/titolo_da_baseurl.rb); si salva come 'blank'. */
-  var KEYS = [['title', 'Titolo'], ['description', 'Motto / descrizione breve'], ['lang', 'Lingua']];
+  var KEYS = [['title', 'Titolo'], ['description', 'Descrizione per i motori di ricerca (ripiego)'], ['lang', 'Lingua']];
   var CFG_SAVE = KEYS.concat([['toc_style', 'Indice articoli']]); // toc_style ha il suo <select> nella vista, non l'input generico
   var cfg = { sha: '', text: '' };
   function getVal(t, k) { // valore singola riga o blocco ">"
@@ -109,6 +109,7 @@
           extra = ' placeholder="' + esc(auto) + '"';
         }
         h += '<label>' + k[1] + '</label><input id="c_' + k[0] + '" value="' + esc(v) + '"' + extra + '>';
+        if (k[0] === 'description') h += '<small>Non compare nel sito. La usano Google e le anteprime sui social solo per le pagine senza una descrizione propria.</small>';
         if (k[0] === 'title') h += '<small>Vuoto = automatico dal nome del sito (vedi anteprima nel campo). Scrivi un testo per cambiarlo.</small>';
       });
       h += '<h3>Lettura</h3>';
