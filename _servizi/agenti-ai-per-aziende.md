@@ -2,6 +2,7 @@
 layout: servizio
 title: Agenti AI per aziende
 description: Agenti AI su misura per i processi della tua azienda.
+in_home: true
 ---
 
 ## Cosa include il servizio
