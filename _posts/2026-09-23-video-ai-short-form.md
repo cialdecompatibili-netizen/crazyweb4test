@@ -4,6 +4,7 @@ title: Video AI short-form
 date: 2026-09-23 12:00:00
 description: Produzione di video brevi generati con AI per Reel, TikTok e Shorts.
 categories: servizi
+permalink: /servizi/video-ai-short-form/
 ---
 
 ## Cosa include il servizio

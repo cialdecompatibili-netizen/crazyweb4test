@@ -4,6 +4,7 @@ title: Personalizzazione 1-to-1
 date: 2026-09-23 12:00:00
 description: Esperienze personalizzate per ogni singolo utente o cliente.
 categories: servizi
+permalink: /servizi/personalizzazione-1-to-1/
 ---
 
 ## Cosa include il servizio

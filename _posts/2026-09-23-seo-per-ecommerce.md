@@ -4,6 +4,7 @@ title: SEO per eCommerce
 date: 2026-09-23 12:00:00
 description: Ottimizzazione SEO specifica per negozi online e schede prodotto.
 categories: servizi
+permalink: /servizi/seo-per-ecommerce/
 ---
 
 ## Cosa include il servizio

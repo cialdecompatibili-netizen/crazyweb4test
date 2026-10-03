@@ -4,6 +4,7 @@ title: App mobile
 date: 2026-09-23 12:00:00
 description: Sviluppo di app mobile per iOS e Android.
 categories: servizi
+permalink: /servizi/app-mobile/
 ---
 
 ## Cosa include il servizio

@@ -4,6 +4,7 @@ title: Analisi competitiva con AI
 date: 2026-09-23 12:00:00
 description: Analisi dei concorrenti automatizzata con strumenti di intelligenza artificiale.
 categories: servizi
+permalink: /servizi/analisi-competitiva-con-ai/
 ---
 
 ## Cosa include il servizio

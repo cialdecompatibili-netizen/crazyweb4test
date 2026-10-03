@@ -4,6 +4,7 @@ title: Restyling del sito
 date: 2026-09-23 12:00:00
 description: Rinnovamento grafico e funzionale di un sito esistente.
 categories: servizi
+permalink: /servizi/restyling-del-sito/
 ---
 
 ## Cosa include il servizio

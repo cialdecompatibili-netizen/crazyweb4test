@@ -4,6 +4,7 @@ title: Web design
 date: 2026-09-23 12:00:00
 description: Progettazione grafica di siti web efficaci e coerenti col brand.
 categories: servizi
+permalink: /servizi/web-design/
 ---
 
 ## Cosa include il servizio

@@ -4,6 +4,7 @@ title: AI Commerce
 date: 2026-09-23 12:00:00
 description: Applicazione dell'AI ai processi di vendita online.
 categories: servizi
+permalink: /servizi/ai-commerce/
 ---
 
 ## Cosa include il servizio

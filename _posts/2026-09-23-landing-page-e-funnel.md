@@ -4,6 +4,7 @@ title: Landing page e funnel
 date: 2026-09-23 12:00:00
 description: Landing page e funnel pensati per convertire i visitatori.
 categories: servizi
+permalink: /servizi/landing-page-e-funnel/
 ---
 
 ## Cosa include il servizio

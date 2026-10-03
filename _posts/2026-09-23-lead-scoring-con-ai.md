@@ -4,6 +4,7 @@ title: Lead scoring con AI
 date: 2026-09-23 12:00:00
 description: Valutazione automatica della qualita' dei lead tramite AI.
 categories: servizi
+permalink: /servizi/lead-scoring-con-ai/
 ---
 
 ## Cosa include il servizio

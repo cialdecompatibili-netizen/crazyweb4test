@@ -4,6 +4,7 @@ title: Analisi predittiva e reporting AI
 date: 2026-09-23 12:00:00
 description: Report e previsioni basate su AI per anticipare l'andamento del business.
 categories: servizi
+permalink: /servizi/analisi-predittiva-e-reporting-ai/
 ---
 
 ## Cosa include il servizio

@@ -4,6 +4,7 @@ title: GEO Audit e Strategy
 date: 2026-09-23 12:00:00
 description: Audit e strategia per la visibilita' sui motori di risposta AI.
 categories: servizi
+permalink: /servizi/geo-audit-e-strategy/
 ---
 
 ## Cosa include il servizio

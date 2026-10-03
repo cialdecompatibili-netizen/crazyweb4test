@@ -4,6 +4,7 @@ title: PPC per eCommerce
 date: 2026-09-23 12:00:00
 description: Campagne a pagamento pensate per negozi online.
 categories: servizi
+permalink: /servizi/ppc-per-ecommerce/
 ---
 
 ## Cosa include il servizio

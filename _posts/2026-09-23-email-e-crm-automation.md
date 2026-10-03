@@ -4,6 +4,7 @@ title: Email e CRM automation
 date: 2026-09-23 12:00:00
 description: Automazione dei flussi email e del CRM.
 categories: servizi
+permalink: /servizi/email-e-crm-automation/
 ---
 
 ## Cosa include il servizio

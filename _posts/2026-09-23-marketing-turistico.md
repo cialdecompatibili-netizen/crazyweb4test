@@ -4,6 +4,7 @@ title: Marketing turistico
 date: 2026-09-23 12:00:00
 description: Marketing digitale per hotel, OTA e tour operator.
 categories: servizi
+permalink: /servizi/marketing-turistico/
 ---
 
 ## Cosa include il servizio

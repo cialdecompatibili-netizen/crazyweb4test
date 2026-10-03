@@ -4,6 +4,7 @@ title: Gestionali e intranet
 date: 2026-09-23 12:00:00
 description: Sviluppo di gestionali e intranet, anche con ERP e AI.
 categories: servizi
+permalink: /servizi/gestionali-e-intranet/
 ---
 
 ## Cosa include il servizio

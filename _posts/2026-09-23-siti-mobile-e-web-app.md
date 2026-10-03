@@ -4,6 +4,7 @@ title: Siti mobile e web app
 date: 2026-09-23 12:00:00
 description: Sviluppo di siti responsive e web app.
 categories: servizi
+permalink: /servizi/siti-mobile-e-web-app/
 ---
 
 ## Cosa include il servizio

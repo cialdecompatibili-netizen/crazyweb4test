@@ -4,6 +4,7 @@ title: SEO copywriting
 date: 2026-09-23 12:00:00
 description: Testi ottimizzati per i motori di ricerca e per chi legge.
 categories: servizi
+permalink: /servizi/seo-copywriting/
 ---
 
 ## Cosa include il servizio

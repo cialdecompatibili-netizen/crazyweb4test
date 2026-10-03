@@ -4,6 +4,7 @@ title: Visual AI su larga scala
 date: 2026-09-23 12:00:00
 description: Produzione di contenuti visivi con AI su larga scala.
 categories: servizi
+permalink: /servizi/visual-ai-su-larga-scala/
 ---
 
 ## Cosa include il servizio

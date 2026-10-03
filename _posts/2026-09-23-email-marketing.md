@@ -4,6 +4,7 @@ title: Email marketing
 date: 2026-09-23 12:00:00
 description: DEM, newsletter e automation via email per fidelizzare i clienti.
 categories: servizi
+permalink: /servizi/email-marketing/
 ---
 
 ## Cosa include il servizio

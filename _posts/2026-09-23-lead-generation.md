@@ -4,6 +4,7 @@ title: Lead generation
 date: 2026-09-23 12:00:00
 description: Generazione di contatti qualificati con marketing e CRM integrati.
 categories: servizi
+permalink: /servizi/lead-generation/
 ---
 
 ## Cosa include il servizio

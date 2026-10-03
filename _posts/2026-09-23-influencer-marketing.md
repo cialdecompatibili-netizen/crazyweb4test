@@ -4,6 +4,7 @@ title: Influencer marketing
 date: 2026-09-23 12:00:00
 description: Collaborazioni con creator per aumentare visibilita' e credibilita'.
 categories: servizi
+permalink: /servizi/influencer-marketing/
 ---
 
 ## Cosa include il servizio

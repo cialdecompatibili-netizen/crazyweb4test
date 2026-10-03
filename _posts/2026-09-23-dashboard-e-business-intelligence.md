@@ -4,6 +4,7 @@ title: Dashboard e business intelligence
 date: 2026-09-23 12:00:00
 description: Dashboard su misura per monitorare in tempo reale i dati chiave della tua attivita'.
 categories: servizi
+permalink: /servizi/dashboard-e-business-intelligence/
 ---
 
 ## Cosa include il servizio
