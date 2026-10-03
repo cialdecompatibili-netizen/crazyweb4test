@@ -42,6 +42,8 @@ pagination:
   .post > .tag-category-list li { margin: 0; padding: 0; }
   .post > .blog-desc { margin: 0 0 .25rem; line-height: 1.25; font-size: .85rem; text-align: center; color: var(--global-text-color-light); }
   .post .featured-posts .mb-4 { margin-bottom: .5rem !important; }
+  /* Miniature elenco blog: stessa proporzione per tutte (16:10), ritaglio centrato, mai deformate. Cambia solo aspect-ratio per altri formati. */
+  .post .card-img { width: 100%; height: auto !important; aspect-ratio: 16 / 10; object-fit: cover; object-position: center; border-radius: .375rem; display: block; background: var(--global-card-bg-color, rgba(128,128,128,.12)); }
   .post > .tag-category-list li + li::before { content: "\00b7"; margin-right: .35rem; color: var(--global-text-color-light); }
 </style>
 {% assign blog_desc = site.blog_description | strip %}
@@ -179,7 +181,7 @@ pagination:
 
   <div class="col-sm-3">
     {% comment %} alt = thumbnail_alt (campo dell'admin) o, se vuoto, il titolo: mai alt="immagine" generico (SEO/accessibilita). {% endcomment %}
-    <img class="card-img" src="{{ post.thumbnail | relative_url }}" style="object-fit: cover; height: 90%" alt="{{ post.thumbnail_alt | default: post.title | escape }}">
+    <img class="card-img" src="{{ post.thumbnail | relative_url }}" loading="lazy" alt="{{ post.thumbnail_alt | default: post.title | escape }}">
   </div>
 </div>
 {% endif %}
