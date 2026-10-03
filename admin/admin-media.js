@@ -242,6 +242,8 @@
       if (nv !== getVal(cfg.text, k[0])) t = setVal(t, k[0], nv);
     });
     var npp = $('c_per_page').value; if (npp !== getPer(cfg.text)) t = setPer(t, npp);
+    /* PUNTO CRITICO (CLAUDE.md punto 27): home_marte e' una chiave in prima colonna di _config.yml, letta da _pages/home.md (condizione Liquid if su site.home_marte).
+       Qui NON e' in KEYS/CFG_SAVE perche' e' una spunta, non un testo. Se la riga sparisce dal config setVal non la ricrea e Marte resta acceso. */
     /* Marte in home: interruttore home_marte (true/false). Se la riga manca nel config non la creo: setVal non fa nulla e il default resta acceso. */
     var hm = $('c_home_marte').checked ? 'true' : 'false'; if (hm !== (getVal(cfg.text, 'home_marte').toLowerCase() === 'false' ? 'false' : 'true')) t = setVal(t, 'home_marte', hm);
     if (t === cfg.text) return A.toast('Nessuna modifica');

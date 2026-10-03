@@ -6,6 +6,8 @@
 #    Baseurl vuoto (sito in root): si usa il primo pezzo dell'host di `url`.
 #  - `title:` valorizzato (da Impostazioni admin o a mano) => vince sempre, non si tocca.
 # Il valore finisce in site.title, quindi header, <title>, footer, about e meta author lo usano senza altro codice.
+# PUNTO CRITICO (CLAUDE.md punto 18): la stessa regola e' COPIATA A MANO in autoTitle() di admin/admin-media.js (serve solo al
+# segnaposto del campo Titolo). Se cambi qui, cambia anche li, altrimenti l'anteprima dell'admin mente. Solo TEST.
 # Se non si riesce a ricavare nulla resta `blank` e i template ripiegano su first_name/middle_name/last_name.
 require 'uri'
 
