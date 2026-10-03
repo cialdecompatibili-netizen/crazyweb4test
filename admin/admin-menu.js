@@ -168,6 +168,7 @@
   });
   /* A.pgDel: elimina il file. Effetti collaterali NON automatici: se la pagina era in un dropdown (children: di un'altra pagina) il link nel menu resta e punta a un 404; se era in nav resta il buco nell'ordine. L'admin avvisa solo con confirm(): controllare il Menu dopo. La pagina con permalink '/' (home) non ha il bottone Elimina: non rimuoverlo. */
   A.pgDel = A.wrap(function (name) {
+    /* dal cestino (admin-cestino.js) la pagina si ripristina, ma il menu NON si ripara da solo: voci/dropdown che la puntano restano 404 finche' non e' tornata. */
     if (!confirm('Spostare ' + name + ' nel cestino? Controlla poi il menu.')) return;
     return A.toTrash([{ dir: '_pages', name: name }], 'admin: cestino pagina ' + name).then(function () { A.toast('Spostata nel cestino'); A.go('pages'); });
   });

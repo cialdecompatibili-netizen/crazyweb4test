@@ -178,6 +178,7 @@ pagination:
 </div>
 
   <div class="col-sm-3">
+    {% comment %} alt = thumbnail_alt (campo dell'admin) o, se vuoto, il titolo: mai alt="immagine" generico (SEO/accessibilita). {% endcomment %}
     <img class="card-img" src="{{ post.thumbnail | relative_url }}" style="object-fit: cover; height: 90%" alt="{{ post.thumbnail_alt | default: post.title | escape }}">
   </div>
 </div>

@@ -40,8 +40,11 @@
     return ns.reduce(function (pr, n) {
       return pr.then(function () {
         return A.getFile(DIR[key] + '/' + n).then(function (f) {
-          var s = A.splitFM(f.text); if (!s.fm) throw new Error('Front matter non trovato in ' + n);
-          var fm = fn(s.fm, n); if (fm === s.fm) return;
+          var s = A.splitFM(f.text); if (!s.fm) throw new Error('Front matter non trovato in ' + n); /* un errore qui ferma TUTTO prima del commit: nessun file viene toccato */
+          var fm = fn(s.fm, n); if (fm === s.fm) return; /* gia' nello stato voluto: il file si salta e non entra nel commit */
+          /* CRITICO: i file del repo possono essere CRLF o LF (misti!). Si riusa lo stesso a capo del file letto, altrimenti ogni azione di gruppo
+             riscriverebbe tutte le righe e il diff di GitHub mostrerebbe l'intero file cambiato. Si rimonta '---' + fm + '---' + body come fa splitFM:
+             il corpo (s.body) NON si tocca mai. */
           var nl = f.text.indexOf('\r\n') >= 0 ? '\r\n' : '\n';
           changes.push({ path: DIR[key] + '/' + n, text: '---' + nl + fm.replace(/\r?\n+$/, '') + nl + '---' + nl + s.body });
         });
@@ -51,17 +54,22 @@
       return A.commitFiles(changes, msg + ' (' + changes.length + ')').then(function () { return changes.length; });
     });
   }
+  /* done: svuota la selezione e rilegge l'elenco dal repo (A.go): le modifiche si vedono subito nell'admin, il sito pubblico si aggiorna dopo il deploy (1-2 min). */
   function done(key, txt) { A.sel[key] = {}; A.toast(txt); A.go(key); }
 
   A.bulk = A.wrap(function (key, act) {
     var ns = names(key), N = ns.length;
     if (!N) { A.toast('Seleziona almeno un elemento', true); return; }
     if (act === 'hide' || act === 'show') {
+      /* CRITICO: Nascondi = riga "published: false" (stesso flag dell'occhio, NON "draft"); Mostra = la riga sparisce (fmDel), non diventa "true".
+         Un articolo nascosto resta nel repo ma Jekyll non lo pubblica: i link scritti a mano verso di lui danno 404. */
       return editMany(key, ns, function (fm) { return act === 'hide' ? A.fmSet(fm, 'published', 'false') : A.fmDel(fm, 'published'); }, 'admin: ' + (act === 'hide' ? 'nascondi' : 'mostra') + ' ' + key)
         .then(function (c) { if (c) done(key, (act === 'hide' ? 'Nascosti ' : 'Mostrati ') + c + ' (pubblicazione in corso)'); });
     }
     if (act === 'cat') {
       var f = CATF[key]; if (!f) return;
+      /* CRITICO: la categoria scelta SOSTITUISCE tutte quelle esistenti (fmSet riscrive l'intera riga): un articolo con "sport cronaca" resta solo con la nuova.
+         Il valore passa da slugify, quindi e' una sola parola senza spazi ne' due punti (niente yq necessario). Su 'posts' la prima categoria decide l'URL. */
       var v = prompt('Nuova categoria per ' + N + ' elementi (vuoto = nessuna categoria).' + (key === 'posts' ? '\nAttenzione: cambia l\'indirizzo degli articoli (/blog/<categoria>/...) e i vecchi indirizzi non reindirizzano.' : ''));
       if (v === null) return;
       v = v.trim() ? A.slugify(v) : '';

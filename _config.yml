@@ -267,7 +267,7 @@ kramdown:
 # non verrebbe mai costruita: sparirebbero home, chi-siamo, servizi, ecc.
 include: ["_pages"]
 exclude:
-  - _cestino/
+  - _cestino/   # NON TOGLIERE: e' il cestino dell'admin (admin-cestino.js); senza exclude i file eliminati tornerebbero a comparire nel sito
   - AGENTS.md
   - al-folio-upgrade-report.md
   - bin/

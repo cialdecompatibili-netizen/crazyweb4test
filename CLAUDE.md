@@ -104,6 +104,8 @@ Other gates:
 ## Azioni di gruppo (admin)
 - admin/admin-bulk.js: checkbox sulle righe di Articoli, Progetti, Servizi, News + barra Nascondi / Mostra / Categoria / Cestino. Un solo commit per azione.
 - Categoria: sugli articoli cambia l'URL (/blog/<categoria>/...), i vecchi indirizzi non reindirizzano; rifiuta le categorie scritte su piu' righe.
+- Categoria SOSTITUISCE tutte le categorie esistenti dell'articolo (ne resta una sola). Le azioni mantengono l'a capo (CRLF/LF) di ogni file e non toccano mai il corpo; un errore su un file ferma tutto prima del commit.
+- Nascondi/Mostra usano 'published: false' (come l'occhio): Mostra toglie la riga.
 
 ## Immagine in evidenza (articoli)
 - Campi `thumbnail` e `thumbnail_alt` nell'editor articoli. `_pages/blog.md` usa `thumbnail_alt` (fallback: titolo) come alt.

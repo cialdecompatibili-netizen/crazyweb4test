@@ -398,6 +398,7 @@
     var star = key === 'posts' ? '<button class="btn sm star' + (r.feat ? ' on' : '') + '" data-n="' + n + '" title="' + (r.feat ? 'In evidenza: clic per togliere' : 'Metti in evidenza (in alto nel blog)') + '" onclick="A.feature(\'' + n + '\',' + (r.feat ? 'false' : 'true') + ',this)">' + (r.feat ? '&#9733;' : '&#9734;') + '</button>' : '';
     var catB = key === 'posts' ? '<em style="font-style:normal;font-size:.8em;white-space:nowrap;margin:0 .6em;padding:1px 9px;border-radius:10px;background:rgba(127,127,127,.18);' + (r.cats.length ? '' : 'opacity:.55;') + '" title="Categoria (la prima decide l\'URL)">' + (r.cats.length ? esc(r.cats.join(', ')) : 'senza categoria') + '</em>' : '';
     var eye = (key === 'posts' || key === 'projects' || key === 'servizi') ? A.eyeBtn(r.name, !!r.hid, key) : '';
+    /* la casella esiste solo se admin-bulk.js e' caricato (A.bulkBar): se quel file manca o da' errore l'elenco funziona come prima. Il nome file e' l'identita' della riga (A.sel[key][nome]). */
     var chk = A.bulkBar ? '<input type="checkbox" style="width:auto;margin:0 8px 0 0;flex:none" title="Seleziona"' + ((A.sel[key] || {})[r.name] ? ' checked' : '') + ' onchange="A.selTog(\'' + key + '\',\'' + n + '\',this.checked)">' : '';
     return '<div class="it' + (r.hid ? ' hid' : '') + '">' + chk + eye + star + home + '<span>' + esc(r.name) + (r.title ? '<small>' + esc(r.title) + '</small>' : '') + '</span>' + catB +
       '<button class="btn sm" onclick="A.edit(\'' + key + '\',\'' + n + '\')">Modifica</button>' +
@@ -412,6 +413,7 @@
     rows.slice((pg - 1) * PP, pg * PP).forEach(function (r) { h += lstRow(key, r); });
     box.innerHTML = h + A.pgBar(key, total, pg, pages, PP);
     A.lstStat(key);
+    /* la barra di gruppo si ridisegna a ogni render (filtri, pagina) cosi' 'Seleziona tutti' e il contatore restano coerenti con le righe visibili */
     var bb = document.getElementById('bulk_' + key); if (bb && A.bulkBar) bb.innerHTML = A.bulkBar(key);
   };
   function lstBar(key) {
@@ -467,6 +469,8 @@
      Si chiamano seo_title/seo_description e NON "description" perche' in al-folio "description" e'
      anche il sottotitolo visibile nella pagina. Vedi admin/claude.md sez. 0d. */
   var SEO = [['seo_title', 'SEO Title (vuoto = usa il titolo)', 'text'], ['seo_description', 'SEO Description (vuoto = estratto automatico del testo)', 'text']];
+  /* IMMAGINE IN EVIDENZA (solo articoli): 'thumbnail' e 'thumbnail_alt' sono letti da _pages/blog.md (elenco blog e articoli in evidenza).
+     Vuoti = la riga sparisce (A.save usa fmDel) e il blog non mostra l'immagine; alt vuoto = il blog usa il titolo. Il percorso e' relativo al sito (relative_url nel template). */
   var FIELDS = {
     posts: [['title', 'Titolo', 'text'], ['date', 'Data', 'date'], ['description', 'Descrizione', 'text'], ['thumbnail', 'Immagine in evidenza (es. assets/img/12.jpg, vuoto = nessuna)', 'text'], ['thumbnail_alt', 'Testo alternativo immagine (vuoto = usa il titolo)', 'text'], ['tags', 'Tag (separati da spazio)', 'text'], ['categories', 'Categoria', 'cat']].concat(SEO),
     projects: [['title', 'Titolo', 'text'], ['description', 'Descrizione', 'text'], ['img', 'Immagine (es. assets/img/12.jpg)', 'text'], ['importance', 'Ordine (numero)', 'text'], ['category', 'Categoria (deve stare in display_categories di projects)', 'cat'], ['redirect', 'Redirect esterno (opzionale)', 'text']].concat(SEO),
