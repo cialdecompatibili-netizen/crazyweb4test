@@ -411,9 +411,11 @@ var A = (function () {
   }
 
   var views = {};
+  /* A.token(): il token del login, SOLO in lettura, per il box "Token di accesso" in Impostazioni (admin-media.js). TOK resta privato nella closure:
+     non e' una variabile globale e nessun altro modulo lo usa per le chiamate (quelle passano da api()). Non loggarlo e non scriverlo in nessun file del repo. */
   var api_ = { $: $, esc: esc, toast: toast, getDir: getDir, getFile: getFile, getFiles: getFiles, putFile: putFile, delFile: delFile,
     commitFiles: commitFiles, splitFM: splitFM, fmGet: fmGet, fmSet: fmSet, fmDel: fmDel, yq: yq, slugify: slugify,
-    today: today, now: now, wrap: wrap, views: views, go: go, off: off, main: function () { return main; }, errMsg: errMsg, api: api,
+    today: today, now: now, wrap: wrap, views: views, go: go, off: off, main: function () { return main; }, errMsg: errMsg, api: api, token: function () { return TOK; },
     baseurl: function () { return BASEURL; }, siteUrl: function () { return SITEURL; } };
 
   /*__MODULI__*/

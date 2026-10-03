@@ -91,6 +91,35 @@
     s = s.replace(/[-_]/g, ' ').trim();
     return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
   }
+  /* BOX TOKEN (Impostazioni): mostra il token salvato nel browser per poterlo copiare (es. per dare la gestione a un'altra persona).
+     PUNTI CRITICI: (1) il campo e' type=password (pallini) e diventa testo solo col clic sull'occhio; l'occhio, quando MOSTRA, copia anche da solo.
+     (2) il valore sta solo nel DOM di questa pagina, mai in localStorage a parte (c'e' gia' la chiave adm_tok:<percorso> del login) ne' nel repo.
+     (3) chi ha il token puo' scrivere sul repo: per un amico meglio un token suo, da revocare su GitHub quando non serve piu'.
+     (4) navigator.clipboard funziona solo in https (GitHub Pages lo e'); in caso contrario si ripiega su select + execCommand('copy'). */
+  A.tokBox = function () {
+    return '<div class="card"><h3>Token di accesso</h3>' +
+      '<p style="margin:0 0 8px;color:#787c82">Il token salvato in questo browser. Con l\'occhio lo vedi e lo copia da solo; con Copia lo copi senza mostrarlo.</p>' +
+      '<div style="display:flex;gap:8px;align-items:center"><input id="tokBox" type="password" readonly autocomplete="off" value="' + esc(A.token()) + '" style="flex:1;min-width:0">' +
+      '<button class="btn" id="tokEye" title="Mostra e copia" onclick="A.tokEye()">&#128065;</button>' +
+      '<button class="btn primary" onclick="A.tokCopy()">Copia</button></div>' +
+      '<small style="color:#787c82">Chi ha il token pu\u00f2 modificare questo repo. Se non ti serve pi\u00f9, revocalo da GitHub (Settings &gt; Developer settings).</small></div>';
+  };
+  A.tokCopy = function () {
+    var el = document.getElementById('tokBox'); if (!el) return;
+    function ok() { A.toast('Token copiato'); }
+    function fb() {
+      var was = el.type; el.type = 'text'; el.select();
+      var done = false; try { done = document.execCommand('copy'); } catch (e) {}
+      el.type = was; if (window.getSelection) window.getSelection().removeAllRanges();
+      if (done) ok(); else A.toast('Copia non riuscita: mostra il token e copialo a mano', true);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(A.token()).then(ok, fb); else fb();
+  };
+  A.tokEye = function () {
+    var el = document.getElementById('tokBox'); if (!el) return;
+    var show = el.type === 'password'; el.type = show ? 'text' : 'password';
+    if (show) A.tokCopy();
+  };
   A.views.settings = function () {
     return A.getFile('_config.yml').then(function (f) {
       cfg = { sha: f.sha, text: f.text };
@@ -119,7 +148,7 @@
       if (ppo.indexOf(pp) < 0) { ppo.push(pp); ppo.sort(function (a, b) { return a - b; }); }
       h += '<label>Articoli per pagina nel blog</label><select id="c_per_page">' + ppo.map(function (o) { return '<option' + (o === pp ? ' selected' : '') + '>' + o + '</option>'; }).join('') + '</select>';
       h += '<p><button class="btn primary" onclick="A.cfgSave()">Salva</button></p></div>';
-      M().innerHTML = h;
+      M().innerHTML = h + A.tokBox();
     });
   };
   A.cfgSave = A.wrap(function () {
