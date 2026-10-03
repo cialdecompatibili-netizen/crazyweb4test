@@ -177,7 +177,7 @@ lsi: false # produce an index for related posts
 # Pagination
 pagination:
   enabled: true
-  per_page: 5 # articoli per pagina del blog (blog.md NON ha piu' per_page: lo prende da qui). Si cambia da admin > Impostazioni (5/10/20/50/100)
+  per_page: 20 # articoli per pagina del blog (blog.md NON ha piu' per_page: lo prende da qui). Si cambia da admin > Impostazioni (5/10/20/50/100)
 
 related_blog_posts:
   enabled: true
