@@ -76,12 +76,12 @@ Un team unico di professionisti coordina ogni fase, dalla strategia al risultato
 <div class="srv-home">
   <h2>I nostri servizi</h2>
   <div class="srv-home-grid">
-    <a class="srv-home-card" href="{{ '/blog/servizi/siti-web-aziendali-e-portali/' | relative_url }}"><b>Siti web aziendali e portali</b><small>Sviluppo su misura</small></a>
-    <a class="srv-home-card" href="{{ '/blog/servizi/sviluppo-ecommerce/' | relative_url }}"><b>Sviluppo eCommerce</b><small>Shopify, WooCommerce, Magento, PrestaShop</small></a>
-    <a class="srv-home-card" href="{{ '/blog/servizi/consulenza-seo/' | relative_url }}"><b>Consulenza SEO</b><small>Audit e strategia di visibilità</small></a>
-    <a class="srv-home-card" href="{{ '/blog/servizi/google-ads/' | relative_url }}"><b>Google Ads</b><small>Search, Shopping, Display, YouTube, PMax</small></a>
-    <a class="srv-home-card" href="{{ '/blog/servizi/social-media-marketing/' | relative_url }}"><b>Social media marketing</b><small>Gestione e contenuti</small></a>
-    <a class="srv-home-card" href="{{ '/blog/servizi/brand-identity/' | relative_url }}"><b>Brand identity</b><small>Design e UI/UX</small></a>
+    <a class="srv-home-card" href="{{ '/servizi/siti-web-aziendali-e-portali/' | relative_url }}"><b>Siti web aziendali e portali</b><small>Sviluppo su misura</small></a>
+    <a class="srv-home-card" href="{{ '/servizi/sviluppo-ecommerce/' | relative_url }}"><b>Sviluppo eCommerce</b><small>Shopify, WooCommerce, Magento, PrestaShop</small></a>
+    <a class="srv-home-card" href="{{ '/servizi/consulenza-seo/' | relative_url }}"><b>Consulenza SEO</b><small>Audit e strategia di visibilità</small></a>
+    <a class="srv-home-card" href="{{ '/servizi/google-ads/' | relative_url }}"><b>Google Ads</b><small>Search, Shopping, Display, YouTube, PMax</small></a>
+    <a class="srv-home-card" href="{{ '/servizi/social-media-marketing/' | relative_url }}"><b>Social media marketing</b><small>Gestione e contenuti</small></a>
+    <a class="srv-home-card" href="{{ '/servizi/brand-identity/' | relative_url }}"><b>Brand identity</b><small>Design e UI/UX</small></a>
   </div>
   <div class="srv-home-more">
     <a href="{{ '/servizi/' | relative_url }}">Vedi tutti i servizi</a>

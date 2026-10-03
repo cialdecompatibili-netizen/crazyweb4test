@@ -100,6 +100,9 @@ def url(anno, slug):
 def assicura_permalink(percorso, slug):
     """Mette 'permalink:' nel front matter del post-servizio (dopo 'categories:').
     La data nel front matter NON cambia: l'ordine per data nel blog resta identico."""
+    # URL ora decisi dal plugin _plugins/permalink_da_categoria.rb (permalink_per_categoria in _config.yml):
+    # niente piu' "permalink:" cablato nei post.
+    return
     fmt = SITO.get("permalink_servizio")
     if not fmt:
         return
@@ -111,7 +114,7 @@ def assicura_permalink(percorso, slug):
     scrivi(percorso, t)
 
 
-RE_VECCHIO = re.compile(r"\{\{ '/(?:blog/\d{4}|servizi)/([a-z0-9-]+)/' \| relative_url \}\}")
+RE_VECCHIO = re.compile(r"\{\{ '/(?:blog/(?:\d{4}|servizi)|servizi)/([a-z0-9-]+)/' \| relative_url \}\}")
 
 
 def riallinea(testo, scelti, stat):

@@ -141,6 +141,9 @@ blog_description: # descrizione opzionale del blog: se vuota non compare e non o
 permalink: /blog/:title/ # post SENZA categoria
 # URL dei post dalla categoria (plugin _plugins/permalink_da_categoria.rb): /blog/<categoria>/<articolo>/, data NON nell'URL.
 permalink_da_categoria: /blog/:categoria/:title/
+# Eccezioni per categoria (vincono sul modello sopra): i servizi stanno in /servizi/<articolo>/, senza /blog/. Redirect automatici dai vecchi URL.
+permalink_per_categoria:
+  servizi: /servizi/:title/
 toc_style: box # aspetto indice articoli: "box" (cornice in alto) oppure "side" (laterale sinistro stile Distill). Si cambia da admin > Impostazioni
 # --- DATE DEI POST: non toccare senza leggere admin/claude.md sez. 0c ---
 # Senza "timezone" Jekyll legge le date dei post nel fuso del server GitHub (UTC): un post scritto
