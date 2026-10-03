@@ -284,15 +284,17 @@
         files = files.filter(function (f) { return f.type === 'file' && /\.md$/.test(f.name); });
         files.sort(function (a, b) { return cfg.sortDesc ? (a.name < b.name ? 1 : -1) : (a.name < b.name ? -1 : 1); });
         /* Solo Articoli: stato "in evidenza" (featured: true nel front matter, letto da _pages/blog.md). getDir non da' il contenuto: leggo i file in parallelo una volta sola. */
-        var feat = cfg.key === 'posts' ? Promise.all(files.map(function (f) {
-          return A.getFile(cfg.dir + '/' + f.name).then(function (r) { return /^featured:[ \t]*true\b/m.test(A.splitFM(r.text).fm); }).catch(function () { return false; });
+        var cats = []; /* categorie per riga, riempite dalla stessa lettura dei file (zero richieste in piu') */
+        var feat = cfg.key === 'posts' ? Promise.all(files.map(function (f, ix) {
+          return A.getFile(cfg.dir + '/' + f.name).then(function (r) { var fm0 = A.splitFM(r.text).fm; cats[ix] = (A.fmGet(fm0, 'categories') || A.fmGet(fm0, 'category') || '').replace(/[\[\]"']/g, '').split(/[ ,]+/).filter(Boolean); return /^featured:[ \t]*true\b/m.test(fm0); }).catch(function () { return false; });
         })) : Promise.resolve([]);
         return feat.then(function (fl) {
         var h = '<h2>' + cfg.label + ' <button class="btn primary sm" onclick="A.edit(\'' + cfg.key + '\')">+ Nuovo</button></h2><div class="card list">';
         if (!files.length) h += 'Nessun elemento.';
         files.forEach(function (f, i) {
           var star = cfg.key === 'posts' ? '<button class="btn sm star' + (fl[i] ? ' on' : '') + '" data-n="' + esc(f.name) + '" title="' + (fl[i] ? 'In evidenza: clic per togliere' : 'Metti in evidenza (in alto nel blog)') + '" onclick="A.feature(\'' + esc(f.name) + '\',' + (fl[i] ? 'false' : 'true') + ',this)">' + (fl[i] ? '&#9733;' : '&#9734;') + '</button>' : '';
-          h += '<div class="it">' + star + '<span>' + esc(f.name) + '</span>' +
+          var catB = cfg.key === 'posts' ? '<em style="font-style:normal;font-size:.8em;white-space:nowrap;margin:0 .6em;padding:1px 9px;border-radius:10px;background:rgba(127,127,127,.18);' + ((cats[i] || []).length ? '' : 'opacity:.55;') + '" title="Categoria (la prima decide l\'URL)">' + ((cats[i] || []).length ? esc(cats[i].join(', ')) : 'senza categoria') + '</em>' : '';
+          h += '<div class="it">' + star + '<span>' + esc(f.name) + '</span>' + catB +
             '<button class="btn sm" onclick="A.edit(\'' + cfg.key + '\',\'' + esc(f.name) + '\')">Modifica</button>' +
             '<button class="btn sm danger" onclick="A.del(\'' + cfg.key + '\',\'' + esc(f.name) + '\')">Elimina</button></div>';
         });
