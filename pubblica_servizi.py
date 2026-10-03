@@ -13,7 +13,7 @@ USO (dalla cartella crazyweb4test):
   ... --push                                          commit + push (solo file toccati)
 
 COSA FA (per ogni cartella scelta):
-  1. genera/aggiorna i post in _posts (via genera_servizi.py)
+  1. genera/aggiorna i servizi in _servizi/<slug>.md (collection, via genera_servizi.py)
   2. rende cliccabili le card di _pages/servizi.md e le 6 card di _pages/home.md
      (link con relative_url: valido con qualsiasi baseurl)
   3. assicura il CSS che rende TUTTA la card cliccabile (anche su mobile)
@@ -93,8 +93,8 @@ def anno_post(slug):
 def url(anno, slug):
     # URL pubblico del servizio: se repos.json ha "permalink_servizio" (es. /servizi/{slug}/)
     # vale quello, altrimenti il permalink standard dei post (/blog/{anno}/{slug}/).
-    # ATTENZIONE: deve coincidere con permalink_per_categoria > servizi in _config.yml (l'URL vero lo decide il plugin
-    # _plugins/permalink_da_categoria.rb, questo valore serve solo per scrivere i link nelle card). Se divergono, le card puntano a pagine che non esistono.
+    # ATTENZIONE: deve coincidere con collections > servizi > permalink in _config.yml (l'URL vero lo decide Jekyll,
+    # questo valore serve solo per scrivere i link nelle card). Se divergono, le card puntano a pagine che non esistono.
     fmt = SITO.get("permalink_servizio") or SITO["permalink_post"]
     return "{{ '%s' | relative_url }}" % fmt.format(anno=anno, slug=slug)
 
@@ -182,15 +182,20 @@ def assicura_css_home(testo, stat):
 
 
 def link_rotti(cartella, testo):
-    posts = os.listdir(os.path.join(cartella, SITO["posts_dir"]))
-    return sorted({s for s in RE_LINK.findall(testo)
-                   if not any(n.endswith("-" + s + ".md") for n in posts)})
+    srv = os.listdir(os.path.join(cartella, SITO["servizi_dir"]))
+    return sorted({s for s in RE_LINK.findall(testo) if (s + ".md") not in srv})
 
 
 def applica(cartella, servizi, dry):
     """Applica tutto a UNA cartella (test o prod). Ritorna (stat, file_toccati)."""
+    # PROTEZIONE: i servizi sono una collection solo se il repo la dichiara in _config.yml (oggi solo TEST).
+    # Su un repo senza collection (PROD) creare _servizi/ darebbe pagine mai pubblicate e card rotte.
+    cfg_repo = leggi(os.path.join(cartella, "_config.yml"))
+    if not re.search(r"^  servizi:\s*\r?\n(?:    .*\r?\n)*?    output: true", cfg_repo, re.M):
+        sys.exit("Questo repo non ha la collection 'servizi' in _config.yml (solo TEST per ora): niente da fare qui.")
     G.POSTS_DIR = os.path.join(cartella, SITO["posts_dir"])
     G.BACKUP_DIR = os.path.join(G.POSTS_DIR, SITO["backup_dir_nome"])
+    G.SERVIZI_DIR = os.path.join(cartella, SITO["servizi_dir"])
     scelti = {s["slug"] for s in servizi}
     stat = {"creati": 0, "modificati": 0, "invariati": 0, "card_servizi": 0,
             "card_home": 0, "css": 0, "senza_servizio": [], "rotti": []}
