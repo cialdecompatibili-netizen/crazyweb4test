@@ -52,6 +52,22 @@ html[data-theme="dark"] .srv-home-card{background:rgba(255,255,255,.05);border-c
 .srv-home-more a{display:inline-block;padding:.55rem 1.4rem;border-radius:999px;border:1px solid rgba(0,0,0,.2);text-decoration:none;font-weight:600}
 html[data-theme="dark"] .srv-home-more a{border-color:rgba(255,255,255,.3)}
 @media (max-width:700px){.srv-home-grid{grid-template-columns:1fr}}
+
+/* ===== PROGETTI HOME (sotto i servizi) =====
+   Stesso aspetto della griglia servizi, classi separate (prj-home*) di proposito: gli script che riallineano le card
+   dei servizi (pubblica_servizi.py) lavorano su .srv-home-card e non devono mai toccare queste.
+   Le card NON sono scritte a mano: le genera il ciclo Liquid nell'HTML qui sotto dai file di _projects/. */
+.prj-home{margin:2.5rem 0}
+.prj-home h2{text-align:center;margin-bottom:1.4rem}
+.prj-home-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:900px;margin:0 auto}
+.prj-home-card{display:block;color:inherit;text-decoration:none;padding:16px 18px;border:1px solid rgba(0,0,0,.12);border-radius:12px;background:#fffdf5;text-align:left}
+.prj-home-card b{display:block;margin-bottom:4px}
+.prj-home-card small{opacity:.65;display:block}
+html[data-theme="dark"] .prj-home-card{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.15)}
+.prj-home-more{text-align:center;margin-top:1.6rem}
+.prj-home-more a{display:inline-block;padding:.55rem 1.4rem;border-radius:999px;border:1px solid rgba(0,0,0,.2);text-decoration:none;font-weight:600}
+html[data-theme="dark"] .prj-home-more a{border-color:rgba(255,255,255,.3)}
+@media (max-width:700px){.prj-home-grid{grid-template-columns:1fr}}
 </style>
 
 <div class="rete-box" id="rete-box" markdown="1">
@@ -88,6 +104,30 @@ Un team unico di professionisti coordina ogni fase, dalla strategia al risultato
   </div>
 </div>
 <!-- ===== SERVIZI HOME END ===== -->
+
+<!-- ===== PROGETTI HOME START =====
+     DINAMICO: prende da solo i primi 6 progetti di _projects/ (nessuna card scritta a mano).
+     Ordine = campo 'importance' del progetto (1 = per primo), come nella pagina /projects/; chi non ha 'importance' va in fondo.
+     Link: se il progetto ha 'redirect:' (sito esterno) punta li', altrimenti alla sua pagina.
+     Un progetto nuovo/modificato/eliminato si riflette qui al prossimo deploy, senza toccare questo file.
+     Per cambiare quanti se ne vedono: 'limit: 6' nel ciclo. Se non ci sono progetti la sezione sparisce. ===== -->
+{%- assign prj_home = site.projects | sort: 'importance', 'last' -%}
+{%- if prj_home.size > 0 %}
+<div class="prj-home">
+  <h2>I nostri progetti</h2>
+  <div class="prj-home-grid">
+    {%- for p in prj_home limit: 6 -%}
+      {%- assign p_ext = false -%}
+      {%- if p.redirect contains '://' -%}{%- assign p_ext = true -%}{%- endif -%}
+    <a class="prj-home-card" href="{% if p_ext %}{{ p.redirect }}{% else %}{{ p.url | relative_url }}{% endif %}"{% if p_ext %} target="_blank" rel="noopener"{% endif %}><b>{{ p.title | escape }}</b>{% if p.description != blank %}<small>{{ p.description | escape }}</small>{% endif %}</a>
+    {%- endfor %}
+  </div>
+  <div class="prj-home-more">
+    <a href="{{ '/projects/' | relative_url }}">Vedi tutti i progetti</a>
+  </div>
+</div>
+{%- endif %}
+<!-- ===== PROGETTI HOME END ===== -->
 
 <script>
 /* ===== MARTE START (js) =====
