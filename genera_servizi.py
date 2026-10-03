@@ -6,7 +6,7 @@ cartella _servizi/ del repo LOCALE di TEST (collection "servizi", NON piu' _post
 Non tocca GitHub: scrive solo file locali. Il push va fatto a mano dopo aver
 controllato il risultato (git add / commit / push, oppure via pubblica_servizi.py).
 ATTENZIONE: _servizi/ esiste SOLO su TEST. Su PROD (crazyweb4) la collection non c'e':
-i file creati la' non verrebbero pubblicati (vedi CLAUDE.md punti 10 e 18).
+i file creati la' non verrebbero pubblicati (vedi CLAUDE.md punti 10 e 21).
 
 USO:
     python genera_servizi.py            -> crea/aggiorna le pagine servizio
