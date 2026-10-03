@@ -472,8 +472,8 @@
   /* IMMAGINE IN EVIDENZA (solo articoli): 'thumbnail' e 'thumbnail_alt' sono letti da _pages/blog.md (elenco blog e articoli in evidenza).
      Vuoti = la riga sparisce (A.save usa fmDel) e il blog non mostra l'immagine; alt vuoto = il blog usa il titolo. Il percorso e' relativo al sito (relative_url nel template). */
   var FIELDS = {
-    posts: [['title', 'Titolo', 'text'], ['date', 'Data', 'date'], ['description', 'Descrizione', 'text'], ['thumbnail', 'Immagine in evidenza (es. assets/img/12.jpg, vuoto = nessuna)', 'text'], ['thumbnail_alt', 'Testo alternativo immagine (vuoto = usa il titolo)', 'text'], ['tags', 'Tag (separati da spazio)', 'text'], ['categories', 'Categoria', 'cat']].concat(SEO),
-    projects: [['title', 'Titolo', 'text'], ['description', 'Descrizione', 'text'], ['img', 'Immagine (es. assets/img/12.jpg)', 'text'], ['importance', 'Ordine (numero)', 'text'], ['category', 'Categoria (deve stare in display_categories di projects)', 'cat'], ['redirect', 'Redirect esterno (opzionale)', 'text']].concat(SEO),
+    posts: [['title', 'Titolo', 'text'], ['date', 'Data', 'date'], ['description', 'Descrizione', 'text'], ['thumbnail', 'Immagine in evidenza', 'img'], ['thumbnail_alt', 'Testo alternativo immagine (vuoto = usa il titolo)', 'text'], ['tags', 'Tag (separati da spazio)', 'text'], ['categories', 'Categoria', 'cat']].concat(SEO),
+    projects: [['title', 'Titolo', 'text'], ['description', 'Descrizione', 'text'], ['img', 'Immagine', 'img'], ['importance', 'Ordine (numero)', 'text'], ['category', 'Categoria (deve stare in display_categories di projects)', 'cat'], ['redirect', 'Redirect esterno (opzionale)', 'text']].concat(SEO),
     servizi: [['title', 'Titolo', 'text'], ['description', 'Descrizione (breve: compare anche nella card in home)', 'text']].concat(SEO),
     news: [['title', 'Titolo (solo se non inline)', 'text'], ['date', 'Data', 'date'], ['inline', 'Inline (true = solo riga in home)', 'text']].concat(SEO)
   };
@@ -533,6 +533,13 @@
     });
   }
 
+  /* imgField: campo immagine stile WordPress. L'input e' NASCOSTO ma ha lo stesso id 'f_<nome>' dei campi di testo, quindi A.save lo legge senza modifiche.
+     Il selettore (A.imgPick) e l'anteprima stanno in admin-media.js. Vuoto = nessuna immagine (la riga sparisce dal front matter). */
+  function imgField(fd, v) {
+    var id = 'f_' + fd[0];
+    return '<label>' + fd[1] + '</label><div id="' + id + '_pv">' + (v ? '<img src="' + esc(A.rawUrl(v)) + '" style="max-width:240px;max-height:150px;border-radius:4px;border:1px solid #a7aaad;display:block;margin:6px 0"><small>' + esc(v) + '</small>' : '<small>Nessuna immagine impostata</small>') + '</div>' +
+      '<input type="hidden" id="' + id + '" value="' + esc(v) + '"><p><button type="button" class="btn" onclick="A.imgPick(\'' + id + '\')">Scegli o carica immagine</button> <button type="button" class="btn danger" onclick="A.imgClr(\'' + id + '\')">Rimuovi</button></p>';
+  }
   function catField(fd, v) {
     var id = 'f_' + fd[0];
     var h = '<label>' + fd[1] + '</label><select id="' + id + '" onchange="if(this.value===\'__new__\'){this.style.display=\'none\';this.nextElementSibling.style.display=\'block\';this.nextElementSibling.focus();}">';
@@ -568,6 +575,7 @@
         var one;
         if (fd[2] === 'cat') one = catField(fd, v);
         else if (fd[2] === 'date') one = dateField(fd, v);
+        else if (fd[2] === 'img') one = imgField(fd, v);
         else one = '<label>' + fd[1] + '</label><input id="f_' + fd[0] + '" value="' + esc(v) + '">';
         if (BELOW.indexOf(fd[0]) >= 0) below += one; else top += one;
       });

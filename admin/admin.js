@@ -492,7 +492,7 @@ var A = (function () {
   var api_ = { $: $, esc: esc, jq: jq, toast: toast, getDir: getDir, getFile: getFile, getFiles: getFiles, putFile: putFile, delFile: delFile,
     commitFiles: commitFiles, splitFM: splitFM, fmGet: fmGet, fmSet: fmSet, fmDel: fmDel, yq: yq, slugify: slugify,
     today: today, now: now, wrap: wrap, views: views, go: go, off: off, main: function () { return main; }, errMsg: errMsg, api: api, token: function () { return TOK; },
-    baseurl: function () { return BASEURL; }, siteUrl: function () { return SITEURL; } };
+    repo: function () { return REPO; }, branch: function () { return BR; }, baseurl: function () { return BASEURL; }, siteUrl: function () { return SITEURL; } };
 
   /*__MODULI__*/
 

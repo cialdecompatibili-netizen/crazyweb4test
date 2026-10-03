@@ -16,6 +16,80 @@
       M().innerHTML = h + '</div>' + (files.length ? '' : 'Nessuna immagine.') + '</div>';
     });
   };
+  /* SELETTORE IMMAGINE (stile WordPress): finestra con Carica + griglia di assets/img. Clic su una foto = selezionata, 'Imposta immagine' la scrive nel campo
+     nascosto <fid> (percorso 'assets/img/nome.jpg') e aggiorna l'anteprima. Le foto caricate da qui sono ridotte nel browser (max 2000 px, qualita' 0.85, come le
+     gallerie) e NON sovrascrivono mai un file con lo stesso nome (si aggiunge -2, -3...). Si seleziona da sola l'ultima caricata. Usato da articoli (thumbnail) e progetti (img). */
+  A.rawUrl = function (p) { return /^https?:/.test(p) ? p : 'https://raw.githubusercontent.com/' + A.repo() + '/' + A.branch() + '/' + String(p).replace(/^\/+/, '').split('/').map(encodeURIComponent).join('/'); };
+  A.imgPrev = function (fid) {
+    var v = ($(fid).value || '').trim(), e = $(fid + '_pv'); if (!e) return;
+    e.innerHTML = v ? '<img src="' + esc(A.rawUrl(v)) + '" style="max-width:240px;max-height:150px;border-radius:4px;border:1px solid #a7aaad;display:block;margin:6px 0"><small>' + esc(v) + '</small>' : '<small>Nessuna immagine impostata</small>';
+  };
+  A.imgClr = function (fid) { $(fid).value = ''; A.imgPrev(fid); };
+  function shrink(f) {
+    return new Promise(function (ok, ko) {
+      function rd(b) { var r = new FileReader(); r.onload = function () { ok(r.result.split(',')[1]); }; r.onerror = ko; r.readAsDataURL(b); }
+      if (!/^image\/(jpeg|png|webp)$/.test(f.type)) return rd(f);
+      var u = URL.createObjectURL(f), im = new Image();
+      im.onload = function () {
+        URL.revokeObjectURL(u);
+        var s = Math.min(1, 2000 / Math.max(im.naturalWidth, im.naturalHeight));
+        if (s === 1 && f.size < 1500000) return rd(f);
+        var cv = document.createElement('canvas'); cv.width = Math.round(im.naturalWidth * s); cv.height = Math.round(im.naturalHeight * s);
+        cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
+        cv.toBlob(function (bl) { rd(bl || f); }, f.type, 0.85);
+      };
+      im.onerror = function () { URL.revokeObjectURL(u); rd(f); };
+      im.src = u;
+    });
+  }
+  A.imgPick = function (fid) {
+    if ($('ip_ov')) return;
+    var sel = ($(fid).value || '').trim(), names = [];
+    var ov = document.createElement('div'); ov.id = 'ip_ov';
+    ov.style.cssText = 'position:fixed;inset:0;background:#0008;z-index:60;display:flex;align-items:center;justify-content:center;padding:12px';
+    ov.innerHTML = '<div style="background:#fff;border-radius:6px;width:100%;max-width:880px;max-height:92vh;display:flex;flex-direction:column">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #ddd"><b>Scegli o carica un\'immagine</b><button class="btn sm" id="ip_x">Chiudi</button></div>' +
+      '<div style="padding:12px 16px;border-bottom:1px solid #ddd"><input type="file" id="ip_f" accept="image/*" multiple style="width:auto"> <small id="ip_s">Carica una foto dal PC: viene ridotta, salvata in assets/img e selezionata.</small></div>' +
+      '<div id="ip_g" class="grid" style="padding:16px;overflow:auto;flex:1;align-content:start"></div>' +
+      '<div style="padding:12px 16px;border-top:1px solid #ddd;text-align:right"><button class="btn primary" id="ip_ok">Imposta immagine</button></div></div>';
+    document.body.appendChild(ov);
+    function close() { ov.remove(); }
+    function paint() {
+      Array.prototype.forEach.call($('ip_g').querySelectorAll('.im'), function (e) { e.style.outline = e.getAttribute('data-p') === sel ? '3px solid #2271b1' : ''; });
+    }
+    function draw() {
+      return A.getDir('assets/img', { rest: true }).then(function (l) {
+        var fs = l.filter(function (f) { return f.type === 'file' && IMG.test(f.name); }); names = fs.map(function (f) { return f.name; });
+        $('ip_g').innerHTML = fs.length ? fs.map(function (f) {
+          return '<div class="im" style="cursor:pointer" data-p="assets/img/' + esc(f.name) + '"><img loading="lazy" src="' + esc(f.download_url) + '"><div>' + esc(f.name) + '</div></div>';
+        }).join('') : 'Nessuna immagine: caricane una.';
+        paint();
+      }, function (e) { $('ip_g').textContent = A.errMsg(e); });
+    }
+    ov.addEventListener('click', function (e) {
+      if (e.target === ov) return close();
+      var t = e.target; while (t && t !== ov && !(t.getAttribute && t.getAttribute('data-p'))) t = t.parentNode;
+      if (t && t !== ov) { sel = t.getAttribute('data-p'); paint(); }
+    });
+    $('ip_x').onclick = close;
+    $('ip_ok').onclick = function () { if (!sel) return A.toast('Scegli o carica un\'immagine', true); $(fid).value = sel; A.imgPrev(fid); close(); };
+    $('ip_f').onchange = function () {
+      var fs = Array.prototype.slice.call(this.files); if (!fs.length) return;
+      var inp = this, st = $('ip_s');
+      fs.reduce(function (pr, f, i) {
+        return pr.then(function () {
+          st.textContent = 'Carico ' + (i + 1) + ' di ' + fs.length + '...';
+          return shrink(f).then(function (b64) {
+            var name = f.name.toLowerCase().replace(/[^a-z0-9._-]+/g, '-'), m = name.match(/^(.*?)(\.[a-z0-9]+)?$/), k = 1;
+            while (names.indexOf(name) >= 0) { k++; name = m[1] + '-' + k + (m[2] || ''); }
+            return A.putFile('assets/img/' + name, b64, '', 'admin: immagine ' + name, true).then(function () { names.push(name); sel = 'assets/img/' + name; });
+          });
+        });
+      }, Promise.resolve()).then(function () { st.textContent = 'Caricata e selezionata.'; inp.value = ''; return draw(); },
+        function (e) { st.textContent = 'Errore: ' + A.errMsg(e); });
+    };
+    draw();
+  };
   A.copyImg = function (n) {
     var t = 'assets/img/' + n;
     if (navigator.clipboard) navigator.clipboard.writeText(t).then(function () { A.toast('Copiato: ' + t); });
