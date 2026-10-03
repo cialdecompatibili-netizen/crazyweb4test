@@ -451,7 +451,8 @@
       if (key === 'posts') {
         var c0 = (A.fmGet(fm, 'categories') || A.fmGet(fm, 'category')).replace(/[\[\]]/g, '').split(/[ ,]+/).filter(Boolean)[0];
         var cs = c0 ? A.slugify(c0) : '', sl = nm.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace(/\.md$/, '') + '/';
-        /* specchio di permalink_per_categoria in _config.yml: i servizi stanno in /servizi/ (senza /blog/) */
+        /* SPECCHIO a mano di permalink_per_categoria (_config.yml) e di repos.json > sito.permalink_servizio: i servizi stanno in /servizi/ (senza /blog/).
+           Serve SOLO per il nome della run in Actions: l'URL vero lo calcola il plugin Jekyll. Se aggiungi/cambi una regola nel config, aggiorna anche questa riga. */
         lbl = cs === 'servizi' ? '/servizi/' + sl : '/blog/' + (cs ? cs + '/' : '') + sl;
       }
       return A.putFile(C[key].dir + '/' + nm, txt, cur.sha, 'admin: ' + (cur.sha ? 'aggiorna ' : 'crea ') + lbl).then(function () {

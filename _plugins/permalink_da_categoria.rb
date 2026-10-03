@@ -11,6 +11,11 @@
 # Per i post che cambiano URL per effetto di una regola in permalink_per_categoria vengono generate
 # pagine-redirect sui vecchi indirizzi (/blog/<categoria>/<articolo>/ e /blog/<anno>/<articolo>/),
 # con canonical: i link gia' indicizzati o salvati continuano a funzionare.
+# PUNTI CRITICI (dettaglio in CLAUDE.md > Punti critici):
+#  - la regola dei servizi esiste anche in repos.json (card) e in admin/admin-views.js (etichetta commit): tenerle uguali;
+#  - un 'permalink:' nel front matter del post vince sempre e lo esclude da regola e redirect;
+#  - i redirect sono pagine HTML (non 301) e si generano solo per le categorie con regola in permalink_per_categoria;
+#  - solo TEST: questo plugin NON e' su PROD (crazyweb4); clona_test.ps1 lo sovrascriverebbe con la versione PROD.
 Jekyll::Hooks.register :site, :post_read do |site|
   modello = site.config["permalink_da_categoria"]
   regole = site.config["permalink_per_categoria"]
@@ -20,6 +25,7 @@ Jekyll::Hooks.register :site, :post_read do |site|
   next unless modello_ok || !regole.empty?
 
   site.posts.docs.each do |doc|
+    # Un permalink scritto a mano nel post ha la precedenza: lo lasciamo stare (e quindi niente redirect per lui).
     next if doc.data["permalink"]
 
     cats = Jekyll::Utils.pluralized_array_from_hash(doc.data, "category", "categories").map(&:to_s)
@@ -43,6 +49,7 @@ Jekyll::Hooks.register :site, :post_read do |site|
     end
 
     doc.data["permalink"] = nuovo_modello.sub(":categoria", cat_slug)
+    # Jekyll memorizza l'URL del documento in @url: lo azzeriamo cosi' viene ricalcolato col permalink appena scelto.
     doc.instance_variable_set(:@url, nil)
   end
 end
@@ -71,7 +78,7 @@ module PermalinkDaCategoria
 
   class GeneraRedirect < Jekyll::Generator
     safe true
-    priority :low
+    priority :low # gira dopo gli altri generatori; le pagine-redirect hanno sitemap=false per non finire nella sitemap
 
     def generate(site)
       (site.config["_redirect_vecchi"] || []).each do |vecchio, nuovo|

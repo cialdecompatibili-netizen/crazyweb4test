@@ -142,6 +142,9 @@ permalink: /blog/:title/ # post SENZA categoria
 # URL dei post dalla categoria (plugin _plugins/permalink_da_categoria.rb): /blog/<categoria>/<articolo>/, data NON nell'URL.
 permalink_da_categoria: /blog/:categoria/:title/
 # Eccezioni per categoria (vincono sul modello sopra): i servizi stanno in /servizi/<articolo>/, senza /blog/. Redirect automatici dai vecchi URL.
+# ATTENZIONE - questa regola vive in 3 posti che devono restare uguali: (1) QUI, (2) repos.json > sito.permalink_servizio (card home/servizi),
+# (3) admin/admin-views.js > doPut (etichetta commit, controlla 'servizi' a mano). Cambiandone uno, cambia anche gli altri.
+# NON scrivere 'permalink:' nei post: vincerebbe sulla regola e il post resterebbe senza redirect. (CLAUDE.md > Punti critici)
 permalink_per_categoria:
   servizi: /servizi/:title/
 toc_style: box # aspetto indice articoli: "box" (cornice in alto) oppure "side" (laterale sinistro stile Distill). Si cambia da admin > Impostazioni

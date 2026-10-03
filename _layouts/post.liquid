@@ -16,6 +16,8 @@ layout: default
   I post veri (collection "posts") contano SEMPRE come blog, qualunque sia il loro URL: i post con
   categoria "servizi" escono su /servizi/<slug>/ (plugin permalink_da_categoria) ma devono
   continuare a linkare anno e categoria agli archivi /blog/<anno>/ e /blog/category/<cat>/.
+  NON TOGLIERE la riga qui sotto e non ripristinare il layout originale: senza, anno e categoria dei servizi
+  tornano testo semplice e nessun errore te lo segnala (CLAUDE.md > Punti critici n.4).
 {% endcomment %}
 {% if page.collection == 'posts' %}{% assign url_beginning = '/blog/' %}{% endif %}
 
