@@ -417,3 +417,7 @@ Creato il 2026-09-20 copiando crazyweb3 senza la cronologia git (un solo commit 
 - Lo stato si legge aprendo ogni post in parallelo all'apertura della lista (1 chiamata API per articolo). Il clic e' OTTIMISTICO: la stella cambia subito, il commit va in background con coda per singolo articolo (starBusy), rollback + avviso se fallisce; la lista non si ricarica.
 - **Categoria nella riga (lista Articoli):** accanto al nome del file c'e' un'etichetta grigia con le categorie dell'articolo (la prima decide l'URL, vedi CLAUDE.md > Punti critici); senza categoria mostra 'senza categoria'. Si legge dalla STESSA apertura dei file che serve per la stella (array `cats` in `collection()` di admin-views.js): nessuna chiamata API in piu'. Legge `categories:` o `category:`, con o senza parentesi quadre.
 
+## Righe per pagina (blog e liste)
+
+- Blog: `pagination.per_page` in `_config.yml`, select in Impostazioni (5/10/20/50/100). `getPer`/`setPer` in `admin-media.js` (chiave annidata, regex `PER_RE`). `_pages/blog.md` non deve avere `per_page`.
+- Liste Articoli/Progetti/News: `A.pgBar`, `A.pp`, `A.setPP`, `A.setPg` in `admin-views.js` (funzione `collection`). Scelta salvata in `localStorage.admin_pp` (default 20). Si leggono solo i file della pagina corrente.
