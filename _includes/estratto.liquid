@@ -1,13 +1,13 @@
-﻿{% comment %}
+{% comment %}
   ESTRATTO + "Leggi tutto" per l'elenco del blog (stile WordPress). Uso: {% include estratto.liquid post=post %}
   - Marcatore manuale: scrivendo <!--more--> nel testo, l'estratto e' tutto quello che sta PRIMA. Mai tagliato.
   - Senza marcatore: testo pulito (via style, script, figure, nav; niente HTML), circa 260 caratteri, tagliato
     all'ULTIMA FINE DI FRASE (. ! ?) dentro il limite. Se non c'e' una frase di almeno 80 caratteri, taglia per parole con "...".
-  - Testo corto (sotto il limite): mostrato intero. Il campo "description" NON viene piu' usato qui (solo se il post e' vuoto).
+  - Testo corto (sotto il limite): mostrato intero e SENZA bottone: Leggi tutto compare solo se l'estratto e' tagliato (automatico o manuale). Il campo "description" NON viene piu' usato qui (solo se il post e' vuoto).
 {% endcomment %}
 {%- assign raw = include.post.content -%}
-{%- assign manual = false -%}
-{%- if raw contains '<!--more-->' -%}{%- assign manual = true -%}{%- assign raw = raw | split: '<!--more-->' | first -%}{%- endif -%}
+{%- assign manual = false -%}{%- assign more = false -%}
+{%- if raw contains '<!--more-->' -%}{%- assign manual = true -%}{%- assign more = true -%}{%- assign raw = raw | split: '<!--more-->' | first -%}{%- endif -%}
 {%- assign kill = 'style,script,figure,nav,pre' | split: ',' -%}
 {%- for t in kill -%}
   {%- assign op = '<' | append: t -%}
@@ -27,11 +27,11 @@
   {%- assign keep = pieces.size | minus: 1 -%}
   {%- capture cut -%}{%- for p in pieces limit: keep -%}{{ p }} {%- endfor -%}{%- endcapture -%}
   {%- assign cut = cut | strip -%}
-  {%- if cut.size >= 80 -%}{%- assign out = cut -%}{%- else -%}{%- assign out = text | truncatewords: 35, '...' -%}{%- endif -%}
+  {%- assign more = true -%}{%- if cut.size >= 80 -%}{%- assign out = cut -%}{%- else -%}{%- assign out = text | truncatewords: 35, '...' -%}{%- endif -%}
 {%- endif -%}
 {%- if out == '' -%}{%- assign out = include.post.description -%}{%- endif -%}
 {%- if include.post.redirect == blank -%}{%- assign href = include.post.url | relative_url -%}
 {%- elsif include.post.redirect contains '://' -%}{%- assign href = include.post.redirect -%}
 {%- else -%}{%- assign href = include.post.redirect | relative_url -%}{%- endif -%}
 <p class="post-excerpt">{{ out }}</p>
-<p class="post-readmore"><a class="btn btn-sm z-depth-0" href="{{ href }}"{% if include.post.redirect contains '://' %} target="_blank"{% endif %}>Leggi tutto</a></p>
+{%- if more -%}<p class="post-readmore"><a class="btn btn-sm z-depth-0" href="{{ href }}"{% if include.post.redirect contains '://' %} target="_blank"{% endif %}>Leggi tutto</a></p>{%- endif -%}
