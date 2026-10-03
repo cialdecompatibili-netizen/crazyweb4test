@@ -36,7 +36,7 @@ Jekyll::Hooks.register :site, :post_read do |site|
     regola = regole[cat_slug]
     if regola.is_a?(String)
       nuovo_modello = regola
-      slug = doc.data["slug"].to_s
+      slug = doc.data["slug"].to_s.strip; slug = File.basename(doc.path, ".*").sub(/\A\d{4}-\d{2}-\d{2}-/, "") if slug.empty? # slug sempre valorizzato
       vecchi = []
       vecchi << "/blog/#{cat_slug}/#{slug}/" if modello_ok
       vecchi << "/blog/#{doc.date.year}/#{slug}/"
@@ -52,6 +52,21 @@ Jekyll::Hooks.register :site, :post_read do |site|
     # Jekyll memorizza l'URL del documento in @url: lo azzeriamo cosi' viene ricalcolato col permalink appena scelto.
     doc.instance_variable_set(:@url, nil)
   end
+end
+
+# CONTROLLO COLLISIONI: due post/pagine sullo stesso URL = Jekyll ne pubblica una sola, senza errore.
+# Qui la build si FERMA con l'elenco dei file in conflitto (nel config: permalink_collisioni_fatali: false = solo avviso).
+Jekyll::Hooks.register :site, :post_read do |site|
+  visti = Hash.new { |h, k| h[k] = [] }
+  (site.posts.docs + site.pages).each do |p|
+    url = p.url.to_s
+    next if url.empty?
+    visti[url] << (p.respond_to?(:relative_path) ? p.relative_path : p.name.to_s)
+  end
+  dup = visti.select { |_, v| v.size > 1 }
+  next if dup.empty?
+  dup.each { |u, v| Jekyll.logger.error("collisione URL", "#{u} <- #{v.join(", ")}") }
+  raise Jekyll::Errors::FatalException, "collisione di URL (elenco sopra)" unless site.config["permalink_collisioni_fatali"] == false
 end
 
 module PermalinkDaCategoria
