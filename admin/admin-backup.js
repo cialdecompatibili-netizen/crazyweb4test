@@ -53,15 +53,17 @@
       LIST = rs[1].map(function (r) { return { name: r.ref.replace('refs/heads/', ''), sha: r.object.sha }; });
       return loadInfo(LIST).then(function () {
       LIST.sort(function (a, b) { var d = when(b) - when(a); return d || (a.name < b.name ? 1 : -1); });
+      var undo = -1; LIST.forEach(function (b, i) { if (undo < 0 && /-pre-ripristino$/.test(b.name) && b.sha !== head) undo = i; });
       var rows = LIST.map(function (b, i) {
-        var same = b.sha === head, inf = INFO[b.sha] || {}, parts = [fmt(inf.when), b.sha.slice(0, 7)];
-        if (same) parts.push('identico allo stato attuale'); if (inf.msg) parts.push(inf.msg);
+        var same = b.sha === head, inf = INFO[b.sha] || {}, pre = /-pre-ripristino$/.test(b.name), parts = [fmt(inf.when), b.sha.slice(0, 7)];
+        if (pre) parts.unshift('stato prima di un ripristino'); if (same) parts.push('identico allo stato attuale'); if (inf.msg) parts.push(inf.msg);
         return '<div class="it"><span>' + esc(b.name) + '<small title="' + esc(inf.msg || '') + '">' + esc(parts.filter(Boolean).join(' \u00b7 ')) + '</small></span>' +
-          '<span>' + (same ? '' : '<button class="btn sm danger" onclick="A.bkRestore(' + i + ')">Ripristina</button> ') +
-          '<button class="btn sm" onclick="A.bkDelete(' + i + ')">Elimina</button></span></div>';
+          '<div style="flex:none;white-space:nowrap">' + (same ? '' : '<button class="btn sm danger" onclick="A.bkRestore(' + i + ')">' + (pre ? 'Torna avanti' : 'Ripristina') + '</button> ') +
+          '<button class="btn sm" onclick="A.bkDelete(' + i + ')">Elimina</button></div></div>';
       }).join('');
+      var undoBtn = undo < 0 ? '' : '<p style="margin:0 0 12px"><button class="btn danger sm" onclick="A.bkRestore(' + undo + ')">\u21b6 Annulla ultimo ripristino</button> <small style="color:#787c82">torna allo stato delle ' + esc(fmt((INFO[LIST[undo].sha] || {}).when) || LIST[undo].name) + '</small></p>';
       M().innerHTML = '<h2>Backup <button class="btn primary sm" onclick="A.bkNew()">+ Crea backup ora</button></h2>' +
-        '<div class="card"><p style="margin:0 0 12px;color:#787c82">Un backup \u00e8 una copia dello stato attuale del sito (un branch <code>backup-\u2026</code> su GitHub). ' +
+        '<div class="card">' + undoBtn + '<p style="margin:0 0 12px;color:#787c82">Un backup \u00e8 una copia dello stato attuale del sito (un branch <code>backup-\u2026</code> su GitHub). ' +
         'Ripristinare riporta tutti i file a quella copia con un nuovo commit: la cronologia non si perde e prima viene creato in automatico un backup dello stato attuale.</p>' +
         '<div class="list">' + (rows || 'Nessun backup.') + '</div></div>';
       });
