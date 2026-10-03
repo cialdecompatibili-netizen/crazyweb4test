@@ -111,5 +111,29 @@ const reset = () => { calls = []; timers = []; };
     assert(!calls.some(c => c.method === 'POST' || c.method === 'PATCH'), 'nessuna scrittura permessa');
     console.log('11 ok: sha cambiato -> 409 e zero scritture'); }
 
+  // 12) getDir da UN albero: due cartelle = 1 richiesta, voci come Contents API; dopo una scrittura l'albero si rilegge; troncato -> REST
+  { const o = ctx.fetch; reset();
+    const r = b => Promise.resolve({ ok: true, status: 200, headers: { get: () => null }, json: () => Promise.resolve(b) });
+    const tree = { truncated: false, tree: [{ path: '_posts', type: 'tree', sha: 'd1' }, { path: '_posts/a.md', type: 'blob', sha: 's1', size: 3 }, { path: '_servizi/x.md', type: 'blob', sha: 's2', size: 5 }, { path: '_servizi', type: 'tree', sha: 'd2' }] };
+    ctx.fetch = (u, p) => { p = p || {}; calls.push({ url: u, method: p.method || 'GET' }); if (/\/git\/trees\/main\?recursive=1/.test(u)) return r(JSON.parse(JSON.stringify(tree))); return o(u, p); };
+    const [p1, p2] = await Promise.all([A.getDir('_posts'), A.getDir('_servizi')]);
+    assert(calls.filter(c => /git\/trees/.test(c.url)).length === 1, 'due cartelle devono fare 1 sola richiesta albero');
+    assert(!calls.some(c => /\/contents\//.test(c.url)), 'nessuna Contents API');
+    assert(p1.length === 1 && p1[0].name === 'a.md' && p1[0].path === '_posts/a.md' && p1[0].sha === 's1' && p1[0].type === 'file', 'forma voce');
+    assert(p2.length === 1 && p2[0].name === 'x.md', 'servizi');
+    assert((await A.getDir('_non_esiste')).length === 0, 'cartella assente = []');
+    reset(); await A.api('PUT', '/contents/x', { a: 1 }).catch(() => {}); await A.getDir('_posts');
+    assert(calls.some(c => /git\/trees/.test(c.url)), 'dopo una scrittura l\'albero va riletto');
+    ctx.fetch = o; console.log('12 ok: getDir da un albero solo, invalidato dalle scritture'); }
+  { const o = ctx.fetch; reset();
+    const r = (st, b) => Promise.resolve({ ok: st < 400, status: st, headers: { get: () => null }, json: () => Promise.resolve(b) });
+    ctx.fetch = (u, p) => { p = p || {}; calls.push({ url: u, method: p.method || 'GET' });
+      if (/git\/trees/.test(u)) return r(200, { truncated: true, tree: [] });
+      if (/\/contents\/_posts/.test(u)) return r(200, [{ name: 'a.md', path: '_posts/a.md', sha: 's1', type: 'file' }]);
+      return o(u, p); };
+    await A.api('PUT', '/contents/x', { a: 1 }).catch(() => {}); reset(); const l = await A.getDir('_posts');
+    assert(l.length === 1 && calls.some(c => /\/contents\/_posts/.test(c.url)), 'albero troncato -> Contents API');
+    ctx.fetch = o; console.log('13 ok: albero troncato -> ripiego REST'); }
+
   console.log('TUTTI I TEST OK');
 })().catch(err => { console.error('FALLITO:', err.message); process.exit(1); });

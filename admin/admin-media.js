@@ -4,7 +4,7 @@
   var IMG = /\.(jpe?g|png|gif|webp|svg)$/i;
 
   A.views.media = function () {
-    return A.getDir('assets/img').then(function (l) {
+    return A.getDir('assets/img', { rest: true }).then(function (l) {
       var files = l.filter(function (f) { return f.type === 'file' && IMG.test(f.name); });
       var h = '<h2>Immagini</h2><div class="card"><input id="up" type="file" accept="image/*" multiple>' +
         '<p><button class="btn primary" onclick="A.upload()">Carica</button> <small>Vanno in assets/img/. Usa nei contenuti: assets/img/nome.jpg</small></p></div><div class="card"><div class="grid">';

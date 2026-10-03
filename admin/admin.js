@@ -34,7 +34,7 @@ var A = (function () {
        autenticata (lo e': header Authorization). In piu' evita i dati vecchi: GitHub manda 'Cache-Control: max-age=60', e senza
        questa riga il browser poteva riservire per un minuto un elenco o un file letto prima di un salvataggio.
        Solo per GET: PUT/DELETE/POST non sono condizionali. [FONTE: docs.github.com > REST API > Best practices > Use conditional requests] */
-    if (method === 'GET') o.cache = 'no-cache';
+    if (method === 'GET') o.cache = 'no-cache'; else TREE_P = null;
     return fetch('https://api.github.com/repos/' + REPO + path, o).then(function (r) {
       /* OROLOGIO: ogni risposta GitHub porta l'header "Date" (ora esatta del server, UTC). Lo confronto
          con l'orologio del PC e tengo lo scarto in SKEW. Cosi' un PC con l'ora sballata non altera
@@ -42,6 +42,7 @@ var A = (function () {
          Se l'header manca o e' illeggibile SKEW resta com'era: si ricade sull'orologio del PC. */
       var sd = r.headers.get('Date'), st = sd ? Date.parse(sd) : NaN;
       if (!isNaN(st)) SKEW = st - Date.now();
+      if (method !== 'GET') TREE_P = null;
       if (r.status === 204) return {};
       /* json() puo' fallire (502/503 con pagina HTML, corpo vuoto): senza il catch l'errore diventava "Unexpected token <" senza stato HTTP e errMsg non riconosceva 401/403/5xx. */
       return r.json().catch(function () { return null; }).then(function (j) {
@@ -66,10 +67,38 @@ var A = (function () {
   /* ep: codifica ogni segmento del percorso (spazi, #, ?, %, apostrofi nei nomi file) lasciando gli '/'. Prima il percorso andava nell'URL cosi' com'era:
      un file "foto 1#.jpg" o "100%.md" faceva una richiesta sbagliata (404 o file diverso). I chiamanti passano SEMPRE percorsi grezzi, mai gia' codificati. */
   function ep(p) { return String(p).split('/').map(encodeURIComponent).join('/'); }
-  function getDir(p) { return api('GET', '/contents/' + ep(p) + '?ref=' + BR).catch(function (e) { if (e.status === 404) return []; throw e; }); }
+  function getDirRest(p) { return api('GET', '/contents/' + ep(p) + '?ref=' + BR).catch(function (e) { if (e.status === 404) return []; throw e; }); }
+  /* ELENCHI DA UN ALBERO SOLO: GET git/trees/<branch>?recursive=1 da' nome, percorso, sha e dimensione di TUTTI i file in una richiesta.
+     Prima ogni cartella (_posts, _servizi, _pages...) era una richiesta: la Bacheca ne faceva 5. Ora le richieste vicine (3 s) condividono la stessa
+     promessa, e la richiesta e' condizionale (api() fa GET con no-cache: 304 = gratis per il limite). Ogni scrittura azzera TREE_P (vedi api()).
+     Se l'albero e' troncato o la richiesta fallisce si torna alla Contents API per 5 minuti (TREE_OFF). Forma delle voci = quella della Contents API
+     (name, path, sha, size, type 'file'|'dir', download_url). opts.rest = forza la Contents API (la Libreria media usa download_url). */
+  function getTree() {
+    if (TREE_P && Date.now() - TREE_T < 3000) return TREE_P;
+    TREE_T = Date.now();
+    var pr = api('GET', '/git/trees/' + encodeURIComponent(BR) + '?recursive=1').then(function (t) {
+      if (!t || t.truncated || !t.tree) throw new Error('tree');
+      var m = {};
+      t.tree.forEach(function (e) {
+        if (e.type !== 'blob' && e.type !== 'tree') return;
+        var i = e.path.lastIndexOf('/'), par = i < 0 ? '' : e.path.slice(0, i);
+        (m[par] || (m[par] = [])).push({ name: e.path.slice(i + 1), path: e.path, sha: e.sha, size: e.size || 0, type: e.type === 'blob' ? 'file' : 'dir',
+          download_url: e.type === 'blob' ? 'https://raw.githubusercontent.com/' + REPO + '/' + BR + '/' + ep(e.path) : null });
+      });
+      return m;
+    });
+    TREE_P = pr;
+    pr.catch(function () { if (TREE_P === pr) TREE_P = null; });
+    return pr;
+  }
+  function getDir(p, opts) {
+    if ((opts && opts.rest) || Date.now() < TREE_OFF) return getDirRest(p);
+    p = String(p).replace(/^\/+|\/+$/g, '');
+    return getTree().then(function (m) { return (m[p] || []).slice(); }, function () { TREE_OFF = Date.now() + 300000; return getDirRest(p); });
+  }
   /* tooBig: sopra 1 MB la Contents API NON manda il contenuto (encoding "none", content vuoto): text resterebbe '' e un salvataggio CANCELLEREBBE il file.
      getFile quindi RIFIUTA (errore 413, messaggio chiaro) invece di restituire testo vuoto. Il file non finisce nella cache BLOB. */
-  function getFile(p) { return api('GET', '/contents/' + ep(p) + '?ref=' + BR).then(function (j) { if (j.encoding === 'none') { var e = new Error('File troppo grande (oltre 1 MB): non si puo\u0027 leggere/modificare dall\u0027admin'); e.status = 413; throw e; } j.text = b64d(j.content); if (j.sha) BLOB[j.sha] = j.text; return j; }); }
+  function getFile(p) { return api('GET', '/contents/' + ep(p) + '?ref=' + BR).then(function (j) { if (j.encoding === 'none') { var e = new Error('File troppo grande (oltre 1 MB): non si puo\u0027 leggere/modificare dall\u0027admin'); e.status = 413; throw e; } j.text = b64d(j.content); if (j.sha) blobSet(j.sha, j.text); return j; }); }
   /* ---- LETTURA DI PIU' FILE INSIEME (ottimizzazione richieste API) ----
      PRIMA: ogni vista che aveva bisogno del contenuto di N file faceva N richieste REST IN PARALLELO. Caso peggiore: l'editor di un
      articolo (loadCats) e 'Categorie articoli' leggevano TUTTI i post a ogni apertura (60-100 richieste). Le richieste parallele in massa
@@ -82,7 +111,21 @@ var A = (function () {
      files = elenco di getDir (servono name, path, sha). Ritorna un array NELLO STESSO ORDINE di oggetti {...file, text}.
      Un file illeggibile vale null, salvo opts.strict: allora la promessa fallisce al primo errore (come faceva Promise.all su getFile).
      NON usare questa funzione prima di una scrittura: per putFile/delFile serve lo sha letto un attimo prima con getFile (vedi sotto). */
-  var BLOB = {}, GQL_OFF = 0;
+  var BLOB = {}, GQL_OFF = 0, TREE_P = null, TREE_T = 0, TREE_OFF = 0, PEND = {}, PEND_T = 0;
+  /* CACHE PERSISTENTE (IndexedDB 'adm_cache'): BLOB (sha -> testo) salvata nel browser. Lo sha identifica il contenuto in modo immutabile, quindi una voce
+     non diventa MAI vecchia e non serve invalidarla: dopo un F5 gli elenchi non rileggono nulla da GitHub (restano solo le richieste condizionali).
+     Se IndexedDB non c'e' o fallisce non succede niente (si lavora in memoria come prima). Si svuota al logout; oltre 3000 voci si azzera. File > 400 KB non si salvano. */
+  function idb() { return new Promise(function (ok, no) { try { var r = indexedDB.open('adm_cache', 1); r.onupgradeneeded = function () { r.result.createObjectStore('blob'); }; r.onsuccess = function () { ok(r.result); }; r.onerror = function () { no(r.error); }; } catch (e) { no(e); } }); }
+  function idbClear() { return idb().then(function (db) { return new Promise(function (ok) { var tx = db.transaction('blob', 'readwrite'); tx.objectStore('blob').clear(); tx.oncomplete = tx.onerror = function () { db.close(); ok(); }; }); }).catch(function () {}); }
+  var BLOB_READY = idb().then(function (db) {
+    return new Promise(function (ok) {
+      var q = db.transaction('blob').objectStore('blob').openCursor(), n = 0;
+      q.onsuccess = function () { var c = q.result; if (c) { if (!(c.key in BLOB)) BLOB[c.key] = c.value; n++; c.continue(); } else { db.close(); if (n > 3000) idbClear(); ok(); } };
+      q.onerror = function () { ok(); };
+    });
+  }).catch(function () {});
+  function blobFlush() { var p = PEND; PEND = {}; idb().then(function (db) { var tx = db.transaction('blob', 'readwrite'), st = tx.objectStore('blob'); for (var k in p) st.put(p[k], k); tx.oncomplete = tx.onerror = function () { db.close(); }; }).catch(function () {}); }
+  function blobSet(sha, text) { BLOB[sha] = text; if (typeof text !== 'string' || text.length > 400000) return; PEND[sha] = text; clearTimeout(PEND_T); PEND_T = setTimeout(blobFlush, 800); }
   function gqlTexts(items) {
     var rp = REPO.split('/');
     var q = 'query{repository(owner:' + JSON.stringify(rp[0]) + ',name:' + JSON.stringify(rp[1]) + '){' + items.map(function (it, i) {
@@ -90,9 +133,10 @@ var A = (function () {
     }).join('') + '}}';
     return fetch('https://api.github.com/graphql', { method: 'POST', headers: { Authorization: 'token ' + TOK, 'Content-Type': 'application/json' }, body: JSON.stringify({ query: q }) })
       .then(function (r) { return r.json().then(function (j) { if (!r.ok || j.errors || !j.data || !j.data.repository) throw new Error('graphql'); return j.data.repository; }); })
-      .then(function (repo) { items.forEach(function (it, i) { var b = repo['f' + i]; if (b && b.oid && !b.isTruncated && typeof b.text === 'string') BLOB[b.oid] = b.text; }); });
+      .then(function (repo) { items.forEach(function (it, i) { var b = repo['f' + i]; if (b && b.oid && !b.isTruncated && typeof b.text === 'string') blobSet(b.oid, b.text); }); });
   }
-  function getFiles(dir, files, opts) {
+  function getFiles(dir, files, opts) { return BLOB_READY.then(function () { return getFiles0(dir, files, opts); }); }
+  function getFiles0(dir, files, opts) {
     var strict = opts && opts.strict, miss = files.filter(function (f) { return !(f.sha in BLOB); }), step = Promise.resolve();
     if (miss.length && Date.now() > GQL_OFF) {
       for (var i = 0; i < miss.length; i += 100) (function (part) { step = step.then(function () { return gqlTexts(part); }); })(miss.slice(i, i + 100));
@@ -383,7 +427,7 @@ var A = (function () {
       BR = r.default_branch || 'main'; start();
     }).catch(function (e) { $('loginMsg').textContent = errMsg(e); });
   }
-  function logout() { localStorage.removeItem(K_TOK); location.reload(); }
+  function logout() { localStorage.removeItem(K_TOK); Promise.race([idbClear(), new Promise(function (r) { setTimeout(r, 1500); })]).then(function () { location.reload(); }); }
   /* start: eseguita dopo il login. Qui si leggono da _config.yml (async) baseurl e timezone. Finche' la Promise non e' risolta BASEURL e SITE_TZ sono vuoti: vedi commento piu' sotto e sez. 0e claude.md. */
   function start() {
     $('login').style.display = 'none'; $('app').style.display = 'block';
