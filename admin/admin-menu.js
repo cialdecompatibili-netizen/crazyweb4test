@@ -139,7 +139,7 @@
       '<button class="btn sm" onclick="mdIns(\'\\n## \',\'\')">H2</button>' +
       '<button class="btn sm" onclick="mdIns(\'\\n- \',\'\')">Lista</button>' +
       '<button class="btn sm" onclick="mdIns(\'[\',\'](https://)\')">Link</button>' +
-      '<button class="btn sm" onclick="mdIns(\'![\',\'](\' + A.baseurl() + \'/assets/img/)\')">Img</button>' +
+      '<button class="btn sm" onclick="mdImg()" title="Scegli o carica una foto e scegli la posizione">Img</button>' +
       '<button class="btn sm" onclick="mdGal()">Galleria</button>' +
       '<button class="btn sm" onclick="mdMore()" title="Nell\'elenco del blog l\'estratto finisce qui">Leggi tutto</button></div>';
   }

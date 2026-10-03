@@ -42,16 +42,16 @@
       im.src = u;
     });
   }
-  A.imgPick = function (fid) {
-    if ($('ip_ov')) return;
-    var sel = ($(fid).value || '').trim(), names = [];
+  /* opts (facoltativo): { align: true, onPick: function (percorso, {align, alt}) } = modalita' INSERIMENTO nel testo (pulsante Img dell'editor): fid null, compaiono Sinistra/Centro/Destra e il testo alternativo, e al posto di scrivere nel campo chiama onPick. Senza opts funziona come prima (immagine in evidenza, progetti). */ A.imgPick = function (fid, opts) {
+    opts = opts || {}; if ($('ip_ov')) return;
+    var sel = fid ? ($(fid).value || '').trim() : '', names = [], al = 'center';
     var ov = document.createElement('div'); ov.id = 'ip_ov';
     ov.style.cssText = 'position:fixed;inset:0;background:#0008;z-index:60;display:flex;align-items:center;justify-content:center;padding:12px';
     ov.innerHTML = '<div style="background:#fff;border-radius:6px;width:100%;max-width:880px;max-height:92vh;display:flex;flex-direction:column">' +
       '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #ddd"><b>Scegli o carica un\'immagine</b><button class="btn sm" id="ip_x">Chiudi</button></div>' +
       '<div style="padding:12px 16px;border-bottom:1px solid #ddd"><input type="file" id="ip_f" accept="image/*" multiple style="width:auto"> <small id="ip_s">Carica una foto dal PC: viene ridotta, salvata in assets/img e selezionata.</small></div>' +
       '<div id="ip_g" class="grid" style="padding:16px;overflow:auto;flex:1;align-content:start"></div>' +
-      '<div style="padding:12px 16px;border-top:1px solid #ddd;text-align:right"><button class="btn primary" id="ip_ok">Imposta immagine</button></div></div>';
+      '<div style="padding:12px 16px;border-top:1px solid #ddd;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">' + (opts.align ? '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><small>Posizione</small><button type="button" class="btn sm" data-al="left">Sinistra</button><button type="button" class="btn sm primary" data-al="center">Centro</button><button type="button" class="btn sm" data-al="right">Destra</button><input id="ip_alt" placeholder="Testo alternativo (descrivi la foto)" style="width:260px"></div>' : '<span></span>') + '<button class="btn primary" id="ip_ok">' + (opts.align ? 'Inserisci immagine' : 'Imposta immagine') + '</button></div></div>';
     document.body.appendChild(ov);
     function close() { ov.remove(); }
     function paint() {
@@ -67,12 +67,12 @@
       }, function (e) { $('ip_g').textContent = A.errMsg(e); });
     }
     ov.addEventListener('click', function (e) {
-      if (e.target === ov) return close();
+      if (e.target === ov) return close(); var ab = e.target.closest ? e.target.closest('[data-al]') : null; if (ab) { al = ab.getAttribute('data-al'); Array.prototype.forEach.call(ov.querySelectorAll('[data-al]'), function (x) { x.classList.toggle('primary', x === ab); }); return; }
       var t = e.target; while (t && t !== ov && !(t.getAttribute && t.getAttribute('data-p'))) t = t.parentNode;
       if (t && t !== ov) { sel = t.getAttribute('data-p'); paint(); }
     });
     $('ip_x').onclick = close;
-    $('ip_ok').onclick = function () { if (!sel) return A.toast('Scegli o carica un\'immagine', true); $(fid).value = sel; A.imgPrev(fid); close(); };
+    $('ip_ok').onclick = function () { if (!sel) return A.toast('Scegli o carica un\'immagine', true); if (opts.onPick) { opts.onPick(sel, { align: al, alt: (($('ip_alt') || {}).value || '').trim() }); close(); return; } $(fid).value = sel; A.imgPrev(fid); close(); };
     $('ip_f').onchange = function () {
       var fs = Array.prototype.slice.call(this.files); if (!fs.length) return;
       var inp = this, st = $('ip_s');

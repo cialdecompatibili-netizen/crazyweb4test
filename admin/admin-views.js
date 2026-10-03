@@ -266,6 +266,21 @@
       origIns('\n\n<!--more-->\n\n', '');
     }
   };
+  /* mdImg: pulsante "Img". Apre il selettore foto (lo stesso di Immagine in evidenza: carica dal PC o scegli da assets/img) con i bottoni Sinistra/Centro/Destra e il testo alternativo.
+     Inserisce {% include immagine.liquid src alt align %} dove sta il cursore (in Visuale come blocco protetto, come la Galleria; in Sorgente come testo). Il sito la disegna con _includes/immagine.liquid. */
+  window.mdImg = function () {
+    var p = $('mdPrev'), saved = null;
+    if (p && visActive()) { var s0 = window.getSelection(); if (s0.rangeCount && p.contains(s0.anchorNode)) saved = s0.getRangeAt(0).cloneRange(); }
+    A.imgPick(null, { align: true, onPick: function (path, o) {
+      var alt = String(o.alt || '').replace(/["{}%]/g, '').replace(/\s+/g, ' ').trim();
+      var raw = '{% include immagine.liquid src="' + path + '" alt="' + alt + '" align="' + o.align + '" %}';
+      if (visActive()) {
+        p.focus(); var s = window.getSelection(); s.removeAllRanges();
+        if (saved) s.addRange(saved); else { var r = document.createRange(); r.selectNodeContents(p); r.collapse(false); s.addRange(r); }
+        document.execCommand('insertHTML', false, window.mdRender(raw)); visSync();
+      } else origIns('\n\n' + raw + '\n\n', '');
+    } });
+  };
   function toolbar() {
     return '<div class="tools">' +
       '<button class="btn sm" id="mdPrevBtn" onclick="mdPrev()">Sorgente</button>' +
@@ -274,7 +289,7 @@
       '<button class="btn sm" onclick="mdIns(\'\\n## \',\'\')">H2</button>' +
       '<button class="btn sm" onclick="mdIns(\'\\n- \',\'\')">Lista</button>' +
       '<button class="btn sm" onclick="mdIns(\'[\',\'](https://)\')">Link</button>' +
-      '<button class="btn sm" onclick="mdIns(\'![\',\'](\' + A.baseurl() + \'/assets/img/)\')">Img</button>' +
+      '<button class="btn sm" onclick="mdImg()" title="Scegli o carica una foto e scegli la posizione">Img</button>' +
       '<button class="btn sm" onclick="mdGal()">Galleria</button>' +
       '<button class="btn sm" onclick="mdMore()" title="Nell\'elenco del blog l\'estratto finisce qui">Leggi tutto</button>' +
       '</div>';
