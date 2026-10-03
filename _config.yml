@@ -139,6 +139,10 @@ bing_site_verification: # out your bing-site-verification ID (Bing Webmaster)
 blog_name: al-folio # blog_name will be displayed in your blog page
 blog_description: # descrizione opzionale del blog: se vuota non compare e non occupa spazio
 permalink: /blog/:year/:title/
+# URL per categoria (plugin _plugins/permalink_da_categoria.rb): categoria -> permalink.
+# Post senza queste categorie restano su /blog/:year/:title/. Tenere allineato repos.json > sito.permalink_servizio.
+permalink_categorie:
+  servizi: /servizi/:title/
 toc_style: box # aspetto indice articoli: "box" (cornice in alto) oppure "side" (laterale sinistro stile Distill). Si cambia da admin > Impostazioni
 # --- DATE DEI POST: non toccare senza leggere admin/claude.md sez. 0c ---
 # Senza "timezone" Jekyll legge le date dei post nel fuso del server GitHub (UTC): un post scritto

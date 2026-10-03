@@ -197,7 +197,6 @@ def applica(cartella, servizi, dry):
         if dry:
             stat["creati" if prima is None else "invariati"] += 1
             continue
-        assicura_permalink(dopo, s["slug"])
         toccati.append(os.path.relpath(dopo, cartella))
         if vecchio is None:
             stat["creati"] += 1
