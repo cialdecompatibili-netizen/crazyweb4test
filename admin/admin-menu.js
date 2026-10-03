@@ -195,8 +195,8 @@
       h += '</div><p><button class="btn primary" onclick="A.mnSave()">Salva menu</button></p></div>';
       var off = PG.filter(function (p) { return !p.nav && p.permalink && !/404/.test(p.permalink); });
       if (off.length) {
-        A.ofAllOn = false; h += '<div class="card"><h3>Pagine fuori dal menu (' + off.length + ')</h3><p><input id="of_q" placeholder="Cerca pagina..." oninput="A.ofF()"> <button class="btn sm" id="of_m" onclick="A.ofM()"' + (off.length <= 8 ? ' style="display:none"' : '') + '>Mostra tutte (' + off.length + ')</button></p><div class="list" id="of_l">';
-        off.forEach(function (p, i) { h += '<div class="it" data-s="' + esc(((p.title || p.name) + ' ' + p.permalink).toLowerCase()) + '"' + (i >= 8 ? ' style="display:none"' : '') + '><span>' + esc(p.title || p.name) + '<small>' + esc(p.permalink) + '</small></span><button class="btn sm" onclick="A.mnOn(\'' + A.jq(p.name) + '\')">Aggiungi al menu</button></div>'; });
+        h += '<div class="card"><h3>Aggiungi una pagina al menu</h3><p><button class="btn" id="of_b" onclick="A.ofT()">Scegli una pagina (' + off.length + ') &#9662;</button> <input id="of_q" placeholder="Cerca pagina..." oninput="A.ofF()" style="display:none"></p><div class="list" id="of_l" style="display:none;max-height:300px;overflow:auto">';
+        off.forEach(function (p) { h += '<div class="it" data-s="' + esc(((p.title || p.name) + ' ' + p.permalink).toLowerCase()) + '"><span>' + esc(p.title || p.name) + '<small>' + esc(p.permalink) + '</small></span><button class="btn sm" onclick="A.mnOn(\'' + A.jq(p.name) + '\')">Aggiungi al menu</button></div>'; });
         h += '</div></div>';
       }
       h += '<div class="card"><h3>Voci link personalizzate</h3><p>Voci di menu che puntano a un URL qualsiasi (pagina del sito o link esterno). Non creano pagine: puoi avere piu voci verso la stessa destinazione senza conflitti.</p><div id="lk">';
@@ -208,16 +208,16 @@
       M().innerHTML = h;
     });
   };
-  /* Pagine fuori dal menu: elenco compatto. Mostra le prime 8, ricerca per titolo/indirizzo, 'Mostra tutte' le apre. Solo filtro visivo (nessuna richiesta). */
-  A.ofF = function () {
-    var q = ($('of_q').value || '').toLowerCase().trim(), rows = document.querySelectorAll('#of_l .it'), m = $('of_m');
-    Array.prototype.forEach.call(rows, function (r, i) {
-      r.style.display = (q ? r.getAttribute('data-s').indexOf(q) >= 0 : (A.ofAllOn || i < 8)) ? '' : 'none';
-    });
-    m.style.display = (q || rows.length <= 8) ? 'none' : '';
-    m.textContent = A.ofAllOn ? 'Mostra meno' : 'Mostra tutte (' + rows.length + ')';
+  /* Tendina 'Aggiungi una pagina al menu': il pulsante apre/chiude ricerca + elenco (max 300 px, scorre). La ricerca filtra per titolo o indirizzo, solo visivo. */
+  A.ofT = function () {
+    var l = $('of_l'), q = $('of_q'), open = l.style.display === 'none';
+    l.style.display = open ? '' : 'none'; q.style.display = open ? '' : 'none';
+    if (open) { q.value = ''; A.ofF(); q.focus(); }
   };
-  A.ofM = function () { A.ofAllOn = !A.ofAllOn; A.ofF(); };
+  A.ofF = function () {
+    var q = ($('of_q').value || '').toLowerCase().trim();
+    Array.prototype.forEach.call(document.querySelectorAll('#of_l .it'), function (r) { r.style.display = r.getAttribute('data-s').indexOf(q) >= 0 ? '' : 'none'; });
+  };
   A.kAdd = function (btn, div) {
     var d = document.createElement('div'); d.className = 'mrow k';
     d.innerHTML = div ? '<input class="k_t" value="divider" readonly><input class="k_p" value="" readonly><span></span><button class="btn sm danger" onclick="this.parentNode.remove()">x</button>'
