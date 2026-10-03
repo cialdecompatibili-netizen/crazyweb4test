@@ -9,10 +9,30 @@
    (5) non c'e' ancora l'eliminazione dei backup: si cancellano a mano come branch su GitHub. */
 (function (A) {
   var esc = A.esc, M = function () { return A.main(); };
-  var BRN = 'main', LIST = [];
+  var BRN = 'main', LIST = [], INFO = {};
   function p2(n) { return (n < 10 ? '0' : '') + n; }
   function stamp() { var d = new Date(); return 'backup-' + d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate()) + '-' + p2(d.getHours()) + p2(d.getMinutes()); }
   function headSha() { return A.api('GET', '/git/ref/heads/' + BRN).then(function (r) { return r.object.sha; }); }
+
+  function fmt(iso) {
+    if (!iso) return ''; var d = new Date(iso); if (isNaN(d.getTime())) return '';
+    return p2(d.getDate()) + '/' + p2(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + p2(d.getHours()) + ':' + p2(d.getMinutes());
+  }
+  /* Data/ora e messaggio di ogni backup: Git NON salva quando e' stato creato il branch, ma la data dell'ultimo commit = il momento a cui
+     risale lo stato del sito salvato (e' quella che serve per scegliere). Una richiesta per commit diverso, a gruppi di 6, con cache per sha
+     (uno sha non cambia mai). Se una richiesta fallisce la riga si mostra lo stesso, senza data. */
+  function loadInfo(list) {
+    var uniq = []; list.forEach(function (b) { if (!(b.sha in INFO) && uniq.indexOf(b.sha) < 0) uniq.push(b.sha); });
+    var chain = Promise.resolve();
+    for (var i = 0; i < uniq.length; i += 6) (function (grp) {
+      chain = chain.then(function () {
+        return Promise.all(grp.map(function (sha) {
+          return A.api('GET', '/git/commits/' + sha).then(function (c) { INFO[sha] = { when: c.committer && c.committer.date, msg: (c.message || '').split('\n')[0] }; }, function () {});
+        }));
+      });
+    })(uniq.slice(i, i + 6));
+    return chain;
+  }
 
   A.views.backup = function () {
     return A.api('GET', '').then(function (repo) {
@@ -22,15 +42,18 @@
       var head = rs[0];
       LIST = rs[1].map(function (r) { return { name: r.ref.replace('refs/heads/', ''), sha: r.object.sha }; })
         .sort(function (a, b) { return a.name < b.name ? 1 : -1; });
+      return loadInfo(LIST).then(function () {
       var rows = LIST.map(function (b, i) {
-        var same = b.sha === head;
-        return '<div class="it"><span>' + esc(b.name) + '<small>' + esc(b.sha.slice(0, 7)) + (same ? ' \u00b7 identico allo stato attuale' : '') + '</small></span>' +
+        var same = b.sha === head, inf = INFO[b.sha] || {}, parts = [fmt(inf.when), b.sha.slice(0, 7)];
+        if (same) parts.push('identico allo stato attuale'); if (inf.msg) parts.push(inf.msg);
+        return '<div class="it"><span>' + esc(b.name) + '<small title="' + esc(inf.msg || '') + '">' + esc(parts.filter(Boolean).join(' \u00b7 ')) + '</small></span>' +
           (same ? '' : '<button class="btn sm danger" onclick="A.bkRestore(' + i + ')">Ripristina</button>') + '</div>';
       }).join('');
       M().innerHTML = '<h2>Backup <button class="btn primary sm" onclick="A.bkNew()">+ Crea backup ora</button></h2>' +
         '<div class="card"><p style="margin:0 0 12px;color:#787c82">Un backup \u00e8 una copia dello stato attuale del sito (un branch <code>backup-\u2026</code> su GitHub). ' +
         'Ripristinare riporta tutti i file a quella copia con un nuovo commit: la cronologia non si perde e prima viene creato in automatico un backup dello stato attuale.</p>' +
         '<div class="list">' + (rows || 'Nessun backup.') + '</div></div>';
+      });
     });
   };
 
