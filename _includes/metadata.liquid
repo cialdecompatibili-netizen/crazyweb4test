@@ -92,12 +92,15 @@
 {% assign seo_canonical = page.url | absolute_url | remove_first: 'index.html' %}
 {% assign is_post = false %}
 {% if page.collection == 'posts' %}{% assign is_post = true %}{% endif %}
-{% assign seo_service_cat = site.schema_org.service_category | default: 'servizi' %}
+{% comment %} I servizi sono la collection 'servizi' (non piu' post con categoria): is_service = pagina di quella collection. {% endcomment %}
 {% assign is_service = false %}
-{% if is_post and page.categories contains seo_service_cat %}{% assign is_service = true %}{% endif %}
+{% if page.collection == 'servizi' %}{% assign is_service = true %}{% endif %}
 {% assign seo_section = '' %}
 {% assign seo_section_url = '' %}
-{% if is_post %}
+{% if is_service %}
+  {% assign seo_section = 'Servizi' %}
+  {% assign seo_section_url = '/servizi/' | absolute_url %}
+{% elsif is_post %}
   {% assign seo_cat = page.categories | first %}
   {% assign seo_rule = site.permalink_per_categoria[seo_cat] %}
   {% if seo_rule %}

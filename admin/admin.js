@@ -337,7 +337,7 @@ var A = (function () {
   }
   /* VOCI DISATTIVATE (temporaneo): chiave = vista, valore = motivo. Non cliccabili (menu, Bacheca, go). Il codice delle viste resta: per riattivare togli la riga qui e class="off" in index.html. */
   var off = { news: 'News temporaneamente disattivate' };
-  var titles = { dash: 'Bacheca', posts: 'Articoli', cats: 'Categorie articoli', pages: 'Pagine', menu: 'Menu', projects: 'Progetti', news: 'News', media: 'Immagini', modules: 'Moduli', settings: 'Impostazioni' };
+  var titles = { dash: 'Bacheca', posts: 'Articoli', cats: 'Categorie articoli', pages: 'Pagine', menu: 'Menu', projects: 'Progetti', news: 'News', servizi: 'Servizi', media: 'Immagini', modules: 'Moduli', settings: 'Impostazioni' };
   function go(p) {
     if (off[p]) { toast(off[p], true); return; }
     var links = document.querySelectorAll('.side a[data-p]');

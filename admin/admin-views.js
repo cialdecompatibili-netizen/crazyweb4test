@@ -265,7 +265,7 @@
 
   /* ---- Bacheca ---- */
   A.views.dash = function () {
-    var dirs = [['_posts', 'Articoli', 'posts'], ['_pages', 'Pagine', 'pages'], ['_projects', 'Progetti', 'projects'], ['_news', 'News', 'news']];
+    var dirs = [['_posts', 'Articoli', 'posts'], ['_pages', 'Pagine', 'pages'], ['_projects', 'Progetti', 'projects'], ['_news', 'News', 'news'], ['_servizi', 'Servizi', 'servizi']];
     return Promise.all(dirs.map(function (d) { return A.getDir(d[0]); })).then(function (r) {
       var h = '<h2>Bacheca</h2><div class="row">';
       dirs.forEach(function (d, i) {
@@ -306,7 +306,7 @@
         /* Solo Articoli: stato "in evidenza" (featured: true nel front matter, letto da _pages/blog.md). getDir non da' il contenuto: leggo i file in parallelo una volta sola. */
         var hm = []; /* servizi: stato 'in home' (in_home: true), letto dalla stessa apertura dei file */
         var cats = []; /* categorie per riga, riempite dalla stessa lettura dei file (zero richieste in piu') */
-        var feat = (cfg.key === 'posts' || cfg.key === 'projects') ? Promise.all(files.map(function (f, ix) {
+        var feat = (cfg.key === 'posts' || cfg.key === 'projects' || cfg.key === 'servizi') ? Promise.all(files.map(function (f, ix) {
           return A.getFile(cfg.dir + '/' + f.name).then(function (r) { var fm0 = A.splitFM(r.text).fm; cats[ix] = (A.fmGet(fm0, 'categories') || A.fmGet(fm0, 'category') || '').replace(/[\[\]"']/g, '').split(/[ ,]+/).filter(Boolean); hm[ix] = /^in_home:[ \t]*true\b/m.test(fm0); return /^featured:[ \t]*true\b/m.test(fm0); }).catch(function () { return false; });
         })) : Promise.resolve([]);
         return feat.then(function (fl) {
@@ -314,7 +314,7 @@
         if (!total) h += 'Nessun elemento.';
         h += A.pgBar(cfg.key, total, pg, pages, PP);
         files.forEach(function (f, i) {
-          var isSrv = (cfg.key === 'posts' && (cats[i] || []).join(' ').toLowerCase().split(' ').indexOf('servizi') >= 0) || cfg.key === 'projects'; /* casetta 'in home': servizi (Articoli) e Progetti, accanto alla stella */
+          var isSrv = cfg.key === 'servizi' || cfg.key === 'projects'; /* casetta 'in home': Servizi (collection _servizi) e Progetti */
           var home = isSrv ? '<button class="btn sm home' + (hm[i] ? ' on' : '') + '" data-n="' + esc(f.name) + '" data-k="' + cfg.key + '" title="' + (hm[i] ? 'In home page: clic per togliere' : 'Mostra in home page') + '" onclick="A.inHome(\'' + esc(f.name) + '\',' + (hm[i] ? 'false' : 'true') + ',this,\'' + cfg.key + '\')">&#127968;</button>' : '';
           var star = cfg.key === 'posts' ? '<button class="btn sm star' + (fl[i] ? ' on' : '') + '" data-n="' + esc(f.name) + '" title="' + (fl[i] ? 'In evidenza: clic per togliere' : 'Metti in evidenza (in alto nel blog)') + '" onclick="A.feature(\'' + esc(f.name) + '\',' + (fl[i] ? 'false' : 'true') + ',this)">' + (fl[i] ? '&#9733;' : '&#9734;') + '</button>' : '';
           var catB = cfg.key === 'posts' ? '<em style="font-style:normal;font-size:.8em;white-space:nowrap;margin:0 .6em;padding:1px 9px;border-radius:10px;background:rgba(127,127,127,.18);' + ((cats[i] || []).length ? '' : 'opacity:.55;') + '" title="Categoria (la prima decide l\'URL)">' + ((cats[i] || []).length ? esc(cats[i].join(', ')) : 'senza categoria') + '</em>' : '';
@@ -330,7 +330,9 @@
   var C = {
     posts: { key: 'posts', dir: '_posts', label: 'Articoli', sortDesc: true },
     projects: { key: 'projects', dir: '_projects', label: 'Progetti' },
-    news: { key: 'news', dir: '_news', label: 'News', sortDesc: true }
+    news: { key: 'news', dir: '_news', label: 'News', sortDesc: true },
+    /* SERVIZI: collection indipendente dal blog (_servizi/, URL /servizi/<nome-file>/). Nessuna data, nessuna categoria. */
+    servizi: { key: 'servizi', dir: '_servizi', label: 'Servizi' }
   };
   Object.keys(C).forEach(function (k) { collection(C[k]); });
 
@@ -344,9 +346,10 @@
   var FIELDS = {
     posts: [['title', 'Titolo', 'text'], ['date', 'Data', 'date'], ['description', 'Descrizione', 'text'], ['tags', 'Tag (separati da spazio)', 'text'], ['categories', 'Categoria', 'cat']].concat(SEO),
     projects: [['title', 'Titolo', 'text'], ['description', 'Descrizione', 'text'], ['img', 'Immagine (es. assets/img/12.jpg)', 'text'], ['importance', 'Ordine (numero)', 'text'], ['category', 'Categoria (deve stare in display_categories di projects)', 'cat'], ['redirect', 'Redirect esterno (opzionale)', 'text']].concat(SEO),
+    servizi: [['title', 'Titolo', 'text'], ['description', 'Descrizione (breve: compare anche nella card in home)', 'text']].concat(SEO),
     news: [['title', 'Titolo (solo se non inline)', 'text'], ['date', 'Data', 'date'], ['inline', 'Inline (true = solo riga in home)', 'text']].concat(SEO)
   };
-  var LAYOUT = { posts: 'post', projects: 'page', news: 'post' };
+  var LAYOUT = { posts: 'post', projects: 'page', news: 'post', servizi: 'servizio' };
   /* campi mostrati SOTTO il Corpo nell'editor (vedi A.edit). Ordine = ordine in FIELDS. */
   var BELOW = ['tags', 'seo_title', 'seo_description'];
   var cur = {};
@@ -383,6 +386,7 @@
      (vedi commento su categories/tags in admin.js), quindi una categoria con spazio nel nome NON
      e' rappresentabile in questa forma. */
   function loadCats(key) {
+    if (key === 'servizi') return Promise.resolve([]); /* i servizi non hanno categorie */
     var field = key === 'projects' ? 'category' : 'categories';
     return A.getDir(C[key].dir).then(function (files) {
       files = files.filter(function (f) { return f.type === 'file' && /\.md$/.test(f.name); });
@@ -470,7 +474,7 @@
     if (!name) {
       var t = $('f_title').value.trim();
       if (key === 'posts') { if (!t) return A.toast('Titolo obbligatorio', true); name = $('f_date_d').value + '-' + A.slugify(t) + '.md'; }
-      else if (key === 'projects') { if (!t) return A.toast('Titolo obbligatorio', true); name = A.slugify(t) + '.md'; }
+      else if (key === 'projects' || key === 'servizi') { if (!t) return A.toast('Titolo obbligatorio', true); name = A.slugify(t) + '.md'; }
       else { return A.getDir('_news').then(function (l) { var n = 1; l.forEach(function (x) { var m = x.name.match(/announcement_(\d+)/); if (m) n = Math.max(n, +m[1] + 1); }); doPut('announcement_' + n + '.md'); }); }
     }
     return doPut(name);
@@ -483,7 +487,10 @@
         var cs = c0 ? A.slugify(c0) : '', sl = nm.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace(/\.md$/, '') + '/';
         /* SPECCHIO a mano di permalink_per_categoria (_config.yml) e di repos.json > sito.permalink_servizio: i servizi stanno in /servizi/ (senza /blog/).
            Serve SOLO per il nome della run in Actions: l'URL vero lo calcola il plugin Jekyll. Se aggiungi/cambi una regola nel config, aggiorna anche questa riga. */
-        lbl = cs === 'servizi' ? '/servizi/' + sl : '/blog/' + (cs ? cs + '/' : '') + sl;
+        lbl = '/blog/' + (cs ? cs + '/' : '') + sl;
+      } else if (key === 'servizi') {
+        /* SPECCHIO a mano del permalink della collection 'servizi' in _config.yml (e di repos.json > sito.permalink_servizio). Serve solo per il nome della run in Actions. */
+        lbl = '/servizi/' + nm.replace(/\.md$/, '') + '/';
       }
       return A.putFile(C[key].dir + '/' + nm, txt, cur.sha, 'admin: ' + (cur.sha ? 'aggiorna ' : 'crea ') + lbl).then(function () {
         A.toast('Salvato: pubblicazione in corso'); A.go(key);
@@ -533,7 +540,7 @@
     if (btn) paintHome(btn, on);
     var prev = starBusy[name] || Promise.resolve();
     starBusy[name] = prev.then(function () {
-      var p = (key === 'projects' ? '_projects/' : '_posts/') + name;
+      var p = (key === 'projects' ? '_projects/' : key === 'servizi' ? '_servizi/' : '_posts/') + name;
       return A.getFile(p).then(function (f) {
         var s = A.splitFM(f.text);
         if (!s.fm) throw new Error('Front matter non trovato in ' + name);

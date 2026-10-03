@@ -157,12 +157,10 @@ blog_description: # descrizione opzionale del blog: se vuota non compare e non o
 permalink: /blog/:title/ # post SENZA categoria
 # URL dei post dalla categoria (plugin _plugins/permalink_da_categoria.rb): /blog/<categoria>/<articolo>/, data NON nell'URL.
 permalink_da_categoria: /blog/:categoria/:title/
-# Eccezioni per categoria (vincono sul modello sopra): i servizi stanno in /servizi/<articolo>/, senza /blog/. Redirect automatici dai vecchi URL.
-# ATTENZIONE - questa regola vive in 3 posti che devono restare uguali: (1) QUI, (2) repos.json > sito.permalink_servizio (card home/servizi),
-# (3) admin/admin-views.js > doPut (etichetta commit, controlla 'servizi' a mano). Cambiandone uno, cambia anche gli altri.
-# NON scrivere 'permalink:' nei post: vincerebbe sulla regola e il post resterebbe senza redirect. (CLAUDE.md > Punti critici)
-permalink_per_categoria:
-  servizi: /servizi/:title/
+# Eccezioni per categoria (vincono sul modello sopra), es. { prodotti: /negozio/:title/ }. Oggi nessuna: i servizi NON sono piu' post,
+# sono la collection 'servizi' (vedi collections: sopra, permalink /servizi/:title/). Se la regola cambia, aggiorna anche
+# repos.json > sito.permalink_servizio (card home/servizi).
+permalink_per_categoria: {}
 toc_style: box # aspetto indice articoli: "box" (cornice in alto) oppure "side" (laterale sinistro stile Distill). Si cambia da admin > Impostazioni
 # --- DATE DEI POST: non toccare senza leggere admin/claude.md sez. 0c ---
 # Senza "timezone" Jekyll legge le date dei post nel fuso del server GitHub (UTC): un post scritto
@@ -237,6 +235,11 @@ collections:
     output: true
   projects:
     output: true
+  # SERVIZI: collection indipendente dal blog (cartella _servizi/, gestita da admin > Servizi). Non compaiono in
+  # /blog/, nelle categorie ne' negli archivi. URL: /servizi/<nome-file>/ . Il permalink e' QUI: non scriverlo nei file.
+  servizi:
+    output: true
+    permalink: /servizi/:title/
   teachings:
     output: true
 
@@ -358,6 +361,12 @@ defaults:
     values:
       toc:
         beginning: true
+  # SERVIZI: layout dedicato (senza data, tag, categorie, link al blog).
+  - scope:
+      path: ""
+      type: "servizi"
+    values:
+      layout: servizio
 
 sass:
   style: compressed

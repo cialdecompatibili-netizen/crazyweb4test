@@ -87,10 +87,10 @@ Un team unico di professionisti coordina ogni fase, dalla strategia al risultato
 </div>
 
 <!-- ===== SERVIZI HOME START (DINAMICO) =====
-     Le card NON sono scritte a mano: il ciclo Liquid prende i post di categoria 'servizi' con 'in_home: true' (casetta nell'admin, lista Articoli).
+     Le card NON sono scritte a mano: il ciclo Liquid prende i documenti della collection 'servizi' con 'in_home: true' (casetta nell'admin, sezione Servizi).
      Campo SEPARATO dalla stella del blog ('featured'): non si mescolano. Ordine alfabetico per titolo (i post hanno la stessa data, per data l'ordine non sarebbe stabile).
      Titolo, descrizione (tagliata a 8 parole) e link vengono dal post. Se nessun servizio ha la casetta la sezione sparisce. NON rimettere card a mano. ===== -->
-{%- assign srv_home = site.posts | where: 'in_home', 'true' | where_exp: 'p', "p.categories contains 'servizi'" | sort: 'title' -%}
+{%- assign srv_home = site.servizi | where: 'in_home', 'true' | sort: 'title' -%}
 {%- if srv_home.size > 0 %}
 <div class="srv-home">
   <h2>I nostri servizi</h2>

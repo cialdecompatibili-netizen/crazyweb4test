@@ -23,9 +23,10 @@ REGOLE FISSE (decise nella chat, non cambiarle senza motivo):
 - Se un post con lo stesso slug esiste gia', viene SOVRASCRITTO con il
   contenuto aggiornato da servizi_data.py (idempotente: si puo' rilanciare
   quante volte si vuole, non crea doppioni).
-- Il file creato si chiama sempre _posts/AAAA-MM-GG-<slug>.md . La data e'
-  quella del primo salvataggio se il file non esiste, altrimenti la data
-  originale del file viene mantenuta (cosi' il post non "salta" nel blog).
+- I servizi sono la collection "servizi" (NON piu' post del blog): il file creato
+  si chiama _servizi/<slug>.md, senza data e senza categorie. Se il file esiste
+  gia' vengono conservati i campi gestiti dall'admin (in_home, seo_title,
+  seo_description).
 """
 
 import os
@@ -41,6 +42,7 @@ from servizi_data import SERVIZI
 REPO_DIR = os.path.dirname(os.path.abspath(__file__))
 POSTS_DIR = os.path.join(REPO_DIR, "_posts")
 BACKUP_DIR = os.path.join(POSTS_DIR, "_backup_test")
+SERVIZI_DIR = os.path.join(REPO_DIR, "_servizi")  # collection servizi (admin > Servizi)
 
 # File "sporchi": prove/test fatte durante lo sviluppo, non post veri.
 # Vengono spostati in _backup_test con --clean, MAI cancellati per davvero.
@@ -87,16 +89,9 @@ def slugify(testo):
 
 
 def trova_file_esistente(slug):
-    """Cerca nella cartella _posts un file che termina con -<slug>.md,
-    indipendentemente dalla data nel nome. Serve per aggiornare un post
-    gia' creato senza duplicarlo con una data diversa."""
-    if not os.path.isdir(POSTS_DIR):
-        return None
-    suffisso = "-" + slug + ".md"
-    for nome in os.listdir(POSTS_DIR):
-        if nome.endswith(suffisso):
-            return os.path.join(POSTS_DIR, nome)
-    return None
+    """Ritorna il percorso di _servizi/<slug>.md se esiste, altrimenti None."""
+    percorso = os.path.join(SERVIZI_DIR, slug + ".md")
+    return percorso if os.path.isfile(percorso) else None
 
 
 def estrai_data_esistente(percorso_file):
@@ -144,31 +139,31 @@ def costruisci_markdown(servizio):
 
 
 def genera_post(servizio, dry_run=False):
-    """Crea o aggiorna il file _posts/<data>-<slug>.md per un servizio.
+    """Crea o aggiorna il file _servizi/<slug>.md per un servizio.
     Ritorna una stringa di log leggibile (creato / aggiornato / [dry-run])."""
     slug = servizio["slug"]
     titolo = servizio["titolo"]
     descrizione = servizio["descrizione"]
 
-    percorso_esistente = trova_file_esistente(slug)
-    if percorso_esistente:
-        data_str = estrai_data_esistente(percorso_esistente) or \
-            datetime.date.today().isoformat()
-        percorso_finale = percorso_esistente
-        azione = "aggiornato"
-    else:
-        data_str = datetime.date.today().isoformat()
-        nome_file = f"{data_str}-{slug}.md"
-        percorso_finale = os.path.join(POSTS_DIR, nome_file)
-        azione = "creato"
+    percorso_finale = os.path.join(SERVIZI_DIR, slug + ".md")
+    esiste = os.path.isfile(percorso_finale)
+    azione = "aggiornato" if esiste else "creato"
+
+    # Campi gestiti dall'admin (casetta "in home", SEO): se il file esiste restano com'erano.
+    extra = ""
+    if esiste:
+        with open(percorso_finale, encoding="utf-8") as f:
+            m = re.match(r"---\r?\n(.*?)\r?\n---", f.read(), re.S)
+        if m:
+            for riga in m.group(1).splitlines():
+                if re.match(r"^(in_home|seo_title|seo_description):", riga):
+                    extra += riga + "\n"
 
     front_matter = f"""---
-layout: post
+layout: servizio
 title: {titolo}
-date: {data_str} 12:00:00
 description: {descrizione}
-categories: {CATEGORIA}
----
+{extra}---
 
 """
     corpo = costruisci_markdown(servizio)
@@ -177,7 +172,7 @@ categories: {CATEGORIA}
     if dry_run:
         return f"[dry-run] {azione}: {os.path.basename(percorso_finale)}"
 
-    os.makedirs(POSTS_DIR, exist_ok=True)
+    os.makedirs(SERVIZI_DIR, exist_ok=True)
     with open(percorso_finale, "w", encoding="utf-8", newline="\n") as f:
         f.write(testo_completo)
 
