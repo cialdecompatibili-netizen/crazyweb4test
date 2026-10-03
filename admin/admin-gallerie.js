@@ -7,6 +7,7 @@
   var $ = A.$, esc = A.esc, M = function () { return A.main(); };
   var DIR = '_data/gallerie', IMGDIR = 'assets/img/gallerie';
   var LAYOUTS = [['3col', '3 colonne'], ['2col', '2 colonne'], ['2-1', '2/3 + 1/3 (alternato)'], ['1', 'Una foto per riga']];
+  var pend = null;                                          /* galleria da aprire subito dopo l'elenco (vedi galOpen) */
   var G = null, OLD = {};                                   /* G = galleria in modifica; OLD = foto gia' salvate (src -> 1) */
   function code(id) { return '{% include galleria.liquid id="' + id + '" %}'; }
   function ids(l) { return l.filter(function (x) { return x.type === 'file' && /\.json$/.test(x.name); }).map(function (x) { return x.name.replace(/\.json$/, ''); }); }
@@ -22,6 +23,7 @@
           '<button class="btn sm danger" onclick="A.galDel(\'' + esc(id) + '\')">x</button></div>';
       });
       M().innerHTML = h + (L.length ? '' : 'Nessuna galleria.') + '</div>';
+      var q = pend; pend = null; if (q && L.indexOf(q) >= 0) A.galEdit(q);
     });
   };
 
@@ -128,9 +130,15 @@
     A.getDir(DIR).then(function (l) {
       var L = ids(l); if (!L.length) { A.toast('Non hai ancora gallerie: creale da Gallerie nel menu', true); return; }
       var d = document.createElement('div'); d.id = 'galPick'; d.className = 'card';
-      d.innerHTML = '<label>Quale galleria inserire?</label><select id="galSel">' + L.map(function (x) { return '<option>' + esc(x) + '</option>'; }).join('') + '</select> <button class="btn primary sm" onclick="galIns()">Inserisci</button>';
+      d.innerHTML = '<label>Quale galleria inserire?</label><select id="galSel">' + L.map(function (x) { return '<option>' + esc(x) + '</option>'; }).join('') + '</select> <button class="btn primary sm" onclick="galIns()">Inserisci</button> <button class="btn sm" onclick="galOpen()">Modifica gallerie</button>';
       var t = document.querySelector('.tools'); if (t) t.parentNode.insertBefore(d, t.nextSibling);
     }).catch(function (e) { A.toast(A.errMsg(e), true); });
+  };
+  /* galOpen: dall'editor di un testo apre l'editor della galleria scelta nella tendina. Si lascia l'editor del testo: avvisa, perche' il testo non salvato andrebbe perso. */
+  window.galOpen = function () {
+    var id = $('galSel') ? $('galSel').value : '';
+    if (!confirm('Lasci l\'editor del testo: se hai modifiche non salvate andranno perse. Continuare?')) return;
+    pend = id; A.go('gallerie');
   };
   /* galIns: in modalita' visuale inserisce il blocco protetto (mdRender lo riconosce come Liquid) dove sta il cursore, altrimenti in fondo; in Sorgente nel punto del cursore. */
   window.galIns = function () {
