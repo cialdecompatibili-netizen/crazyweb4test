@@ -7,7 +7,7 @@ pagination:
   enabled: true
   collection: posts
   permalink: /page/:num/
-  per_page: 5
+  # per_page: NON metterlo qui (vincerebbe sul config): si imposta in _config.yml > pagination.per_page, da admin > Impostazioni
   sort_field: date
   sort_reverse: true
   trail:

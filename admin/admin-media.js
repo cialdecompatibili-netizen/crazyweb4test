@@ -75,6 +75,11 @@
     var cm = m[1].match(/(\s+#.*)$/);
     return t.slice(0, start) + k + ': ' + (/[:#]/.test(v) && !/^https?:/.test(v) ? '"' + v.replace(/"/g, '\\"') + '"' : v) + (cm ? cm[1] : '') + t.slice(end);
   }
+  /* Righe per pagina del blog: nel config e' ANNIDATA (pagination > per_page), quindi non passa da getVal/setVal (solo chiavi in prima colonna).
+     jekyll-paginate-v2 la legge da qui perche' _pages/blog.md NON ha piu' per_page (se ci torna, vince blog.md e questo menu non ha effetto). */
+  var PER_RE = /(^pagination:[ \t]*\r?\n(?:[ \t]+[^\r\n]*\r?\n)*?[ \t]+per_page:[ \t]*)(\d+)/m;
+  function getPer(t) { var q = t.match(PER_RE); return q ? q[2] : ''; }
+  function setPer(t, n) { return t.replace(PER_RE, function (_q, a) { return a + n; }); }
   A.views.settings = function () {
     return A.getFile('_config.yml').then(function (f) {
       cfg = { sha: f.sha, text: f.text };
@@ -82,6 +87,9 @@
       KEYS.forEach(function (k) { h += '<label>' + k[1] + ' <small>(' + k[0] + ')</small></label><input id="c_' + k[0] + '" value="' + esc(getVal(f.text, k[0])) + '">'; });
       var ts = getVal(f.text, 'toc_style') === 'side' ? 'side' : 'box';
       h += '<label>Indice articoli <small>(toc_style)</small></label><select id="c_toc_style"><option value="box"' + (ts === 'box' ? ' selected' : '') + '>Cornice in alto</option><option value="side"' + (ts === 'side' ? ' selected' : '') + '>Laterale sinistro (su mobile va in alto)</option></select>';
+      var pp = parseInt(getPer(f.text), 10) || 5, ppo = [5, 10, 20, 50, 100];
+      if (ppo.indexOf(pp) < 0) { ppo.push(pp); ppo.sort(function (a, b) { return a - b; }); }
+      h += '<label>Articoli per pagina nel blog <small>(pagination.per_page)</small></label><select id="c_per_page">' + ppo.map(function (o) { return '<option' + (o === pp ? ' selected' : '') + '>' + o + '</option>'; }).join('') + '</select>';
       h += '<p><button class="btn primary" onclick="A.cfgSave()">Salva</button></p><small>Attenzione: url e baseurl sbagliati rompono il sito. Modifica solo se sai cosa fai.</small></div>';
       M().innerHTML = h;
     });
@@ -92,6 +100,7 @@
       var nv = $('c_' + k[0]).value.trim();
       if (nv !== getVal(cfg.text, k[0])) t = setVal(t, k[0], nv);
     });
+    var npp = $('c_per_page').value; if (npp !== getPer(cfg.text)) t = setPer(t, npp);
     if (t === cfg.text) return A.toast('Nessuna modifica');
     return A.putFile('_config.yml', t, cfg.sha, 'admin: impostazioni').then(function () { A.toast('Salvato'); A.go('settings'); });
   });

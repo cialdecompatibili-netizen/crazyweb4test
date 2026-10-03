@@ -278,11 +278,29 @@
   };
 
   /* ---- vista generica collezione ---- */
+  /* Paginazione delle liste (stile PrestaShop): righe per pagina scelte dal menu (5/10/20/50/100), ricordate nel browser (localStorage 'admin_pp').
+     La lista legge SOLO i file della pagina mostrata (l'elenco nomi arriva intero da getDir, il contenuto no): meno richieste a GitHub. */
+  var PP_OPT = [5, 10, 20, 50, 100];
+  A.pgn = {};
+  A.pp = function () { var n = 20; try { n = parseInt(localStorage.getItem('admin_pp'), 10) || 20; } catch (e) {} return PP_OPT.indexOf(n) >= 0 ? n : 20; };
+  A.setPP = function (key, n) { try { localStorage.setItem('admin_pp', n); } catch (e) {} A.pgn = {}; A.go(key); };
+  A.setPg = function (key, n) { A.pgn[key] = n; A.go(key); };
+  A.pgBar = function (key, total, pg, pages, PP) {
+    if (total <= PP_OPT[0]) return '';
+    function btn(n, lab, dis, on) { return '<button class="btn sm' + (on ? ' primary' : '') + '"' + (dis ? ' disabled' : ' onclick="A.setPg(\'' + key + '\',' + n + ')"') + '>' + lab + '</button> '; }
+    var b = btn(1, '&laquo;', pg === 1) + btn(pg - 1, '&lsaquo;', pg === 1), s = Math.max(1, pg - 2), e = Math.min(pages, pg + 2);
+    for (var i = s; i <= e; i++) b += btn(i, i, false, i === pg);
+    b += btn(pg + 1, '&rsaquo;', pg === pages) + btn(pages, '&raquo;', pg === pages);
+    var sel = '<select onchange="A.setPP(\'' + key + '\',this.value)">' + PP_OPT.map(function (o) { return '<option' + (o === PP ? ' selected' : '') + '>' + o + '</option>'; }).join('') + '</select>';
+    return '<div class="pgbar" style="display:flex;flex-wrap:wrap;gap:.6em;align-items:center;justify-content:space-between;margin:.6em 0"><small>' + ((pg - 1) * PP + 1) + '-' + Math.min(total, pg * PP) + ' di ' + total + '</small><span>' + b + '</span><span><small>Mostra</small> ' + sel + ' <small>per pagina</small></span></div>';
+  };
   function collection(cfg) {
     A.views[cfg.key] = function () {
       return A.getDir(cfg.dir).then(function (files) {
         files = files.filter(function (f) { return f.type === 'file' && /\.md$/.test(f.name); });
         files.sort(function (a, b) { return cfg.sortDesc ? (a.name < b.name ? 1 : -1) : (a.name < b.name ? -1 : 1); });
+        var total = files.length, PP = A.pp(), pages = Math.max(1, Math.ceil(total / PP)), pg = Math.min(A.pgn[cfg.key] || 1, pages);
+        files = files.slice((pg - 1) * PP, pg * PP); /* da qui in poi solo la pagina corrente: gli altri file non vengono nemmeno letti */
         /* Solo Articoli: stato "in evidenza" (featured: true nel front matter, letto da _pages/blog.md). getDir non da' il contenuto: leggo i file in parallelo una volta sola. */
         var hm = []; /* servizi: stato 'in home' (in_home: true), letto dalla stessa apertura dei file */
         var cats = []; /* categorie per riga, riempite dalla stessa lettura dei file (zero richieste in piu') */
@@ -291,7 +309,8 @@
         })) : Promise.resolve([]);
         return feat.then(function (fl) {
         var h = '<h2>' + cfg.label + ' <button class="btn primary sm" onclick="A.edit(\'' + cfg.key + '\')">+ Nuovo</button></h2><div class="card list">';
-        if (!files.length) h += 'Nessun elemento.';
+        if (!total) h += 'Nessun elemento.';
+        h += A.pgBar(cfg.key, total, pg, pages, PP);
         files.forEach(function (f, i) {
           var isSrv = (cfg.key === 'posts' && (cats[i] || []).join(' ').toLowerCase().split(' ').indexOf('servizi') >= 0) || cfg.key === 'projects'; /* casetta 'in home': servizi (Articoli) e Progetti, accanto alla stella */
           var home = isSrv ? '<button class="btn sm home' + (hm[i] ? ' on' : '') + '" data-n="' + esc(f.name) + '" data-k="' + cfg.key + '" title="' + (hm[i] ? 'In home page: clic per togliere' : 'Mostra in home page') + '" onclick="A.inHome(\'' + esc(f.name) + '\',' + (hm[i] ? 'false' : 'true') + ',this,\'' + cfg.key + '\')">&#127968;</button>' : '';
@@ -301,7 +320,7 @@
             '<button class="btn sm" onclick="A.edit(\'' + cfg.key + '\',\'' + esc(f.name) + '\')">Modifica</button>' +
             '<button class="btn sm danger" onclick="A.del(\'' + cfg.key + '\',\'' + esc(f.name) + '\')">Elimina</button></div>';
         });
-        M().innerHTML = h + '</div>';
+        M().innerHTML = h + A.pgBar(cfg.key, total, pg, pages, PP) + '</div>';
         });
       });
     };
