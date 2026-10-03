@@ -335,8 +335,11 @@ var A = (function () {
     var s = $('side'), o = $('overlay'), on = f === undefined ? !s.classList.contains('open') : f;
     s.classList.toggle('open', on); o.classList.toggle('open', on);
   }
+  /* VOCI DISATTIVATE (temporaneo): chiave = vista, valore = motivo. Non cliccabili (menu, Bacheca, go). Il codice delle viste resta: per riattivare togli la riga qui e class="off" in index.html. */
+  var off = { news: 'News temporaneamente disattivate' };
   var titles = { dash: 'Bacheca', posts: 'Articoli', cats: 'Categorie articoli', pages: 'Pagine', menu: 'Menu', projects: 'Progetti', news: 'News', media: 'Immagini', modules: 'Moduli', settings: 'Impostazioni' };
   function go(p) {
+    if (off[p]) { toast(off[p], true); return; }
     var links = document.querySelectorAll('.side a[data-p]');
     for (var i = 0; i < links.length; i++) links[i].classList.toggle('on', links[i].getAttribute('data-p') === p);
     $('topTitle').textContent = titles[p] || ''; toggleMenu(false);
@@ -355,7 +358,7 @@ var A = (function () {
   var views = {};
   var api_ = { $: $, esc: esc, toast: toast, getDir: getDir, getFile: getFile, putFile: putFile, delFile: delFile,
     commitFiles: commitFiles, splitFM: splitFM, fmGet: fmGet, fmSet: fmSet, fmDel: fmDel, yq: yq, slugify: slugify,
-    today: today, now: now, wrap: wrap, views: views, go: go, main: function () { return main; }, errMsg: errMsg, api: api,
+    today: today, now: now, wrap: wrap, views: views, go: go, off: off, main: function () { return main; }, errMsg: errMsg, api: api,
     baseurl: function () { return BASEURL; }, siteUrl: function () { return SITEURL; } };
 
   /*__MODULI__*/

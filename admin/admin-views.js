@@ -270,7 +270,9 @@
       var h = '<h2>Bacheca</h2><div class="row">';
       dirs.forEach(function (d, i) {
         var n = Array.isArray(r[i]) ? r[i].filter(function (x) { return x.type === 'file'; }).length : 0;
-        h += '<div class="card" style="cursor:pointer" onclick="A.go(\'' + d[2] + '\')"><h3>' + n + '</h3>' + d[1] + '</div>';
+        var dis = A.off && A.off[d[2]]; /* voce disattivata (admin.js > off): riquadro spento e non cliccabile */
+        h += dis ? '<div class="card" style="opacity:.45;cursor:not-allowed" title="' + esc(dis) + '"><h3>' + n + '</h3>' + d[1] + ' <small>(disattivato)</small></div>'
+          : '<div class="card" style="cursor:pointer" onclick="A.go(\'' + d[2] + '\')"><h3>' + n + '</h3>' + d[1] + '</div>';
       });
       h += '</div><div class="card">Ogni salvataggio fa un commit e il sito si aggiorna in 1-2 minuti (pallino in alto: verde = pubblicato).</div>';
       M().innerHTML = h;

@@ -21,6 +21,8 @@ label{display:block;margin:10px 0 4px;font-weight:600;font-size:13px}
 .side a{display:block;padding:11px 16px;color:#c3c4c7;text-decoration:none}
 .side a:hover{background:#2c3338;color:#72aee6}
 .side a.on{background:#2271b1;color:#fff}
+.side a.off{opacity:.4;cursor:not-allowed;pointer-events:none}
+.side a.off small{font-size:10px}
 .side a.out{margin-top:16px;border-top:1px solid #3c434a}
 .topbar{display:flex;align-items:center;gap:12px;position:sticky;top:0;margin-left:200px;background:#1d2327;color:#fff;padding:10px 20px;z-index:30;position:sticky}
 .topbar .burger{display:none}
