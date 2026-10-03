@@ -6,7 +6,6 @@ description: sartaaaaaaaa
 categories: sample-posts
 toc:
   beginning: true
-published: false
 ---
 
 sartaaaaaaaa
