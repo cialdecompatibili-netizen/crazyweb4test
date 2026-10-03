@@ -71,8 +71,8 @@ html[data-theme="dark"] .prj-home-more a{border-color:rgba(255,255,255,.3)}
 </style>
 
 <div class="rete-box" id="rete-box" markdown="1">
-<!-- ===== MARTE START (html) ===== -->
-<div class="marte-orbita" aria-hidden="true"><div class="marte-y"><canvas class="marte" width="208" height="208" aria-hidden="true"></canvas></div></div>
+<!-- ===== MARTE START (html) - interruttore: home_marte in _config.yml (admin > Impostazioni). Se false non esce ne' l'HTML ne' lo script ===== -->
+{%- if site.home_marte != false %}<div class="marte-orbita" aria-hidden="true"><div class="marte-y"><canvas class="marte" width="208" height="208" aria-hidden="true"></canvas></div></div>{% endif %}
 <!-- ===== MARTE END (html) ===== -->
 <canvas id="rete-cv" aria-hidden="true"></canvas>
 
@@ -132,6 +132,7 @@ Un team unico di professionisti coordina ogni fase, dalla strategia al risultato
 {%- endif %}
 <!-- ===== PROGETTI HOME END ===== -->
 
+{%- if site.home_marte != false %}
 <script>
 /* ===== MARTE START (js) =====
    COME FUNZIONA (3 pezzi indipendenti):
@@ -241,6 +242,7 @@ Un team unico di professionisti coordina ogni fase, dalla strategia al risultato
 })();
 /* ===== MARTE END (js) ===== */
 </script>
+{%- endif %}
 
 <script>
 (function(){

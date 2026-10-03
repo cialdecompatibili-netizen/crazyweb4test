@@ -223,6 +223,7 @@
         if (k[0] === 'description') h += '<small>Non compare nel sito. La usano Google e le anteprime sui social solo per le pagine senza una descrizione propria.</small>';
         if (k[0] === 'title') h += '<small>Vuoto = automatico dal nome del sito (vedi anteprima nel campo). Scrivi un testo per cambiarlo.</small>';
       });
+      h += '<h3>Home</h3><label style="display:flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" id="c_home_marte" style="width:auto"' + (getVal(f.text, 'home_marte').toLowerCase() === 'false' ? '' : ' checked') + '> Mostra Marte animato nella home</label><small>Spento = Marte non viene proprio caricato (nemmeno l\'immagine). Dopo Salva serve il deploy (2-3 minuti).</small>';
       h += '<h3>Lettura</h3>';
       var ts = getVal(f.text, 'toc_style') === 'side' ? 'side' : 'box';
       h += '<label>Indice articoli</label><select id="c_toc_style"><option value="box"' + (ts === 'box' ? ' selected' : '') + '>Cornice in alto</option><option value="side"' + (ts === 'side' ? ' selected' : '') + '>Laterale sinistro (su mobile va in alto)</option></select>';
@@ -241,6 +242,8 @@
       if (nv !== getVal(cfg.text, k[0])) t = setVal(t, k[0], nv);
     });
     var npp = $('c_per_page').value; if (npp !== getPer(cfg.text)) t = setPer(t, npp);
+    /* Marte in home: interruttore home_marte (true/false). Se la riga manca nel config non la creo: setVal non fa nulla e il default resta acceso. */
+    var hm = $('c_home_marte').checked ? 'true' : 'false'; if (hm !== (getVal(cfg.text, 'home_marte').toLowerCase() === 'false' ? 'false' : 'true')) t = setVal(t, 'home_marte', hm);
     if (t === cfg.text) return A.toast('Nessuna modifica');
     return A.putFile('_config.yml', t, cfg.sha, 'admin: impostazioni').then(function () { A.toast('Salvato'); A.go('settings'); });
   });
