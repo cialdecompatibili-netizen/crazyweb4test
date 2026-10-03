@@ -4,6 +4,7 @@ title: Brand identity
 date: 2026-09-23 12:00:00
 description: Costruzione dell'identita' visiva e valoriale del tuo brand.
 categories: servizi
+in_home: true
 ---
 
 ## Cosa include il servizio

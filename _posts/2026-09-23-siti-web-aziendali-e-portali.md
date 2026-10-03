@@ -4,6 +4,7 @@ title: Siti web aziendali e portali
 date: 2026-09-23 12:00:00
 description: Realizzazione di siti web aziendali e portali su misura.
 categories: servizi
+in_home: true
 ---
 
 ## Cosa include il servizio

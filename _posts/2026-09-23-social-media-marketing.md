@@ -4,6 +4,7 @@ title: Social media marketing
 date: 2026-09-23 12:00:00
 description: Gestione strategica dei canali social del tuo brand.
 categories: servizi
+in_home: true
 ---
 
 ## Cosa include il servizio

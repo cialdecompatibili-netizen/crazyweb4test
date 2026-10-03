@@ -405,6 +405,12 @@ Creato il 2026-09-20 copiando crazyweb3 senza la cronologia git (un solo commit 
 - **Se aggiorni la gem al_folio_core:** confronta `_layouts/archive.liquid` (repo) col nuovo file
   della gem, come gia' si fa per `header.liquid` — altrimenti si perdono correzioni della gem.
 
+### Servizi in home (casetta)
+- Nella lista Articoli, le righe con categoria servizi hanno una casetta accanto alla stella (campi separati: casetta = `in_home`, stella = `featured`); anche la lista Progetti ha la casetta. Casetta piena = `in_home: true` nel front matter. Home Progetti: se almeno un progetto e' marcato vanno solo quelli, altrimenti i primi 6 per importance.
+- Il clic (`A.inHome` in admin-views.js) aggiunge/toglie SOLO quella riga. Stessa logica ottimistica e stessa coda per file (`starBusy`) di `A.feature`.
+- La home (`_pages/home.md`, box 'I nostri servizi') li mostra in modo DINAMICO (Liquid, ordine per titolo). Campo SEPARATO da `featured` (blog): non si mescolano.
+- Lo stato `in_home` si legge nella stessa apertura in parallelo dei file della stella (nessuna chiamata in piu').
+
 ### Articoli in evidenza (stella)
 - Nella lista Articoli ogni riga ha una stella: piena = eatured: true nel front matter. Il clic (A.feature in admin-views.js) aggiunge/toglie SOLO quella riga, poi commit.
 - Il blog (_pages/blog.md, site.posts | where: featured, true) li mostra in alto come card con puntina.

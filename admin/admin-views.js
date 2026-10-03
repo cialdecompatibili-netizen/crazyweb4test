@@ -284,17 +284,20 @@
         files = files.filter(function (f) { return f.type === 'file' && /\.md$/.test(f.name); });
         files.sort(function (a, b) { return cfg.sortDesc ? (a.name < b.name ? 1 : -1) : (a.name < b.name ? -1 : 1); });
         /* Solo Articoli: stato "in evidenza" (featured: true nel front matter, letto da _pages/blog.md). getDir non da' il contenuto: leggo i file in parallelo una volta sola. */
+        var hm = []; /* servizi: stato 'in home' (in_home: true), letto dalla stessa apertura dei file */
         var cats = []; /* categorie per riga, riempite dalla stessa lettura dei file (zero richieste in piu') */
-        var feat = cfg.key === 'posts' ? Promise.all(files.map(function (f, ix) {
-          return A.getFile(cfg.dir + '/' + f.name).then(function (r) { var fm0 = A.splitFM(r.text).fm; cats[ix] = (A.fmGet(fm0, 'categories') || A.fmGet(fm0, 'category') || '').replace(/[\[\]"']/g, '').split(/[ ,]+/).filter(Boolean); return /^featured:[ \t]*true\b/m.test(fm0); }).catch(function () { return false; });
+        var feat = (cfg.key === 'posts' || cfg.key === 'projects') ? Promise.all(files.map(function (f, ix) {
+          return A.getFile(cfg.dir + '/' + f.name).then(function (r) { var fm0 = A.splitFM(r.text).fm; cats[ix] = (A.fmGet(fm0, 'categories') || A.fmGet(fm0, 'category') || '').replace(/[\[\]"']/g, '').split(/[ ,]+/).filter(Boolean); hm[ix] = /^in_home:[ \t]*true\b/m.test(fm0); return /^featured:[ \t]*true\b/m.test(fm0); }).catch(function () { return false; });
         })) : Promise.resolve([]);
         return feat.then(function (fl) {
         var h = '<h2>' + cfg.label + ' <button class="btn primary sm" onclick="A.edit(\'' + cfg.key + '\')">+ Nuovo</button></h2><div class="card list">';
         if (!files.length) h += 'Nessun elemento.';
         files.forEach(function (f, i) {
+          var isSrv = (cfg.key === 'posts' && (cats[i] || []).join(' ').toLowerCase().split(' ').indexOf('servizi') >= 0) || cfg.key === 'projects'; /* casetta 'in home': servizi (Articoli) e Progetti, accanto alla stella */
+          var home = isSrv ? '<button class="btn sm home' + (hm[i] ? ' on' : '') + '" data-n="' + esc(f.name) + '" data-k="' + cfg.key + '" title="' + (hm[i] ? 'In home page: clic per togliere' : 'Mostra in home page') + '" onclick="A.inHome(\'' + esc(f.name) + '\',' + (hm[i] ? 'false' : 'true') + ',this,\'' + cfg.key + '\')">&#127968;</button>' : '';
           var star = cfg.key === 'posts' ? '<button class="btn sm star' + (fl[i] ? ' on' : '') + '" data-n="' + esc(f.name) + '" title="' + (fl[i] ? 'In evidenza: clic per togliere' : 'Metti in evidenza (in alto nel blog)') + '" onclick="A.feature(\'' + esc(f.name) + '\',' + (fl[i] ? 'false' : 'true') + ',this)">' + (fl[i] ? '&#9733;' : '&#9734;') + '</button>' : '';
           var catB = cfg.key === 'posts' ? '<em style="font-style:normal;font-size:.8em;white-space:nowrap;margin:0 .6em;padding:1px 9px;border-radius:10px;background:rgba(127,127,127,.18);' + ((cats[i] || []).length ? '' : 'opacity:.55;') + '" title="Categoria (la prima decide l\'URL)">' + ((cats[i] || []).length ? esc(cats[i].join(', ')) : 'senza categoria') + '</em>' : '';
-          h += '<div class="it">' + star + '<span>' + esc(f.name) + '</span>' + catB +
+          h += '<div class="it">' + star + home + '<span>' + esc(f.name) + '</span>' + catB +
             '<button class="btn sm" onclick="A.edit(\'' + cfg.key + '\',\'' + esc(f.name) + '\')">Modifica</button>' +
             '<button class="btn sm danger" onclick="A.del(\'' + cfg.key + '\',\'' + esc(f.name) + '\')">Elimina</button></div>';
         });
@@ -489,6 +492,34 @@
     }).catch(function (e) {
       if (btn) paintStar(btn, !on); // rollback visivo
       A.toast('Stella non salvata: ' + A.errMsg(e), true);
+    });
+    return starBusy[name];
+  };
+  /* A.inHome: casetta "mostra in home" su SERVIZI (post con categoria servizi, lista Articoli) e su PROGETTI (lista Progetti). Aggiunge/toglie SOLO la riga "in_home: true" nel front matter.
+     La home (_pages/home.md, box "I nostri servizi") mostra in modo DINAMICO i servizi con in_home: true.
+     CAMPO SEPARATO dalla stella (featured = blog): non si mescolano mai. Sui servizi la stella non c'e', sugli altri articoli non c'e' la casetta.
+     Stessa logica ottimistica e stessa coda per file (starBusy) di A.feature: stella e casetta sullo stesso file si accodano (lo sha cambia a ogni commit). */
+  function paintHome(btn, on) {
+    btn.className = 'btn sm home' + (on ? ' on' : '');
+    btn.title = on ? 'In home page: clic per togliere' : 'Mostra in home page';
+    btn.setAttribute('onclick', 'A.inHome(\'' + btn.getAttribute('data-n') + '\',' + (on ? 'false' : 'true') + ',this,\'' + btn.getAttribute('data-k') + '\')');
+  }
+  A.inHome = function (name, on, btn, key) {
+    if (btn) paintHome(btn, on);
+    var prev = starBusy[name] || Promise.resolve();
+    starBusy[name] = prev.then(function () {
+      var p = (key === 'projects' ? '_projects/' : '_posts/') + name;
+      return A.getFile(p).then(function (f) {
+        var s = A.splitFM(f.text);
+        if (!s.fm) throw new Error('Front matter non trovato in ' + name);
+        var fm = on ? A.fmSet(s.fm, 'in_home', 'true') : A.fmDel(s.fm, 'in_home');
+        var nl = f.text.indexOf('\r\n') >= 0 ? '\r\n' : '\n';
+        var out = '---' + nl + fm.replace(/\r?\n+$/, '') + nl + '---' + nl + s.body;
+        return A.putFile(p, out, f.sha, 'admin: ' + (on ? 'in home ' : 'tolto dalla home ') + name);
+      }).then(function () { A.toast(on ? 'In home (pubblicazione in corso)' : 'Tolto dalla home (pubblicazione in corso)'); });
+    }).catch(function (e) {
+      if (btn) paintHome(btn, !on); // rollback visivo
+      A.toast('Casetta non salvata: ' + A.errMsg(e), true);
     });
     return starBusy[name];
   };

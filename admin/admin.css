@@ -91,3 +91,4 @@ label{display:block;margin:10px 0 4px;font-weight:600;font-size:13px}
 .mdprev th{background:#f0f0f1}
 .mdprev pre[data-lang]::before{content:attr(data-lang);display:block;font-size:11px;color:#787c82;margin-bottom:4px}
 .btn.star{background:none;border:0;padding:0 4px;font-size:20px;line-height:1;color:#a7aaad;cursor:pointer}.btn.star:hover{color:#dba617}.btn.star.on{color:#dba617}
+.btn.home{background:none;border:0;padding:0 4px;font-size:18px;line-height:1;cursor:pointer;opacity:.35;filter:grayscale(1)}.btn.home:hover{opacity:.8;filter:none}.btn.home.on{opacity:1;filter:none}

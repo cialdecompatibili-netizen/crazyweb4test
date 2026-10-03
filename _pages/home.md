@@ -86,23 +86,24 @@ Un team unico di professionisti coordina ogni fase, dalla strategia al risultato
 
 </div>
 
-<!-- ===== SERVIZI HOME START =====
-     6 servizi principali presi da _pages/servizi.md, tenuti sincronizzati a mano qui.
-     Se cambi i servizi principali in /servizi/, aggiorna anche questi 6. ===== -->
+<!-- ===== SERVIZI HOME START (DINAMICO) =====
+     Le card NON sono scritte a mano: il ciclo Liquid prende i post di categoria 'servizi' con 'in_home: true' (casetta nell'admin, lista Articoli).
+     Campo SEPARATO dalla stella del blog ('featured'): non si mescolano. Ordine alfabetico per titolo (i post hanno la stessa data, per data l'ordine non sarebbe stabile).
+     Titolo, descrizione (tagliata a 8 parole) e link vengono dal post. Se nessun servizio ha la casetta la sezione sparisce. NON rimettere card a mano. ===== -->
+{%- assign srv_home = site.posts | where: 'in_home', 'true' | where_exp: 'p', "p.categories contains 'servizi'" | sort: 'title' -%}
+{%- if srv_home.size > 0 %}
 <div class="srv-home">
   <h2>I nostri servizi</h2>
   <div class="srv-home-grid">
-    <a class="srv-home-card" href="{{ '/servizi/siti-web-aziendali-e-portali/' | relative_url }}"><b>Siti web aziendali e portali</b><small>Sviluppo su misura</small></a>
-    <a class="srv-home-card" href="{{ '/servizi/sviluppo-ecommerce/' | relative_url }}"><b>Sviluppo eCommerce</b><small>Shopify, WooCommerce, Magento, PrestaShop</small></a>
-    <a class="srv-home-card" href="{{ '/servizi/consulenza-seo/' | relative_url }}"><b>Consulenza SEO</b><small>Audit e strategia di visibilità</small></a>
-    <a class="srv-home-card" href="{{ '/servizi/google-ads/' | relative_url }}"><b>Google Ads</b><small>Search, Shopping, Display, YouTube, PMax</small></a>
-    <a class="srv-home-card" href="{{ '/servizi/social-media-marketing/' | relative_url }}"><b>Social media marketing</b><small>Gestione e contenuti</small></a>
-    <a class="srv-home-card" href="{{ '/servizi/brand-identity/' | relative_url }}"><b>Brand identity</b><small>Design e UI/UX</small></a>
+    {%- for p in srv_home -%}
+    <a class="srv-home-card" href="{{ p.url | relative_url }}"><b>{{ p.title | escape }}</b>{% if p.description != blank %}<small>{{ p.description | truncatewords: 8 | escape }}</small>{% endif %}</a>
+    {%- endfor %}
   </div>
   <div class="srv-home-more">
     <a href="{{ '/servizi/' | relative_url }}">Vedi tutti i servizi</a>
   </div>
 </div>
+{%- endif %}
 <!-- ===== SERVIZI HOME END ===== -->
 
 <!-- ===== PROGETTI HOME START =====
@@ -110,13 +111,15 @@ Un team unico di professionisti coordina ogni fase, dalla strategia al risultato
      Ordine = campo 'importance' del progetto (1 = per primo), come nella pagina /projects/; chi non ha 'importance' va in fondo.
      Link: se il progetto ha 'redirect:' (sito esterno) punta li', altrimenti alla sua pagina.
      Un progetto nuovo/modificato/eliminato si riflette qui al prossimo deploy, senza toccare questo file.
-     Per cambiare quanti se ne vedono: 'limit: 6' nel ciclo. Se non ci sono progetti la sezione sparisce. ===== -->
-{%- assign prj_home = site.projects | sort: 'importance', 'last' -%}
+     Casetta nell'admin (lista Progetti, campo 'in_home: true'): se almeno un progetto ce l'ha, in home vanno SOLO quelli marcati (tutti); se nessuno e' marcato, ripiego sui primi 6 per importance. Se non ci sono progetti la sezione sparisce. ===== -->
+{%- assign prj_home = site.projects | where: 'in_home', 'true' | sort: 'importance', 'last' -%}
+{%- assign prj_limit = prj_home.size -%}
+{%- if prj_home.size == 0 -%}{%- assign prj_home = site.projects | sort: 'importance', 'last' -%}{%- assign prj_limit = 6 -%}{%- endif -%}
 {%- if prj_home.size > 0 %}
 <div class="prj-home">
   <h2>I nostri progetti</h2>
   <div class="prj-home-grid">
-    {%- for p in prj_home limit: 6 -%}
+    {%- for p in prj_home limit: prj_limit -%}
       {%- assign p_ext = false -%}
       {%- if p.redirect contains '://' -%}{%- assign p_ext = true -%}{%- endif -%}
     <a class="prj-home-card" href="{% if p_ext %}{{ p.redirect }}{% else %}{{ p.url | relative_url }}{% endif %}"{% if p_ext %} target="_blank" rel="noopener"{% endif %}><b>{{ p.title | escape }}</b>{% if p.description != blank %}<small>{{ p.description | escape }}</small>{% endif %}</a>

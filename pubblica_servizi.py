@@ -149,6 +149,8 @@ def collega_servizi(testo, scelti, anni, stat):
 
 
 def collega_home(testo, scelti, anni, stat):
+    if 'SERVIZI HOME START (DINAMICO)' in testo:
+        return testo  # box home dinamico (Liquid, campo in_home): nessuna card a mano da riallineare
     def r(m):
         slug = TITOLO2SLUG.get(html.unescape(m.group("t")))
         if slug is None or slug not in scelti:
