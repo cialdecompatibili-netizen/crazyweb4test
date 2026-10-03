@@ -44,6 +44,15 @@ pagination:
   .post .featured-posts .mb-4 { margin-bottom: .5rem !important; }
   /* Miniature elenco blog: stessa proporzione per tutte (16:10), ritaglio centrato, mai deformate. Cambia solo aspect-ratio per altri formati. */
   .post .card-img { width: 100%; height: auto !important; aspect-ratio: 16 / 10; object-fit: cover; object-position: center; border-radius: .375rem; display: block; background: var(--global-card-bg-color, rgba(128,128,128,.12)); }
+  /* Leggi tutto: pillola con bordo sottile (minimal). Hover: bordo e testo pieni; la freccia scorre di 3px. */
+  .post .post-excerpt { margin: 0 0 .9rem; max-width: 65ch; line-height: 1.65; }
+  .post .post-readmore { margin: 0 0 .9rem; }
+  .post .readmore { display: inline-flex; align-items: center; gap: .5rem; padding: .4rem 1rem; font-size: .875rem; font-weight: 500; line-height: 1.2; color: var(--global-text-color); text-decoration: none; border: 1px solid var(--global-divider-color); border-radius: 999px; transition: border-color .2s, color .2s; }
+  .post .readmore svg { transition: transform .2s; }
+  .post .readmore:hover { border-color: var(--global-text-color); color: var(--global-text-color); text-decoration: none; }
+  .post .readmore:hover svg { transform: translateX(3px); }
+  .post .readmore:focus-visible { outline: 2px solid var(--global-theme-color); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { .post .readmore, .post .readmore svg { transition: none; } }
   .post > .tag-category-list li + li::before { content: "\00b7"; margin-right: .35rem; color: var(--global-text-color-light); }
 </style>
 {% assign blog_desc = site.blog_description | strip %}
