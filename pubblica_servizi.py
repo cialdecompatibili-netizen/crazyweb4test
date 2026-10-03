@@ -71,7 +71,7 @@ CSS_HOME_PREFIX = "display:block;color:inherit;text-decoration:none;"
 RE_TD = re.compile(r"^<td><b>(?P<t>.*?)</b>(?P<resto>.*)</td>(?P<cr>\r?)$", re.M)
 RE_HOME = re.compile(
     r'<div class="srv-home-card"><b>(?P<t>.*?)</b>(?P<resto>.*?)</div>')
-RE_LINK = re.compile(r"/blog/(\d{4})/([a-z0-9-]+)/")
+RE_LINK = re.compile(r"/(?:blog/\d{4}|servizi)/([a-z0-9-]+)/")
 
 
 def leggi(p):
@@ -91,7 +91,41 @@ def anno_post(slug):
 
 
 def url(anno, slug):
-    return "{{ '%s' | relative_url }}" % SITO["permalink_post"].format(anno=anno, slug=slug)
+    # URL pubblico del servizio: se repos.json ha "permalink_servizio" (es. /servizi/{slug}/)
+    # vale quello, altrimenti il permalink standard dei post (/blog/{anno}/{slug}/).
+    fmt = SITO.get("permalink_servizio") or SITO["permalink_post"]
+    return "{{ '%s' | relative_url }}" % fmt.format(anno=anno, slug=slug)
+
+
+def assicura_permalink(percorso, slug):
+    """Mette 'permalink:' nel front matter del post-servizio (dopo 'categories:').
+    La data nel front matter NON cambia: l'ordine per data nel blog resta identico."""
+    fmt = SITO.get("permalink_servizio")
+    if not fmt:
+        return
+    t = leggi(percorso)
+    riga = "permalink: " + fmt.format(anno="", slug=slug)
+    if riga in t:
+        return
+    t = re.sub(r"^categories: .*$", lambda m: m.group(0) + "\n" + riga, t, count=1, flags=re.M)
+    scrivi(percorso, t)
+
+
+RE_VECCHIO = re.compile(r"\{\{ '/blog/\d{4}/([a-z0-9-]+)/' \| relative_url \}\}")
+
+
+def riallinea(testo, scelti, stat):
+    """Card gia' collegate col vecchio URL /blog/<anno>/<slug>/ -> nuovo URL servizio."""
+    fmt = SITO.get("permalink_servizio")
+    if not fmt:
+        return testo
+
+    def r(m):
+        if m.group(1) not in scelti:
+            return m.group(0)
+        stat["riallineate"] = stat.get("riallineate", 0) + 1
+        return "{{ '%s' | relative_url }}" % fmt.format(anno="", slug=m.group(1))
+    return RE_VECCHIO.sub(r, testo)
 
 
 def collega_servizi(testo, scelti, anni, stat):
@@ -142,7 +176,7 @@ def assicura_css_home(testo, stat):
 
 def link_rotti(cartella, testo):
     posts = os.listdir(os.path.join(cartella, SITO["posts_dir"]))
-    return sorted({s for _, s in RE_LINK.findall(testo)
+    return sorted({s for s in RE_LINK.findall(testo)
                    if not any(n.endswith("-" + s + ".md") for n in posts)})
 
 
@@ -163,6 +197,7 @@ def applica(cartella, servizi, dry):
         if dry:
             stat["creati" if prima is None else "invariati"] += 1
             continue
+        assicura_permalink(dopo, s["slug"])
         toccati.append(os.path.relpath(dopo, cartella))
         if vecchio is None:
             stat["creati"] += 1
@@ -176,7 +211,8 @@ def applica(cartella, servizi, dry):
     for nome, funz in ((SITO["servizi_page"], collega_servizi), (SITO["home_page"], collega_home)):
         p = os.path.join(cartella, nome)
         vecchio = leggi(p)
-        nuovo = funz(vecchio, scelti, anni, stat)
+        nuovo = riallinea(vecchio, scelti, stat)
+        nuovo = funz(nuovo, scelti, anni, stat)
         nuovo = (assicura_css_servizi(nuovo, stat) if nome == SITO["servizi_page"]
                  else assicura_css_home(nuovo, stat))
         testi[nome] = nuovo
