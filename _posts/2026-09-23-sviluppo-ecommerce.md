@@ -4,7 +4,6 @@ title: Sviluppo eCommerce
 date: 2026-09-23 12:00:00
 description: Sviluppo eCommerce su Shopify, WooCommerce, Magento e PrestaShop.
 categories: servizi
-permalink: /servizi/sviluppo-ecommerce/
 ---
 
 ## Cosa include il servizio

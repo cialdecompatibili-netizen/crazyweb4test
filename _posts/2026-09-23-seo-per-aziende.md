@@ -4,7 +4,6 @@ title: SEO per aziende
 date: 2026-09-23 12:00:00
 description: Percorsi SEO pensati per le esigenze di aziende strutturate.
 categories: servizi
-permalink: /servizi/seo-per-aziende/
 ---
 
 ## Cosa include il servizio

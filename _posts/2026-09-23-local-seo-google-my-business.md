@@ -4,7 +4,6 @@ title: Local SEO / Google My Business
 date: 2026-09-23 12:00:00
 description: Ottimizzazione della presenza locale su Google per attirare clienti vicini.
 categories: servizi
-permalink: /servizi/local-seo-google-my-business/
 ---
 
 ## Cosa include il servizio

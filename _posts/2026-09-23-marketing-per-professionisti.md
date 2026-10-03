@@ -4,7 +4,6 @@ title: Marketing per professionisti
 date: 2026-09-23 12:00:00
 description: Marketing digitale pensato per studi e liberi professionisti.
 categories: servizi
-permalink: /servizi/marketing-per-professionisti/
 ---
 
 ## Cosa include il servizio

@@ -4,7 +4,6 @@ title: Agenti AI vocali
 date: 2026-09-23 12:00:00
 description: Agenti AI per interazioni vocali con i clienti.
 categories: servizi
-permalink: /servizi/agenti-ai-vocali/
 ---
 
 ## Cosa include il servizio

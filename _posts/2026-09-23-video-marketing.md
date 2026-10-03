@@ -4,7 +4,6 @@ title: Video marketing
 date: 2026-09-23 12:00:00
 description: Produzione di video per comunicare il tuo brand e i tuoi prodotti.
 categories: servizi
-permalink: /servizi/video-marketing/
 ---
 
 ## Cosa include il servizio

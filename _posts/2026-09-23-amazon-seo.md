@@ -4,7 +4,6 @@ title: Amazon SEO
 date: 2026-09-23 12:00:00
 description: Ottimizzazione delle schede prodotto per la ricerca interna di Amazon.
 categories: servizi
-permalink: /servizi/amazon-seo/
 ---
 
 ## Cosa include il servizio

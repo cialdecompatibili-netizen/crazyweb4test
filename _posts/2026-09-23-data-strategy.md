@@ -4,7 +4,6 @@ title: Data strategy
 date: 2026-09-23 12:00:00
 description: Strategia per raccogliere, organizzare e usare i dati della tua azienda.
 categories: servizi
-permalink: /servizi/data-strategy/
 ---
 
 ## Cosa include il servizio

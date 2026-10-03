@@ -4,7 +4,6 @@ title: Agenti AI per aziende
 date: 2026-09-23 12:00:00
 description: Agenti AI su misura per i processi della tua azienda.
 categories: servizi
-permalink: /servizi/agenti-ai-per-aziende/
 ---
 
 ## Cosa include il servizio

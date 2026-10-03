@@ -4,7 +4,6 @@ title: Reputazione online
 date: 2026-09-23 12:00:00
 description: Monitoraggio e gestione della reputazione online del tuo brand.
 categories: servizi
-permalink: /servizi/reputazione-online/
 ---
 
 ## Cosa include il servizio

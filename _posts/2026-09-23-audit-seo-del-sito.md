@@ -4,7 +4,6 @@ title: Audit SEO del sito
 date: 2026-09-23 12:00:00
 description: Analisi tecnica e strategica completa dello stato SEO del tuo sito.
 categories: servizi
-permalink: /servizi/audit-seo-del-sito/
 ---
 
 ## Cosa include il servizio

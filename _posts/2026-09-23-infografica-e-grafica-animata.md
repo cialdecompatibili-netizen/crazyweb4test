@@ -4,7 +4,6 @@ title: Infografica e grafica animata
 date: 2026-09-23 12:00:00
 description: Contenuti visivi e animati per comunicare dati e concetti.
 categories: servizi
-permalink: /servizi/infografica-e-grafica-animata/
 ---
 
 ## Cosa include il servizio

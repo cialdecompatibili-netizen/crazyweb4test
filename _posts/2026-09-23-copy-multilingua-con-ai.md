@@ -4,7 +4,6 @@ title: Copy multilingua con AI
 date: 2026-09-23 12:00:00
 description: Produzione di testi in piu' lingue con l'ausilio dell'AI.
 categories: servizi
-permalink: /servizi/copy-multilingua-con-ai/
 ---
 
 ## Cosa include il servizio

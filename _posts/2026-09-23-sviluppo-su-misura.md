@@ -4,7 +4,6 @@ title: Sviluppo su misura
 date: 2026-09-23 12:00:00
 description: Sviluppo di soluzioni web personalizzate.
 categories: servizi
-permalink: /servizi/sviluppo-su-misura/
 ---
 
 ## Cosa include il servizio

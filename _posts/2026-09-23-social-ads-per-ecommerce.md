@@ -4,7 +4,6 @@ title: Social ads per eCommerce
 date: 2026-09-23 12:00:00
 description: Advertising sui social pensato per vendere prodotti online.
 categories: servizi
-permalink: /servizi/social-ads-per-ecommerce/
 ---
 
 ## Cosa include il servizio

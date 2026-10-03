@@ -4,7 +4,6 @@ title: Sito multilingua
 date: 2026-09-23 12:00:00
 description: Realizzazione di siti in piu' lingue.
 categories: servizi
-permalink: /servizi/sito-multilingua/
 ---
 
 ## Cosa include il servizio

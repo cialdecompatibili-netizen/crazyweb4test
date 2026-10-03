@@ -4,7 +4,6 @@ title: Web analytics e CRO
 date: 2026-09-23 12:00:00
 description: Analisi dei dati e ottimizzazione del tasso di conversione del sito.
 categories: servizi
-permalink: /servizi/web-analytics-e-cro/
 ---
 
 ## Cosa include il servizio

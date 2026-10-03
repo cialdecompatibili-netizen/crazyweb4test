@@ -4,7 +4,6 @@ title: LinkedIn Ads
 date: 2026-09-23 12:00:00
 description: Campagne pubblicitarie B2B su LinkedIn.
 categories: servizi
-permalink: /servizi/linkedin-ads/
 ---
 
 ## Cosa include il servizio

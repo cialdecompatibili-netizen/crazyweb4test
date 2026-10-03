@@ -4,7 +4,6 @@ title: Web marketing strategico
 date: 2026-09-23 12:00:00
 description: Analisi di target e concorrenti per costruire una strategia di web marketing solida e misurabile.
 categories: servizi
-permalink: /servizi/web-marketing-strategico/
 ---
 
 ## Cosa include il servizio

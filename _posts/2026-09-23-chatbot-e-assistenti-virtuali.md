@@ -4,7 +4,6 @@ title: Chatbot e assistenti virtuali
 date: 2026-09-23 12:00:00
 description: Sviluppo di chatbot e assistenti virtuali.
 categories: servizi
-permalink: /servizi/chatbot-e-assistenti-virtuali/
 ---
 
 ## Cosa include il servizio
