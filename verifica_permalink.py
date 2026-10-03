@@ -48,7 +48,7 @@ def statico():
         ok.append("config == repos.json")
     js = leggi(os.path.join("admin", "admin-views.js"))
     pre = pc.split(":title")[0]
-    if f"'{pre}' + nm" not in js:
+    if f"'{pre}' + nm" not in js and f"'{pre}' + (effSl || nm" not in js:
         err.append(f"admin-views.js: manca lo specchio del permalink dei servizi -> {pre}")
     for cat, rg in regole.items():
         pre_c = rg.split(":title")[0]
