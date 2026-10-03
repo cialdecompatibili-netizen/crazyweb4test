@@ -140,7 +140,7 @@ pagination:
           <a class="post-title" href="{{ post.redirect | relative_url }}">{{ post.title }}</a>
         {% endif %}
       </h3>
-      <p>{{ post.description }}</p>
+      {% include estratto.liquid post=post %}
       <p class="post-meta">
         {{ read_time }} min di lettura &nbsp; &middot; &nbsp;
         {{ post.date | data_it: '%d %B %Y' }}
