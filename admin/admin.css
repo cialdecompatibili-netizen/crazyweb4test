@@ -1,4 +1,4 @@
-﻿*{box-sizing:border-box}
+*{box-sizing:border-box}
 html,body{margin:0;height:100%}
 body{font:14px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;background:#c3c4c7;color:#1d2327}
 h1,h2,h3{margin:0 0 12px;font-weight:600}
@@ -80,10 +80,15 @@ label{display:block;margin:10px 0 4px;font-weight:600;font-size:13px}
 
 
 /* blocchi protetti dell'editor visuale (tabelle, HTML, Liquid) */
-.mdraw{position:relative;margin:10px 0;padding:8px 34px 8px 10px;border:1px dashed #b5bcc2;border-radius:4px;background:#fafbfc;user-select:none}
+.mdraw{position:relative;margin:10px 0;padding:8px 100px 8px 10px;border:1px dashed #b5bcc2;border-radius:4px;background:#fafbfc;user-select:none}
 .mdraw:hover{border-color:#2271b1}
 .mdraw .mdedit{position:absolute;top:4px;right:4px;width:26px;height:26px;padding:0;border:1px solid #c3c4c7;border-radius:4px;background:#fff;cursor:pointer;line-height:1}
 .mdraw .mdedit:hover{background:#2271b1;color:#fff;border-color:#2271b1}
+.mdraw .mddel{right:34px}
+.mdraw .mddel:hover{background:#d63638;border-color:#d63638}
+.mdraw .mddrag{right:64px;display:flex;align-items:center;justify-content:center;cursor:grab;font-size:13px;letter-spacing:-3px;user-select:none}
+#mdPrev .dnd-before{box-shadow:0 -3px 0 #2271b1}
+#mdPrev .dnd-after{box-shadow:0 3px 0 #2271b1}
 .mdraw-ta{display:block;width:100%;font-family:Consolas,monospace;font-size:13px;user-select:text}
 .mdraw-view{pointer-events:none;overflow:auto}
 .mdraw-liquid .mdliqb,.mdliq{font-family:Consolas,monospace;font-size:12px;background:#eef3fb;color:#1d4f91;border:1px solid #c8d8ee;border-radius:3px;padding:1px 6px;white-space:pre-wrap}
