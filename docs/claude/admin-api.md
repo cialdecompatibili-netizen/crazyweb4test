@@ -34,3 +34,14 @@ Test automatico (GitHub finto, 9 scenari): `node docs/claude/test_admin_api.js` 
 - Il comportamento nel browser (login, editor, liste): provato solo con il test automatico e la sintassi. Dopo ogni modifica a questi file: Ctrl+F5 sull'admin e prova di una lista, dell'editor di un articolo e di Categorie articoli.
 - Se il token ha il permesso solo sui contenuti, GraphQL potrebbe rifiutare: in quel caso funziona il ripiego REST (a gruppi di 6), senza il guadagno maggiore.
 - La versione degli script e' nel parametro `?v=` di `admin/index.html`: va cambiata a ogni modifica, altrimenti il browser tiene i file vecchi.
+
+
+## Irrobustimento (03/10/2026, sera)
+
+- **A.jq(x)**: OBBLIGATORIO per ogni nome/id dentro un onclick=\"A.fn('...')\" (al posto di esc). Con esc un nome con apostrofo o backslash (immagine l'arte.jpg, categoria l'arte) chiudeva la stringa JS e il pulsante moriva. Gia' applicato a tutti i moduli (patch_jq.py).
+- **Percorsi**: getFile/getDir/putFile/delFile codificano il percorso con ep() (spazi, #, %, ?). Passare SEMPRE percorsi grezzi.
+- **File > 1 MB**: getFile ora fallisce con errore 413 chiaro (prima dava testo vuoto e un salvataggio avrebbe cancellato il file).
+- **commitFiles**: ogni voce accetta sha (letto prima): se il file nel repo e' cambiato il commit fallisce con 409 e non scrive niente. Non ancora usato da cestino/azioni di gruppo/categorie (DA FARE: passare lo sha letto).
+- **pollDeploy**: un solo ciclo vivo (contatore POLL); pi() distingue rete assente (status 0), 403 e 5xx con messaggi chiari; login accetta URL GitHub incollato.
+- Dopo queste modifiche: Ctrl+F5 e provare login, lista, editor, immagine con apostrofo, Categorie.
+

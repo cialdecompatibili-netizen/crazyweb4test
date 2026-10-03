@@ -10,8 +10,8 @@
         '<p><button class="btn primary" onclick="A.upload()">Carica</button> <small>Vanno in assets/img/. Usa nei contenuti: assets/img/nome.jpg</small></p></div><div class="card"><div class="grid">';
       files.forEach(function (f) {
         h += '<div class="im"><img loading="lazy" src="' + esc(f.download_url) + '"><div>' + esc(f.name) + '</div>' +
-          '<button class="btn sm" onclick="A.copyImg(\'' + esc(f.name) + '\')">Copia</button>' +
-          '<button class="btn sm danger" onclick="A.delImg(\'' + esc(f.name) + '\')">x</button></div>';
+          '<button class="btn sm" onclick="A.copyImg(\'' + A.jq(f.name) + '\')">Copia</button>' +
+          '<button class="btn sm danger" onclick="A.delImg(\'' + A.jq(f.name) + '\')">x</button></div>';
       });
       M().innerHTML = h + '</div>' + (files.length ? '' : 'Nessuna immagine.') + '</div>';
     });

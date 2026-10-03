@@ -15,6 +15,9 @@ var A = (function () {
   var SKEW = 0, SITE_TZ = '', SITEURL = '';
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  /* jq: valore da mettere dentro una stringa JS tra apici in un attributo HTML: onclick="A.x('<qui>')". Prima si escapano \ e ', poi l'HTML (esc).
+     Con esc() da solo un nome come l'immagine.jpg chiudeva la stringa JS: il bottone moriva (e un nome costruito apposta poteva eseguire codice). Usarlo per OGNI nome/id dentro un onclick. */
+  var jq = function (s) { return esc(String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/'/g, "\\'")); };
   var b64e = function (s) { return btoa(unescape(encodeURIComponent(s))); };
   var b64d = function (s) { return decodeURIComponent(escape(atob(s.replace(/\n/g, '')))); };
 
@@ -40,20 +43,33 @@ var A = (function () {
       var sd = r.headers.get('Date'), st = sd ? Date.parse(sd) : NaN;
       if (!isNaN(st)) SKEW = st - Date.now();
       if (r.status === 204) return {};
-      return r.json().then(function (j) {
-        if (!r.ok) { var e = new Error(j.message || r.status); e.status = r.status; throw e; }
-        return j;
+      /* json() puo' fallire (502/503 con pagina HTML, corpo vuoto): senza il catch l'errore diventava "Unexpected token <" senza stato HTTP e errMsg non riconosceva 401/403/5xx. */
+      return r.json().catch(function () { return null; }).then(function (j) {
+        if (!r.ok) { var e = new Error((j && j.message) || ('HTTP ' + r.status)); e.status = r.status; throw e; }
+        return j == null ? {} : j;
       });
+    }, function () {
+      /* fetch rifiuta SOLO se la rete non c'e' (offline, DNS, blocco): status 0 = "rete", cosi' errMsg dice una cosa chiara invece di "Failed to fetch". */
+      var e = new Error('Rete non raggiungibile'); e.status = 0; throw e;
     });
   }
   function errMsg(e) {
+    e = e || {};
+    if (e.status === 0) return 'Rete non raggiungibile: controlla la connessione e riprova';
     if (e.status === 401) return 'Token non valido o scaduto (401)';
     if (e.status === 404) return 'Non trovato (404): controlla repo e token';
     if (e.status === 409 || e.status === 422) return 'Conflitto: ricarica e riprova (' + e.status + ')';
+    if (e.status === 403) return 'Permesso negato o troppe richieste a GitHub (403): ' + (e.message || '') + '. Controlla i permessi del token o riprova tra qualche minuto';
+    if (e.status >= 500) return 'GitHub non risponde (' + e.status + '): riprova tra poco';
     return e.message;
   }
-  function getDir(p) { return api('GET', '/contents/' + p + '?ref=' + BR).catch(function (e) { if (e.status === 404) return []; throw e; }); }
-  function getFile(p) { return api('GET', '/contents/' + p + '?ref=' + BR).then(function (j) { j.text = b64d(j.content); if (j.sha) BLOB[j.sha] = j.text; return j; }); }
+  /* ep: codifica ogni segmento del percorso (spazi, #, ?, %, apostrofi nei nomi file) lasciando gli '/'. Prima il percorso andava nell'URL cosi' com'era:
+     un file "foto 1#.jpg" o "100%.md" faceva una richiesta sbagliata (404 o file diverso). I chiamanti passano SEMPRE percorsi grezzi, mai gia' codificati. */
+  function ep(p) { return String(p).split('/').map(encodeURIComponent).join('/'); }
+  function getDir(p) { return api('GET', '/contents/' + ep(p) + '?ref=' + BR).catch(function (e) { if (e.status === 404) return []; throw e; }); }
+  /* tooBig: sopra 1 MB la Contents API NON manda il contenuto (encoding "none", content vuoto): text resterebbe '' e un salvataggio CANCELLEREBBE il file.
+     getFile quindi RIFIUTA (errore 413, messaggio chiaro) invece di restituire testo vuoto. Il file non finisce nella cache BLOB. */
+  function getFile(p) { return api('GET', '/contents/' + ep(p) + '?ref=' + BR).then(function (j) { if (j.encoding === 'none') { var e = new Error('File troppo grande (oltre 1 MB): non si puo\u0027 leggere/modificare dall\u0027admin'); e.status = 413; throw e; } j.text = b64d(j.content); if (j.sha) BLOB[j.sha] = j.text; return j; }); }
   /* ---- LETTURA DI PIU' FILE INSIEME (ottimizzazione richieste API) ----
      PRIMA: ogni vista che aveva bisogno del contenuto di N file faceva N richieste REST IN PARALLELO. Caso peggiore: l'editor di un
      articolo (loadCats) e 'Categorie articoli' leggevano TUTTI i post a ogni apertura (60-100 richieste). Le richieste parallele in massa
@@ -107,11 +123,11 @@ var A = (function () {
   function putFile(p, text, sha, msg, isB64) {
     var b = { message: msg || 'admin: aggiorna ' + p, content: isB64 ? text : b64e(text), branch: BR };
     if (sha) b.sha = sha;
-    return api('PUT', '/contents/' + p, b).then(function (r) { pollDeploy(); return r; });
+    return api('PUT', '/contents/' + ep(p), b).then(function (r) { pollDeploy(); return r; });
   }
   /* delFile: DELETE su GitHub Contents API richiede lo sha corrente del file (stessa concorrenza ottimistica di putFile). Va sempre letto un attimo prima con getFile: uno sha vecchio da' 409. Dopo l'eliminazione parte pollDeploy() perche' la cancellazione e' un commit e fa ripartire il build. [FONTE: docs.github.com REST 'Delete a file'] */
   function delFile(p, sha) {
-    return api('DELETE', '/contents/' + p, { message: 'admin: elimina ' + p, sha: sha, branch: BR }).then(function (r) { pollDeploy(); return r; });
+    return api('DELETE', '/contents/' + ep(p), { message: 'admin: elimina ' + p, sha: sha, branch: BR }).then(function (r) { pollDeploy(); return r; });
   }
 
   /* commitFiles(changes, message): UN SOLO commit con piu' file insieme (aggiunte, modifiche, cancellazioni).
@@ -121,6 +137,10 @@ var A = (function () {
        changes = [ {path:'a/b.md', text:'...'}   (testo UTF-8)
                  | {path:'x.png', b64:'...'}     (contenuto gia' in base64, SENZA prefisso 'data:...;base64,')
                  | {path:'old.md', del:true} ]   (cancella)
+     In OGNI voce si puo' aggiungere sha:'<sha letto con getFile/getFiles>': prima di scrivere si verifica che nel repo il file abbia ANCORA quello sha,
+     altrimenti il commit fallisce con 409 ("e' cambiato nel frattempo") e non tocca niente. Senza sha vince l'ultima scrittura (come prima).
+     Serve a tutto cio' che legge, modifica e riscrive N file (azioni di gruppo, cestino, categorie): senza il controllo, un file salvato da un'altra scheda
+     nel frattempo veniva sovrascritto in silenzio con la versione vecchia.
      Sequenza (Git Data API) [DOC GitHub REST: docs.github.com/rest/git/refs, /commits, /blobs, /trees]:
        1. GET  git/ref/heads/<branch>  -> sha del commit in cima
        2. GET  git/commits/<sha>       -> sha dell'albero (tree) di quel commit
@@ -150,11 +170,11 @@ var A = (function () {
     function listExisting(paths) {
       var have = {};
       return api('GET', '/git/trees/' + baseTree + '?recursive=1').then(function (t) {
-        if (!t.truncated) { (t.tree || []).forEach(function (n) { have[n.path] = true; }); return have; }
+        if (!t.truncated) { (t.tree || []).forEach(function (n) { have[n.path] = n.sha || true; }); return have; }
         return paths.reduce(function (pr, p) {
           return pr.then(function () {
             return api('GET', '/contents/' + p.split('/').map(encodeURIComponent).join('/') + '?ref=' + BR)
-              .then(function () { have[p] = true; }, function (e) { if (e.status !== 404) throw e; });
+              .then(function (r) { have[p] = (r && r.sha) || true; }, function (e) { if (e.status !== 404) throw e; });
           });
         }, Promise.resolve()).then(function () { return have; });
       });
@@ -163,9 +183,13 @@ var A = (function () {
       headSha = ref.object.sha; return api('GET', '/git/commits/' + headSha);
     }).then(function (c) {
       baseTree = c.tree.sha;
-      var dels = changes.filter(function (x) { return x.del; }).map(function (x) { return x.path; });
-      return dels.length ? listExisting(dels) : {};
+      var chk = changes.filter(function (x) { return x.del || x.sha; }).map(function (x) { return x.path; });
+      return chk.length ? listExisting(chk) : {};
     }).then(function (have) {
+      /* verifica sha atteso PRIMA di creare blob/albero: se qualcosa e' cambiato non si scrive niente (409 = "Conflitto: ricarica e riprova"). */
+      changes.forEach(function (ch) {
+        if (ch.sha && have[ch.path] !== ch.sha) { var e = new Error('Il file ' + ch.path + ' e\' cambiato nel frattempo'); e.status = 409; throw e; }
+      });
       return changes.reduce(function (pr, ch) {
         return pr.then(function () {
           if (ch.del) { if (have[ch.path]) entries.push({ path: ch.path, mode: '100644', type: 'blob', sha: null }); return; }
@@ -274,7 +298,9 @@ var A = (function () {
      Se dopo ~6 minuti non e' finito: "Controlla su GitHub" (grigio), mai verde falso.
      Un salvataggio che non tocca file monitorati da deploy.yml (vedi claude.md sez. 2) non lancia "Deploy site":
      in quel caso dopo 40 secondi senza run si mostra "Nessun deploy necessario" invece di aspettare all'infinito. */
-  var pt, pf;
+  /* POLL = numero del ciclo di controllo attivo. Ogni pollDeploy() ne apre uno nuovo; i callback dei cicli VECCHI (richieste gia' partite) si fermano al primo controllo `my !== POLL`.
+     Senza questo, due salvataggi ravvicinati lasciavano DUE cicli vivi (ognuno si riprogrammava da solo): richieste API raddoppiate e pallino che balla tra stati diversi. */
+  var pt, pf, POLL = 0;
   function setDeploy(cls, txt, pct) {
     var dot = $('deployDot'), t = $('deployTxt'), bar = $('deployBar');
     dot.className = 'dot ' + cls; t.textContent = txt; bar.style.width = pct + '%';
@@ -289,14 +315,16 @@ var A = (function () {
     return api('GET', '/commits/' + BR).then(function (c) { return c.sha; });
   }
   function pollDeploy() {
-    clearTimeout(pt); clearInterval(pf);
+    clearTimeout(pt); clearInterval(pf); var my = ++POLL;
     var pct = 5, t0 = Date.now(), base = '', sha = '', vistaBuild = false, bl0 = null;
     setDeploy('run', 'Deploy in corso...', pct);
     // la barra avanza da sola fino all'85%: e' solo un segnale visivo, il verde arriva SOLO dai dati veri
     pf = setInterval(function () { if (pct < 85) { pct += pct < 40 ? 2 : 0.6; $('deployBar').style.width = pct + '%'; } }, 1500);
     Promise.all([buildLatest(), headSha()]).then(function (v) {
+      if (my !== POLL) return;
       base = v[0] ? v[0].commit : ''; sha = v[1]; bl0 = v[0];
       (function tick(first) {
+        if (my !== POLL) return;
         /* Segue SEMPRE l'ultimo commit del branch (non quello preso all'avvio): se fai un secondo salvataggio (o una stella)
            mentre il deploy e' in corso, il primo deploy viene annullato da "concurrency" e ne parte uno nuovo con un altro SHA.
            Con lo SHA fisso il pallino aspettava un deploy cancellato e restava su "Pubblicazione..." per 6 minuti. */
@@ -305,6 +333,7 @@ var A = (function () {
           api('GET', '/actions/runs?head_sha=' + sha + '&per_page=10'),
           first ? Promise.resolve(bl0) : buildLatest()
         ]); }).then(function (v) {
+          if (my !== POLL) return;
           var runs = v[0].workflow_runs || [], bl = v[1];
           var b = runs.filter(function (x) { return x.name === 'Deploy site'; })[0];
           if (b) vistaBuild = true;
@@ -328,9 +357,9 @@ var A = (function () {
              condizionali (vedi api) quelle senza novita' non consumano comunque il limite. */
           var el = Date.now() - t0;
           if (el < 360000) pt = setTimeout(tick, el < 60000 ? 5000 : el < 180000 ? 8000 : 12000); else { clearInterval(pf); setDeploy('', 'Controlla su GitHub', 0); }
-        }).catch(function () { clearInterval(pf); setDeploy('', 'Stato non disponibile', 0); });
+        }).catch(function () { if (my !== POLL) return; clearInterval(pf); setDeploy('', 'Stato non disponibile', 0); });
       })(true);
-    }).catch(function () { clearInterval(pf); setDeploy('', 'Stato non disponibile', 0); });
+    }).catch(function () { if (my !== POLL) return; clearInterval(pf); setDeploy('', 'Stato non disponibile', 0); });
   }
   /* lastDeploy: stato del pallino all'apertura dell'admin (senza aver appena salvato).
      Legge SOLO /pages/builds/latest: built -> verde, errored -> rosso, queued/building -> segue la pubblicazione. */
@@ -344,8 +373,11 @@ var A = (function () {
   }
   /* ---- login / nav ---- */
   function login() {
-    TOK = $('tok').value.trim(); REPO = $('repo').value.trim();
+    /* REPO accetta anche l'indirizzo incollato (https://github.com/utente/repo, con .git o '/' finale): si riduce a utente/repo. Un formato diverso romperebbe silenziosamente le query GraphQL (REPO.split('/')). */
+    TOK = $('tok').value.trim(); REPO = $('repo').value.trim().replace(/^https?:\/\/github\.com\//i, '').replace(/\.git$/i, '').replace(/^\/+|\/+$/g, '');
     if (!TOK || !REPO) { $('loginMsg').textContent = 'Inserisci token e repo'; return; }
+    if (!/^[\w.-]+\/[\w.-]+$/.test(REPO)) { $('loginMsg').textContent = 'Il repo va scritto cosi: utente/nome-repo'; return; }
+    $('repo').value = REPO;
     api('GET', '').then(function (r) {
       localStorage.setItem(K_TOK, TOK); localStorage.setItem(K_REPO, REPO);
       BR = r.default_branch || 'main'; start();
@@ -403,7 +435,7 @@ var A = (function () {
   }
   function wrap(fn) { // evita doppio click su salvataggi
     return function () {
-      if (busy) return; busy = true; var a = arguments;
+      if (busy) { toast('Operazione in corso, attendi un attimo...'); return; } busy = true; var a = arguments;
       return Promise.resolve().then(function () { return fn.apply(null, a); })
         .catch(function (e) { toast(errMsg(e), true); })
         .then(function () { busy = false; });
@@ -413,7 +445,7 @@ var A = (function () {
   var views = {};
   /* A.token(): il token del login, SOLO in lettura, per il box "Token di accesso" in Impostazioni (admin-media.js). TOK resta privato nella closure:
      non e' una variabile globale e nessun altro modulo lo usa per le chiamate (quelle passano da api()). Non loggarlo e non scriverlo in nessun file del repo. */
-  var api_ = { $: $, esc: esc, toast: toast, getDir: getDir, getFile: getFile, getFiles: getFiles, putFile: putFile, delFile: delFile,
+  var api_ = { $: $, esc: esc, jq: jq, toast: toast, getDir: getDir, getFile: getFile, getFiles: getFiles, putFile: putFile, delFile: delFile,
     commitFiles: commitFiles, splitFM: splitFM, fmGet: fmGet, fmSet: fmSet, fmDel: fmDel, yq: yq, slugify: slugify,
     today: today, now: now, wrap: wrap, views: views, go: go, off: off, main: function () { return main; }, errMsg: errMsg, api: api, token: function () { return TOK; },
     baseurl: function () { return BASEURL; }, siteUrl: function () { return SITEURL; } };

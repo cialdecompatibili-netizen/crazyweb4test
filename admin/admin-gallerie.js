@@ -19,8 +19,8 @@
       var L = ids(l);
       L.forEach(function (id) {
         h += '<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid #eee"><b style="flex:1">' + esc(id) + '</b>' +
-          '<button class="btn sm" onclick="A.galEdit(\'' + esc(id) + '\')">Modifica</button>' +
-          '<button class="btn sm danger" onclick="A.galDel(\'' + esc(id) + '\')">x</button></div>';
+          '<button class="btn sm" onclick="A.galEdit(\'' + A.jq(id) + '\')">Modifica</button>' +
+          '<button class="btn sm danger" onclick="A.galDel(\'' + A.jq(id) + '\')">x</button></div>';
       });
       M().innerHTML = h + (L.length ? '' : 'Nessuna galleria.') + '</div>';
       var q = pend; pend = null; if (q && L.indexOf(q) >= 0) A.galEdit(q);

@@ -90,8 +90,8 @@
       var h = '<h2>Pagine <button class="btn primary sm" onclick="A.pgEdit()">+ Nuova</button></h2><div class="card list">';
       PG.slice().sort(function (a, b) { return a.name < b.name ? -1 : 1; }).forEach(function (p) {
         h += '<div class="it' + (p.hidden ? ' hid' : '') + '">' + (p.permalink === '/' ? '' : A.eyeBtn(p.name, p.hidden, 'pages')) + '<span>' + esc(p.title || p.name) + '<small>' + esc(p.name) + (p.nav ? ' - nel menu' : '') + '</small></span>' +
-          '<button class="btn sm" onclick="A.pgEdit(\'' + esc(p.name) + '\')">Modifica</button>' +
-          (p.permalink === '/' ? '' : '<button class="btn sm danger" onclick="A.pgDel(\'' + esc(p.name) + '\')">Elimina</button>') + '</div>';
+          '<button class="btn sm" onclick="A.pgEdit(\'' + A.jq(p.name) + '\')">Modifica</button>' +
+          (p.permalink === '/' ? '' : '<button class="btn sm danger" onclick="A.pgDel(\'' + A.jq(p.name) + '\')">Elimina</button>') + '</div>';
       });
       M().innerHTML = h + '</div>';
     });
@@ -180,7 +180,7 @@
       var h = '<h2>Menu</h2><div class="card"><p>Cambia titolo e ordine delle voci (numero piu basso = piu a sinistra). Le pagine "Dropdown" sono submenu.</p><div id="mn">';
       top.forEach(function (p, i) {
         h += '<div class="mrow" data-n="' + esc(p.name) + '"><input class="m_t" value="' + esc(p.title) + '"><input class="m_o" type="number" value="' + (p.order || (i + 1)) + '">' +
-          '<span>' + (p.dropdown ? 'Dropdown' : esc(p.permalink)) + '</span><button class="btn sm danger" onclick="A.mnOff(\'' + esc(p.name) + '\')">Togli</button></div>';
+          '<span>' + (p.dropdown ? 'Dropdown' : esc(p.permalink)) + '</span><button class="btn sm danger" onclick="A.mnOff(\'' + A.jq(p.name) + '\')">Togli</button></div>';
         if (p.dropdown) {
           h += '<div class="sub" data-d="' + esc(p.name) + '">';
           kids(p.fm).forEach(function (k) {
@@ -193,7 +193,7 @@
       var off = PG.filter(function (p) { return !p.nav && p.permalink && !/404/.test(p.permalink); });
       if (off.length) {
         h += '<div class="card"><h3>Pagine fuori dal menu</h3><div class="list">';
-        off.forEach(function (p) { h += '<div class="it"><span>' + esc(p.title || p.name) + '<small>' + esc(p.permalink) + '</small></span><button class="btn sm" onclick="A.mnOn(\'' + esc(p.name) + '\')">Aggiungi al menu</button></div>'; });
+        off.forEach(function (p) { h += '<div class="it"><span>' + esc(p.title || p.name) + '<small>' + esc(p.permalink) + '</small></span><button class="btn sm" onclick="A.mnOn(\'' + A.jq(p.name) + '\')">Aggiungi al menu</button></div>'; });
         h += '</div></div>';
       }
       h += '<div class="card"><h3>Voci link personalizzate</h3><p>Voci di menu che puntano a un URL qualsiasi (pagina del sito o link esterno). Non creano pagine: puoi avere piu voci verso la stessa destinazione senza conflitti.</p><div id="lk">';

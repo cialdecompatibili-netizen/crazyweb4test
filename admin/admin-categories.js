@@ -77,9 +77,9 @@
       if (!names.length) h += '<div class="it"><span>Nessuna categoria usata.</span></div>';
       names.forEach(function (n) {
         h += '<div class="it"><span>' + esc(n) + '<small>' + c[n] + ' articol' + (c[n] === 1 ? 'o' : 'i') + '</small></span>' +
-          '<button class="btn sm" onclick="A.catEdit(\'' + esc(n) + '\')">Modifica</button>' +
-          '<button class="btn sm" onclick="A.catRen(\'' + esc(n) + '\')">Rinomina</button>' +
-          '<button class="btn sm danger" onclick="A.catDel(\'' + esc(n) + '\')">Elimina</button></div>';
+          '<button class="btn sm" onclick="A.catEdit(\'' + A.jq(n) + '\')">Modifica</button>' +
+          '<button class="btn sm" onclick="A.catRen(\'' + A.jq(n) + '\')">Rinomina</button>' +
+          '<button class="btn sm danger" onclick="A.catDel(\'' + A.jq(n) + '\')">Elimina</button></div>';
       });
       h += '</div></div>';
       var nocat = POSTS.filter(function (p) { return !p.cats.length; }).length;
@@ -129,7 +129,7 @@
         '<p><small>Testo mostrato quando si apre la pagina di questa categoria (es. /blog/category/' + esc(n) + '/). Lascia vuoto per usare il testo automatico.</small></p>' +
         '<label>Titolo</label><input id="cm_title" value="' + esc(v.title) + '" placeholder="vuoto = ' + esc(n) + '">' +
         '<label>Descrizione</label><input id="cm_desc" value="' + esc(v.desc) + '" placeholder="vuoto = elenco degli articoli in questa categoria">' +
-        '<p><button class="btn primary" onclick="A.cmSave(\'' + esc(n) + '\')">Salva</button> <button class="btn" onclick="A.go(\'cats\')">Annulla</button></p></div>';
+        '<p><button class="btn primary" onclick="A.cmSave(\'' + A.jq(n) + '\')">Salva</button> <button class="btn" onclick="A.go(\'cats\')">Annulla</button></p></div>';
       M().innerHTML = h;
     });
   });

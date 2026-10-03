@@ -135,9 +135,9 @@
              config_fields e senza roots). La pagina Configura (A.views.mdconfig) decide cosa mostrare:
              info del modulo (sempre), URL pubblici con Copia se ha roots, form se ha config_fields.
              NON legare mai questo bottone a una condizione: un modulo senza campi resta comunque configurabile/ispezionabile. */
-          '<button class="btn sm" onclick="A.mdConfig(\'' + esc(s) + '\')">Configura</button> ' +
-          '<button class="btn sm" onclick="A.mdToggle(\'' + esc(s) + '\')">' + (m.enabled ? 'Disattiva' : 'Attiva') + '</button> ' +
-          '<button class="btn sm danger" onclick="A.mdUninstall(\'' + esc(s) + '\')">Disinstalla</button></div>';
+          '<button class="btn sm" onclick="A.mdConfig(\'' + A.jq(s) + '\')">Configura</button> ' +
+          '<button class="btn sm" onclick="A.mdToggle(\'' + A.jq(s) + '\')">' + (m.enabled ? 'Disattiva' : 'Attiva') + '</button> ' +
+          '<button class="btn sm danger" onclick="A.mdUninstall(\'' + A.jq(s) + '\')">Disinstalla</button></div>';
         // L'URL pubblico dei file root/ non sta piu' qui: e' nella pagina Configura (A.views.mdconfig), uguale per tutti i moduli.
       });
       h += '</div>';
@@ -147,7 +147,7 @@
       if (!toInstall.length) h += '<small>Nessun modulo nuovo trovato in ' + SRC + '/.</small>';
       toInstall.forEach(function (a) {
         h += '<div class="it"><span><b>' + esc(a.manifest.name || a.slug) + '</b> <small>(' + esc(a.slug) + ', hook: ' + esc(Object.keys(a.manifest.hooks).join(', ') || '-') + ')</small></span>' +
-          '<button class="btn sm primary" onclick="A.mdInstall(\'' + esc(a.slug) + '\')">Installa</button></div>';
+          '<button class="btn sm primary" onclick="A.mdInstall(\'' + A.jq(a.slug) + '\')">Installa</button></div>';
       });
       h += '</div>';
       M().innerHTML = h;
@@ -180,7 +180,7 @@
         roots.forEach(function (path) {
           var id = slug + '_' + path;
           h += '<div class="it" style="padding:6px 0"><code id="mdurl_' + esc(id) + '">' + esc(A.siteUrl() + path) + '</code> ' +
-            '<button class="btn sm" onclick="A.mdCopy(\'' + esc(id) + '\')">Copia</button> ' +
+            '<button class="btn sm" onclick="A.mdCopy(\'' + A.jq(id) + '\')">Copia</button> ' +
             '<a class="btn sm" href="' + esc(A.siteUrl() + path) + '" target="_blank" rel="noopener">Apri</a></div>';
         });
         h += '</div>';
@@ -211,7 +211,7 @@
           h += '<input type="text" id="mdf_' + esc(fld.key) + '" value="' + esc(v) + '">';
         }
       });
-      h += '<div style="margin-top:10px"><button class="btn primary" onclick="A.mdConfigSave(\'' + esc(slug) + '\',\'' + esc(sha) + '\')">Salva</button> ' +
+      h += '<div style="margin-top:10px"><button class="btn primary" onclick="A.mdConfigSave(\'' + esc(slug) + '\',\'' + A.jq(sha) + '\')">Salva</button> ' +
         '<button class="btn" onclick="A.go(\'modules\')">Annulla</button></div></div>';
       M().innerHTML = h;
     });
