@@ -87,5 +87,29 @@ const reset = () => { calls = []; timers = []; };
   await A.putFile('_x/y.md', 'hello', 's', 'prova'); await new Promise(r => setTimeout(r, 50));
   const poll = calls.filter(c => !(c.method === 'PUT'));
   assert.strictEqual(poll.length, 3, 'richieste nel primo giro: ' + poll.length); assert.deepStrictEqual(timers.slice(-1), [5000]); console.log('9 ok: pollDeploy primo giro = 3 richieste, prossimo giro tra 5 s');
+  // 10) percorsi con spazio/# codificati; file > 1 MB (encoding 'none') rifiutato con 413 invece di testo vuoto
+  { const o = ctx.fetch; reset();
+    ctx.fetch = (u, p) => (u.includes('/contents/') && u.includes('grande')) ? Promise.resolve({ ok: true, status: 200, headers: { get: () => null }, json: () => Promise.resolve({ path: 'x', sha: 'sb', encoding: 'none', content: '' }) }) : o(u, p);
+    let err = null; try { await A.getFile('_posts/grande.md'); } catch (e) { err = e; }
+    assert(err && err.status === 413, 'file grande: deve fallire con 413');
+    ctx.fetch = o; reset(); mode = { files: mk(F('a b#.md', 'sab', 'X')) };
+    await A.getFile('_posts/a b#.md');
+    assert(calls[0].url.includes('/contents/_posts/a%20b%23.md'), 'percorso non codificato: ' + calls[0].url);
+    console.log('10 ok: percorso codificato, file >1MB -> errore 413'); }
+
+  // 11) commitFiles con sha vecchio: 409 e NESSUNA scrittura (niente POST/PATCH)
+  { const o = ctx.fetch; reset();
+    const r = b => Promise.resolve({ ok: true, status: 200, headers: { get: () => null }, json: () => Promise.resolve(b) });
+    ctx.fetch = (u, p) => { p = p || {}; calls.push({ url: u, method: p.method || 'GET' });
+      if (/\/git\/ref\/heads\//.test(u)) return r({ object: { sha: 'h' } });
+      if (/\/git\/commits\/h/.test(u)) return r({ tree: { sha: 't' } });
+      if (/\/git\/trees\/t/.test(u)) return r({ truncated: false, tree: [{ path: '_posts/z.md', sha: 'NUOVO' }] });
+      return o(u, p); };
+    let err = null; try { await A.commitFiles([{ path: '_posts/z.md', text: 'x', sha: 'VECCHIO' }], 'm'); } catch (e) { err = e; }
+    ctx.fetch = o;
+    assert(err && err.status === 409, 'sha vecchio: deve dare 409');
+    assert(!calls.some(c => c.method === 'POST' || c.method === 'PATCH'), 'nessuna scrittura permessa');
+    console.log('11 ok: sha cambiato -> 409 e zero scritture'); }
+
   console.log('TUTTI I TEST OK');
 })().catch(err => { console.error('FALLITO:', err.message); process.exit(1); });

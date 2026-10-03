@@ -46,7 +46,9 @@
              riscriverebbe tutte le righe e il diff di GitHub mostrerebbe l'intero file cambiato. Si rimonta '---' + fm + '---' + body come fa splitFM:
              il corpo (s.body) NON si tocca mai. */
           var nl = f.text.indexOf('\r\n') >= 0 ? '\r\n' : '\n';
-          changes.push({ path: DIR[key] + '/' + n, text: '---' + nl + fm.replace(/\r?\n+$/, '') + nl + '---' + nl + s.body });
+          /* CRITICO: sha = quello appena letto. commitFiles confronta con il repo e, se il file e' cambiato nel frattempo (altra scheda, push da PC),
+             il commit fallisce con 409 e NON scrive niente: senza, qui sotto si sovrascriveva in silenzio la versione piu' nuova. */
+          changes.push({ path: DIR[key] + '/' + n, sha: f.sha, text: '---' + nl + fm.replace(/\r?\n+$/, '') + nl + '---' + nl + s.body });
         });
       });
     }, Promise.resolve()).then(function () {

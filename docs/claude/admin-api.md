@@ -41,7 +41,7 @@ Test automatico (GitHub finto, 9 scenari): `node docs/claude/test_admin_api.js` 
 - **A.jq(x)**: OBBLIGATORIO per ogni nome/id dentro un onclick=\"A.fn('...')\" (al posto di esc). Con esc un nome con apostrofo o backslash (immagine l'arte.jpg, categoria l'arte) chiudeva la stringa JS e il pulsante moriva. Gia' applicato a tutti i moduli (patch_jq.py).
 - **Percorsi**: getFile/getDir/putFile/delFile codificano il percorso con ep() (spazi, #, %, ?). Passare SEMPRE percorsi grezzi.
 - **File > 1 MB**: getFile ora fallisce con errore 413 chiaro (prima dava testo vuoto e un salvataggio avrebbe cancellato il file).
-- **commitFiles**: ogni voce accetta sha (letto prima): se il file nel repo e' cambiato il commit fallisce con 409 e non scrive niente. Non ancora usato da cestino/azioni di gruppo/categorie (DA FARE: passare lo sha letto).
+- **commitFiles**: ogni voce accetta sha (letto prima): se il file nel repo e' cambiato il commit fallisce con 409 e non scrive niente. Usato da azioni di gruppo (`editMany`), cestino (`toTrash`) e categorie (rinomina/elimina). Test: scenari 10 e 11 di `test_admin_api.js`.
 - **pollDeploy**: un solo ciclo vivo (contatore POLL); pi() distingue rete assente (status 0), 403 e 5xx con messaggi chiari; login accetta URL GitHub incollato.
 - Dopo queste modifiche: Ctrl+F5 e provare login, lista, editor, immagine con apostrofo, Categorie.
 

@@ -16,11 +16,12 @@
     }).then(function (fs) {
       POSTS = fs.filter(Boolean).map(function (f) {
         var s = A.splitFM(f.text);
-        return { path: f.path, text: f.text, fm: s.fm, cats: A.fmGet(s.fm, 'categories').split(/\s+/).filter(Boolean) };
+        return { path: f.path, sha: f.sha, text: f.text, fm: s.fm, cats: A.fmGet(s.fm, 'categories').split(/\s+/).filter(Boolean) };
       });
     });
   }
 
+  /* sha di ogni post (da getFiles) viaggia fino a commitFiles: se un articolo cambia mentre rinomini/elimini una categoria, il commit fallisce (409) e non sovrascrive la versione nuova con quella letta prima. */
   /* nome -> numero di post che la usano */
   function counts() {
     var c = {};
@@ -97,7 +98,7 @@
       if (p.cats.indexOf(da) < 0) return;
       var nc = [];
       p.cats.forEach(function (x) { x = x === da ? a : x; if (nc.indexOf(x) < 0) nc.push(x); });
-      ch.push({ path: p.path, text: rewrite(p, nc) });
+      ch.push({ path: p.path, sha: p.sha, text: rewrite(p, nc) });
     });
     if (!ch.length) return;
     return A.commitFiles(ch, 'admin: categoria ' + da + ' -> ' + a).then(function () { A.toast('Rinominata in ' + a + ' (' + ch.length + ' articoli)'); A.go('cats'); });
@@ -108,7 +109,7 @@
     var ch = [];
     POSTS.forEach(function (p) {
       if (p.cats.indexOf(n) < 0) return;
-      ch.push({ path: p.path, text: rewrite(p, p.cats.filter(function (x) { return x !== n; })) });
+      ch.push({ path: p.path, sha: p.sha, text: rewrite(p, p.cats.filter(function (x) { return x !== n; })) });
     });
     if (!ch.length) return;
     if (!confirm('Togliere la categoria "' + n + '" da ' + ch.length + ' articol' + (ch.length === 1 ? 'o' : 'i') + '?\nGli articoli non vengono cancellati, perdono solo questa categoria.')) return;

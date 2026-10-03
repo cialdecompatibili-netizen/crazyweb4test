@@ -27,7 +27,9 @@
           /* CRITICO: si copia il base64 cosi' com'e' (GitHub lo manda con "\n" ogni 60 caratteri, da togliere): niente decodifica/ricodifica UTF-8,
                il file nel cestino e' identico al byte, anche con accenti o a capo CRLF. Aggiunta + cancellazione stanno nello stesso commit: o tutte e due o nessuna. */
           changes.push({ path: '_cestino/' + sub + '/' + st + '__' + it.name, b64: f.content.replace(/\n/g, '') });
-          changes.push({ path: it.dir + '/' + it.name, del: true });
+          /* sha = quello letto sopra: se il file e' stato modificato da qualcun altro mentre si spostava, il commit fallisce (409) e il cestino
+             non porta via una versione vecchia lasciando perdere quella nuova. */
+          changes.push({ path: it.dir + '/' + it.name, del: true, sha: f.sha });
         });
       });
     }, Promise.resolve()).then(function () { return A.commitFiles(changes, msg || ('admin: cestino ' + items.map(function (i) { return i.name; }).join(', ').slice(0, 120))); });
