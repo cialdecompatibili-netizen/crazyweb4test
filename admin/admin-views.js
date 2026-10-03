@@ -284,10 +284,10 @@
   /* Paginazione delle liste (stile PrestaShop): righe per pagina scelte dal menu (5/10/20/50/100), ricordate nel browser (localStorage 'admin_pp').
      La lista legge SOLO i file della pagina mostrata (l'elenco nomi arriva intero da getDir, il contenuto no): meno richieste a GitHub. */
   var PP_OPT = [5, 10, 20, 50, 100];
-  A.pgn = {};
+  A.pgn = {}; A.LST = {}; A.flt = {}; /* LST = righe gia' lette per collezione, flt = filtri correnti (vedi ELENCHI sotto) */
   A.pp = function () { var n = 20; try { n = parseInt(localStorage.getItem('admin_pp'), 10) || 20; } catch (e) {} return PP_OPT.indexOf(n) >= 0 ? n : 20; };
-  A.setPP = function (key, n) { try { localStorage.setItem('admin_pp', n); } catch (e) {} A.pgn = {}; A.go(key); };
-  A.setPg = function (key, n) { A.pgn[key] = n; A.go(key); };
+  A.setPP = function (key, n) { try { localStorage.setItem('admin_pp', n); } catch (e) {} A.pgn = {}; if (A.LST[key]) A.lstRender(key); else A.go(key); };
+  A.setPg = function (key, n) { A.pgn[key] = n; if (A.LST[key]) A.lstRender(key); else A.go(key); };
   A.pgBar = function (key, total, pg, pages, PP) {
     if (total <= PP_OPT[0]) return '';
     function btn(n, lab, dis, on) { return '<button class="btn sm' + (on ? ' primary' : '') + '"' + (dis ? ' disabled' : ' onclick="A.setPg(\'' + key + '\',' + n + ')"') + '>' + lab + '</button> '; }
@@ -322,6 +322,7 @@
   /* A.pub: REATTIVA come stella/casetta: l'occhio cambia subito, il commit parte in background, se fallisce torna com'era. */
   A.pub = function (name, hide, btn, key) {
     if (btn) paintEye(btn, hide);
+    A.lstUpd(key, name, 'hid', hide);
     var prev = starBusy[name] || Promise.resolve();
     starBusy[name] = prev.then(function () {
       var p = PUBDIR[key] + name;
@@ -335,6 +336,7 @@
       }).then(function () { A.toast(hide ? 'Nascosto al pubblico (aggiornamento in corso)' : 'Visibile (pubblicazione in corso)'); });
     }).catch(function (e) {
       if (btn) paintEye(btn, !hide);
+      A.lstUpd(key, name, 'hid', !hide);
       A.toast('Non salvato: ' + A.errMsg(e), true);
     }).then(function () { if (A.afterPub) return A.afterPub(key); });
     return starBusy[name];
@@ -346,35 +348,100 @@
     return '<label style="display:flex;gap:8px;align-items:center;margin:16px 0 4px;font-weight:600;cursor:pointer"><input type="checkbox" id="' + (id || 'f__hidden') + '"' + (hidden ? ' checked' : '') + ' onchange="pubLbl(this.checked)" style="width:auto;margin:0"> Nascondi al pubblico (bozza)</label>' +
       '<small style="display:block;margin:0 0 14px;color:#787c82">Si salva ma non e\' visibile sul sito: sparisce da elenchi, menu, ricerca e Google. Togli la spunta per pubblicarlo.</small>';
   };
+  /* ---- ELENCHI: RICERCA / FILTRI / ORDINE (Articoli, Progetti, Servizi, News) ----------------------------------------------
+     Come WordPress: barra sopra l'elenco con ricerca, stato, categoria (solo Articoli) e ordine. L'elenco legge il contenuto di TUTTI i file
+     con A.getFiles (UNA query GraphQL a blocchi di 100 + cache per sha: la prima apertura costa 1 richiesta, poi 0 per i file invariati) e
+     tiene le righe in A.LST[chiave]. Ricerca, filtri, ordine e paginazione lavorano su quella copia: nessuna richiesta mentre scrivi.
+     Occhio, stella e casetta aggiornano la copia con A.lstUpd (e la rimettono a posto se il salvataggio fallisce).
+     PUNTI CRITICI: (1) mai tornare alla lettura per pagina con getFile in parallelo (punto 22 di CLAUDE.md). (2) i filtri restano in A.flt
+     finche' la pagina e' aperta; "Azzera" li svuota. (3) l'elenco Pagine (admin-menu.js) ha un suo codice e per ora non usa questa barra.
+     (4) dopo un toggle la riga resta sullo schermo anche se non rispetta piu' il filtro, fino al prossimo ridisegno: e' voluto. */
+  var qT = 0;
+  function fltOf(key) { return A.flt[key] || (A.flt[key] = { q: '', st: '', cat: '', so: '' }); }
+  function lstFiltered(key) {
+    var f = fltOf(key), q = (f.q || '').toLowerCase().trim(), so = f.so || (C[key].sortDesc ? 'name_desc' : 'name_asc');
+    var out = (A.LST[key] || []).filter(function (r) {
+      if (q && (r.name + ' ' + r.title + ' ' + r.cats.join(' ')).toLowerCase().indexOf(q) < 0) return false;
+      if (f.st === 'vis' && r.hid) return false;
+      if (f.st === 'hid' && !r.hid) return false;
+      if (f.st === 'feat' && !r.feat) return false;
+      if (f.st === 'home' && !r.home) return false;
+      if (f.cat === '__none') { if (r.cats.length) return false; }
+      else if (f.cat && r.cats.indexOf(f.cat) < 0) return false;
+      return true;
+    });
+    out.sort(function (a, b) {
+      if (so === 'title_asc') { var x = (a.title || a.name).toLowerCase(), y = (b.title || b.name).toLowerCase(); return x < y ? -1 : x > y ? 1 : 0; }
+      return so === 'name_desc' ? (a.name < b.name ? 1 : -1) : (a.name < b.name ? -1 : 1);
+    });
+    return out;
+  }
+  A.fltQ = function (key, v) { clearTimeout(qT); qT = setTimeout(function () { fltOf(key).q = v; A.pgn[key] = 1; A.lstRender(key); }, 150); };
+  A.fltSet = function (key, k, v) { fltOf(key)[k] = v; A.pgn[key] = 1; A.lstRender(key); };
+  A.fltReset = function (key) { A.flt[key] = null; A.pgn[key] = 1; A.go(key); };
+  A.lstUpd = function (key, name, field, val) {
+    var L = A.LST[key]; if (!L) return;
+    for (var i = 0; i < L.length; i++) if (L[i].name === name) { L[i][field] = val; break; }
+    A.lstStat(key);
+  };
+  A.lstStat = function (key) {
+    var el = document.getElementById('lst_stat_' + key); if (!el) return;
+    var all = A.LST[key] || [], nh = 0; all.forEach(function (r) { if (r.hid) nh++; });
+    el.textContent = lstFiltered(key).length + ' di ' + all.length + (nh ? ' \u00b7 ' + nh + ' nascosti' : '');
+  };
+  function lstRow(key, r) {
+    var isSrv = key === 'servizi' || key === 'projects', n = esc(r.name);
+    var home = isSrv ? '<button class="btn sm home' + (r.home ? ' on' : '') + '" data-n="' + n + '" data-k="' + key + '" title="' + (r.home ? 'In home page: clic per togliere' : 'Mostra in home page') + '" onclick="A.inHome(\'' + n + '\',' + (r.home ? 'false' : 'true') + ',this,\'' + key + '\')">&#127968;</button>' : '';
+    var star = key === 'posts' ? '<button class="btn sm star' + (r.feat ? ' on' : '') + '" data-n="' + n + '" title="' + (r.feat ? 'In evidenza: clic per togliere' : 'Metti in evidenza (in alto nel blog)') + '" onclick="A.feature(\'' + n + '\',' + (r.feat ? 'false' : 'true') + ',this)">' + (r.feat ? '&#9733;' : '&#9734;') + '</button>' : '';
+    var catB = key === 'posts' ? '<em style="font-style:normal;font-size:.8em;white-space:nowrap;margin:0 .6em;padding:1px 9px;border-radius:10px;background:rgba(127,127,127,.18);' + (r.cats.length ? '' : 'opacity:.55;') + '" title="Categoria (la prima decide l\'URL)">' + (r.cats.length ? esc(r.cats.join(', ')) : 'senza categoria') + '</em>' : '';
+    var eye = (key === 'posts' || key === 'projects' || key === 'servizi') ? A.eyeBtn(r.name, !!r.hid, key) : '';
+    return '<div class="it' + (r.hid ? ' hid' : '') + '">' + eye + star + home + '<span>' + esc(r.name) + (r.title ? '<small>' + esc(r.title) + '</small>' : '') + '</span>' + catB +
+      '<button class="btn sm" onclick="A.edit(\'' + key + '\',\'' + n + '\')">Modifica</button>' +
+      '<button class="btn sm danger" onclick="A.del(\'' + key + '\',\'' + n + '\')">Elimina</button></div>';
+  }
+  A.lstRender = function (key) {
+    var box = document.getElementById('lst_' + key); if (!box) return;
+    var all = A.LST[key] || [], rows = lstFiltered(key), total = rows.length, PP = A.pp(), pages = Math.max(1, Math.ceil(total / PP)), pg = Math.min(A.pgn[key] || 1, pages), h = '';
+    A.pgn[key] = pg;
+    if (!all.length) h += 'Nessun elemento.'; else if (!total) h += 'Nessun risultato per questi filtri.';
+    h += A.pgBar(key, total, pg, pages, PP);
+    rows.slice((pg - 1) * PP, pg * PP).forEach(function (r) { h += lstRow(key, r); });
+    box.innerHTML = h + A.pgBar(key, total, pg, pages, PP);
+    A.lstStat(key);
+  };
+  function lstBar(key) {
+    var f = fltOf(key), L = A.LST[key] || [], so = f.so || (C[key].sortDesc ? 'name_desc' : 'name_asc'), recent = !!C[key].sortDesc;
+    function opt(v, lab, cur) { return '<option value="' + esc(v) + '"' + (v === cur ? ' selected' : '') + '>' + esc(lab) + '</option>'; }
+    function sel(k, opts) { return '<select style="width:auto;max-width:100%" onchange="A.fltSet(\'' + key + '\',\'' + k + '\',this.value)">' + opts + '</select>'; }
+    var h = '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px">' +
+      '<input type="search" value="' + esc(f.q) + '" placeholder="Cerca per titolo, nome file o categoria" oninput="A.fltQ(\'' + key + '\',this.value)" style="flex:1 1 220px;width:auto;min-width:180px">';
+    if (key === 'posts' || key === 'projects' || key === 'servizi') {
+      h += sel('st', opt('', 'Tutti', f.st) + opt('vis', 'Visibili', f.st) + opt('hid', 'Nascosti', f.st) + (key === 'posts' ? opt('feat', 'In evidenza', f.st) : opt('home', 'In home', f.st)));
+    }
+    if (key === 'posts') {
+      var cc = {}, none = 0;
+      L.forEach(function (r) { if (!r.cats.length) none++; r.cats.forEach(function (c) { cc[c] = (cc[c] || 0) + 1; }); });
+      h += sel('cat', opt('', 'Tutte le categorie', f.cat) + Object.keys(cc).sort().map(function (c) { return opt(c, c + ' (' + cc[c] + ')', f.cat); }).join('') + (none ? opt('__none', 'Senza categoria (' + none + ')', f.cat) : ''));
+    }
+    h += sel('so', opt('name_asc', recent ? 'Pi\u00f9 vecchi' : 'Nome A-Z', so) + opt('name_desc', recent ? 'Pi\u00f9 recenti' : 'Nome Z-A', so) + opt('title_asc', 'Titolo A-Z', so));
+    return h + '<button class="btn sm" onclick="A.fltReset(\'' + key + '\')">Azzera</button><small id="lst_stat_' + key + '" style="color:#787c82"></small></div>';
+  }
   function collection(cfg) {
     A.views[cfg.key] = function () {
       return A.getDir(cfg.dir).then(function (files) {
         files = files.filter(function (f) { return f.type === 'file' && /\.md$/.test(f.name); });
-        files.sort(function (a, b) { return cfg.sortDesc ? (a.name < b.name ? 1 : -1) : (a.name < b.name ? -1 : 1); });
-        var total = files.length, PP = A.pp(), pages = Math.max(1, Math.ceil(total / PP)), pg = Math.min(A.pgn[cfg.key] || 1, pages);
-        files = files.slice((pg - 1) * PP, pg * PP); /* da qui in poi solo la pagina corrente: gli altri file non vengono nemmeno letti */
-        /* Solo Articoli: stato "in evidenza" (featured: true nel front matter, letto da _pages/blog.md). getDir non da' il contenuto: leggo i file in parallelo una volta sola. */
-        var hm = []; /* servizi: stato 'in home' (in_home: true), letto dalla stessa apertura dei file */
-        var hid = []; /* stato 'nascosto' (published: false), dalla stessa lettura */
-        var cats = []; /* categorie per riga, riempite dalla stessa lettura dei file (zero richieste in piu') */
-        var feat = (cfg.key === 'posts' || cfg.key === 'projects' || cfg.key === 'servizi') ? A.getFiles(cfg.dir, files).then(function (rs) { return Promise.all(files.map(function (f, ix) {
-          return Promise.resolve(rs[ix]).then(function (r) { var fm0 = A.splitFM(r.text).fm; cats[ix] = (A.fmGet(fm0, 'categories') || A.fmGet(fm0, 'category') || '').replace(/[\[\]"']/g, '').split(/[ ,]+/).filter(Boolean); hm[ix] = /^in_home:[ \t]*true\b/m.test(fm0); hid[ix] = /^published:[ \t]*false\b/m.test(fm0); return /^featured:[ \t]*true\b/m.test(fm0); }).catch(function () { return false; });
-        })); }) : Promise.resolve([]);
-        return feat.then(function (fl) {
-        var h = '<h2>' + cfg.label + ' <button class="btn primary sm" onclick="A.edit(\'' + cfg.key + '\')">+ Nuovo</button></h2><div class="card list">';
-        if (!total) h += 'Nessun elemento.';
-        h += A.pgBar(cfg.key, total, pg, pages, PP);
-        files.forEach(function (f, i) {
-          var isSrv = cfg.key === 'servizi' || cfg.key === 'projects'; /* casetta 'in home': Servizi (collection _servizi) e Progetti */
-          var home = isSrv ? '<button class="btn sm home' + (hm[i] ? ' on' : '') + '" data-n="' + esc(f.name) + '" data-k="' + cfg.key + '" title="' + (hm[i] ? 'In home page: clic per togliere' : 'Mostra in home page') + '" onclick="A.inHome(\'' + esc(f.name) + '\',' + (hm[i] ? 'false' : 'true') + ',this,\'' + cfg.key + '\')">&#127968;</button>' : '';
-          var star = cfg.key === 'posts' ? '<button class="btn sm star' + (fl[i] ? ' on' : '') + '" data-n="' + esc(f.name) + '" title="' + (fl[i] ? 'In evidenza: clic per togliere' : 'Metti in evidenza (in alto nel blog)') + '" onclick="A.feature(\'' + esc(f.name) + '\',' + (fl[i] ? 'false' : 'true') + ',this)">' + (fl[i] ? '&#9733;' : '&#9734;') + '</button>' : '';
-          var catB = cfg.key === 'posts' ? '<em style="font-style:normal;font-size:.8em;white-space:nowrap;margin:0 .6em;padding:1px 9px;border-radius:10px;background:rgba(127,127,127,.18);' + ((cats[i] || []).length ? '' : 'opacity:.55;') + '" title="Categoria (la prima decide l\'URL)">' + ((cats[i] || []).length ? esc(cats[i].join(', ')) : 'senza categoria') + '</em>' : '';
-          var eye = (cfg.key === 'posts' || cfg.key === 'projects' || cfg.key === 'servizi') ? A.eyeBtn(f.name, !!hid[i], cfg.key) : '';
-          h += '<div class="it' + (hid[i] ? ' hid' : '') + '">' + eye + star + home + '<span>' + esc(f.name) + '</span>' + catB +
-            '<button class="btn sm" onclick="A.edit(\'' + cfg.key + '\',\'' + esc(f.name) + '\')">Modifica</button>' +
-            '<button class="btn sm danger" onclick="A.del(\'' + cfg.key + '\',\'' + esc(f.name) + '\')">Elimina</button></div>';
-        });
-        M().innerHTML = h + A.pgBar(cfg.key, total, pg, pages, PP) + '</div>';
+        return A.getFiles(cfg.dir, files).then(function (rs) {
+          A.LST[cfg.key] = files.map(function (f, ix) {
+            var r = rs[ix], fm0 = r ? (A.splitFM(r.text).fm || '') : '';
+            return {
+              name: f.name,
+              title: (A.fmGet(fm0, 'title') || '').replace(/^["']|["']$/g, ''),
+              cats: (A.fmGet(fm0, 'categories') || A.fmGet(fm0, 'category') || '').replace(/[\[\]"']/g, '').split(/[ ,]+/).filter(Boolean),
+              hid: /^published:[ \t]*false\b/m.test(fm0), home: /^in_home:[ \t]*true\b/m.test(fm0), feat: /^featured:[ \t]*true\b/m.test(fm0)
+            };
+          });
+          M().innerHTML = '<h2>' + cfg.label + ' <button class="btn primary sm" onclick="A.edit(\'' + cfg.key + '\')">+ Nuovo</button></h2><div class="card list">' + lstBar(cfg.key) + '<div id="lst_' + cfg.key + '"></div></div>';
+          A.lstRender(cfg.key);
         });
       });
     };
@@ -565,6 +632,7 @@
   }
   A.feature = function (name, on, btn) {
     if (btn) paintStar(btn, on);
+    A.lstUpd('posts', name, 'feat', on);
     var prev = starBusy[name] || Promise.resolve();
     starBusy[name] = prev.then(function () {
       var p = '_posts/' + name;
@@ -578,6 +646,7 @@
       }).then(function () { A.toast(on ? 'In evidenza (pubblicazione in corso)' : 'Tolto da evidenza (pubblicazione in corso)'); });
     }).catch(function (e) {
       if (btn) paintStar(btn, !on); // rollback visivo
+      A.lstUpd('posts', name, 'feat', !on);
       A.toast('Stella non salvata: ' + A.errMsg(e), true);
     });
     return starBusy[name];
@@ -593,6 +662,7 @@
   }
   A.inHome = function (name, on, btn, key) {
     if (btn) paintHome(btn, on);
+    A.lstUpd(key, name, 'home', on);
     var prev = starBusy[name] || Promise.resolve();
     starBusy[name] = prev.then(function () {
       var p = (key === 'projects' ? '_projects/' : key === 'servizi' ? '_servizi/' : '_posts/') + name;
@@ -606,6 +676,7 @@
       }).then(function () { A.toast(on ? 'In home (pubblicazione in corso)' : 'Tolto dalla home (pubblicazione in corso)'); });
     }).catch(function (e) {
       if (btn) paintHome(btn, !on); // rollback visivo
+      A.lstUpd(key, name, 'home', !on);
       A.toast('Casetta non salvata: ' + A.errMsg(e), true);
     });
     return starBusy[name];
