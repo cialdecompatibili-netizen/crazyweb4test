@@ -27,6 +27,12 @@ Rischi da ricordare:
 
 Prossimo passo, quando Mirco lo chiede: scheletro minimo (catalogo statico, checkout Stripe, Worker per gli ordini, tabelle D1). Serve un account Cloudflare e uno Stripe: chiedere prima.
 
-## 2. Hosting e clone Node
+## 2. Hosting e clone Node (decisione del 04/10/2026, NIENTE DA FARE ORA)
 
-Decisione: si resta con Jekyll + admin su GitHub. Quando il sito va su PROD con dominio vero, valutare Cloudflare Pages o Netlify (301 veri dagli slug_precedenti, anteprime su branch, login vero). Il clone Node con le stesse funzioni e' un desiderio per il futuro: dettaglio in CLAUDE.md punto 29.
+- Decisione: si resta con Jekyll + admin su GitHub (statico, nessun database). Non si riscrive in Node adesso.
+   - Hosting: quando il sito va su PROD con dominio vero, valutare Netlify o Cloudflare Pages (non cambia il CMS). Motivi: 301 veri (file `_redirects` generato da `slug_precedenti`, punto 28), anteprima su branch prima di pubblicare, login vero al posto del token nel browser, header configurabili. Costi e limiti dei piani non verificati: controllarli prima.
+   - Clone Node (volonta' di Mirco: farlo in futuro, in automatico, usando QUESTO progetto come base, con le stesse funzioni). NON iniziare senza che lo chieda. Quando si fara':
+     * Funzioni da portare (tutte quelle dell'admin): articoli, pagine, progetti, servizi, news, categorie, menu, immagini, gallerie, moduli, impostazioni, backup/ripristino, cestino, azioni di gruppo, nascondi (occhio), in evidenza (stella), in home (casetta), slug con redirect, SEO/schema, editor Visuale con blocchi protetti (immagine, galleria, Leggi tutto).
+     * Regole da mantenere uguali: front matter come oggi (slug, slug_precedenti, published, featured, in_home, thumbnail, thumbnail_alt, categories), URL /blog/<categoria>/<slug>/ e /servizi/<slug>/, redirect dai vecchi slug, controllo doppioni, test e verifica_permalink.py come rete di sicurezza.
+     * Fonti da leggere per ricostruire il comportamento: questo CLAUDE.md (punti numerati), admin/*.js, _plugins/permalink_da_categoria.rb, _layouts, _includes, verifica_permalink.py.
+     * Idea di partenza (da rivalutare): contenuti ancora in file Markdown nel repo, motore Node al posto di Jekyll, stesso admin riusato; il backend lato server risolve token, anteprime e 301.
