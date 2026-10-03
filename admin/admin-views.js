@@ -394,6 +394,9 @@
         var v = A.fmGet(A.splitFM(f.text).fm, field);
         v.split(/\s+/).forEach(function (c) { c = c.trim(); if (c) set[c] = 1; });
       });
+      /* 'senza-categoria' e' la categoria predefinita dei NUOVI articoli (vedi A.edit): sta sempre
+         nel dropdown, anche se nessun post la usa ancora. Solo per i post, non per i progetti. */
+      if (key === 'posts') set['senza-categoria'] = 1;
       return Object.keys(set).sort();
     });
   }
@@ -428,6 +431,7 @@
         if (!f && fd[0] === 'date') v = A.now();
         if (!f && fd[0] === 'inline') v = 'true';
         if (!f && fd[0] === 'importance') v = '1';
+        if (!f && key === 'posts' && fd[0] === 'categories') v = 'senza-categoria'; /* default nuovi articoli */
         var one;
         if (fd[2] === 'cat') one = catField(fd, v);
         else if (fd[2] === 'date') one = dateField(fd, v);
