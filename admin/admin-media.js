@@ -194,6 +194,14 @@
     var show = el.type === 'password'; el.type = show ? 'text' : 'password';
     if (show) A.tokCopy();
   };
+  /* MODALITA' ESPERTO: interruttore (localStorage 'adm_expert', per browser, spento di default). Nasconde le parti tecniche che un utente normale non deve toccare:
+     oggi il front matter YAML nelle Pagine (admin-menu.js). Il campo p_fm resta nel DOM (nascosto) perche' pgSave lo legge per id. Il cambio vale alla prossima apertura della pagina. */
+  A.expert = function () { try { return localStorage.getItem('adm_expert') === '1'; } catch (e) { return false; } };
+  A.expSet = function (on) { try { localStorage.setItem('adm_expert', on ? '1' : '0'); } catch (e) {} A.toast(on ? 'Modalit\u00e0 esperto attiva' : 'Modalit\u00e0 esperto spenta'); };
+  A.expBox = function () {
+    return '<div class="card"><h3>Modalit\u00e0 esperto</h3><label style="display:flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" style="width:auto"' + (A.expert() ? ' checked' : '') + ' onchange="A.expSet(this.checked)"> Mostra le impostazioni tecniche (es. il front matter YAML nelle Pagine)</label>' +
+      '<small style="color:#787c82">Spenta di default: serve solo a chi sa cosa sta toccando. Vale per questo browser.</small></div>';
+  };
   A.views.settings = function () {
     return A.getFile('_config.yml').then(function (f) {
       cfg = { sha: f.sha, text: f.text };
@@ -222,7 +230,7 @@
       if (ppo.indexOf(pp) < 0) { ppo.push(pp); ppo.sort(function (a, b) { return a - b; }); }
       h += '<label>Articoli per pagina nel blog</label><select id="c_per_page">' + ppo.map(function (o) { return '<option' + (o === pp ? ' selected' : '') + '>' + o + '</option>'; }).join('') + '</select>';
       h += '<p><button class="btn primary" onclick="A.cfgSave()">Salva</button></p></div>';
-      M().innerHTML = h + A.tokBox();
+      M().innerHTML = h + A.expBox() + A.tokBox();
     });
   };
   A.cfgSave = A.wrap(function () {

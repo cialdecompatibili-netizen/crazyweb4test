@@ -122,9 +122,9 @@
       /* SEO sotto il Corpo (stesso ordine dell'editor articoli). Solo posizione: pgSave() li legge per id. */
       '<label>SEO Title (vuoto = usa il titolo)</label><input id="p_seot" value="' + esc(A.fmGet(curP.fm, 'seo_title')) + '">' +
       '<label>SEO Description (vuoto = estratto automatico del testo)</label><input id="p_seod" value="' + esc(A.fmGet(curP.fm, 'seo_description')) + '">' +
-      (pHome ? '' : A.hideBox(pHid, 'p_hidden')) + '<details style="margin:14px 0"><summary style="cursor:pointer;font-weight:600">Impostazioni avanzate (front matter YAML)</summary>' +
+      (pHome ? '' : A.hideBox(pHid, 'p_hidden')) + (A.expert() ? '<details style="margin:14px 0"><summary style="cursor:pointer;font-weight:600">Impostazioni avanzate (front matter YAML)</summary>' : '<div style="display:none">') +
       '<p style="margin:6px 0"><small>Layout, permalink, menu, ecc. Se rompi il YAML la pagina sparisce dal sito senza errore visibile.</small></p>' +
-      '<textarea id="p_fm" style="min-height:200px">' + esc(curP.fm) + '</textarea></details>' +
+      '<textarea id="p_fm" style="min-height:200px">' + esc(curP.fm) + '</textarea>' + (A.expert() ? '</details>' : '</div>') +
       '<p>' + save + '</p></div>';
     M().innerHTML = h;
     if (window.mdStart) window.mdStart();
