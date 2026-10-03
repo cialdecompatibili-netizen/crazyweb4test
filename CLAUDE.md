@@ -129,3 +129,4 @@ Other gates:
      * Regole da mantenere uguali: front matter come oggi (slug, slug_precedenti, published, featured, in_home, thumbnail, thumbnail_alt, categories), URL /blog/<categoria>/<slug>/ e /servizi/<slug>/, redirect dai vecchi slug, controllo doppioni, test e verifica_permalink.py come rete di sicurezza.
      * Fonti da leggere per ricostruire il comportamento: questo CLAUDE.md (punti numerati), admin/*.js, _plugins/permalink_da_categoria.rb, _layouts, _includes, verifica_permalink.py.
      * Idea di partenza (da rivalutare): contenuti ancora in file Markdown nel repo, motore Node al posto di Jekyll, stesso admin riusato; il backend lato server risolve token, anteprime e 301.
+30. **IDEE FUTURE: leggi memoria.md** (e-commerce gratis su Cloudflare + Stripe, hosting, clone Node). Sono idee di Mirco per dopo: non iniziarle senza una sua richiesta.
