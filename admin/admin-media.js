@@ -46,8 +46,9 @@
   });
 
   /* ---- Impostazioni: solo campi semplici di _config.yml, edit chirurgico riga per riga ---- */
-  var KEYS = [['title', 'Titolo sito'], ['first_name', 'Nome'], ['middle_name', 'Secondo nome'], ['last_name', 'Cognome'],
-    ['contact_note', 'Nota contatti'], ['description', 'Descrizione'], ['footer_text', 'Testo footer'], ['keywords', 'Parole chiave'],
+  /* Nome/Secondo nome/Cognome/Nota contatti NON sono piu' in Impostazioni (logica da sito personale): restano in _config.yml come ripiego.
+     Titolo: vuoto = automatico dal baseurl (plugin _plugins/titolo_da_baseurl.rb); si salva come 'blank'. */
+  var KEYS = [['title', 'Titolo'], ['description', 'Descrizione'], ['footer_text', 'Testo footer'], ['keywords', 'Parole chiave'],
     ['lang', 'Lingua (es. it)'], ['url', 'URL sito'], ['baseurl', 'Baseurl']];
   var CFG_SAVE = KEYS.concat([['toc_style', 'Indice articoli']]); // toc_style ha il suo <select> nella vista, non l'input generico
   var cfg = { sha: '', text: '' };
@@ -80,11 +81,27 @@
   var PER_RE = /(^pagination:[ \t]*\r?\n(?:[ \t]+[^\r\n]*\r?\n)*?[ \t]+per_page:[ \t]*)(\d+)/m;
   function getPer(t) { var q = t.match(PER_RE); return q ? q[2] : ''; }
   function setPer(t, n) { return t.replace(PER_RE, function (_q, a) { return a + n; }); }
+  /* Copia a mano della regola del plugin _plugins/titolo_da_baseurl.rb (serve solo al segnaposto): tenerle uguali. */
+  function autoTitle(t) {
+    var s = getVal(t, 'baseurl').replace(/^\/+|\/+$/g, '').split('/').pop() || '';
+    if (!s) { var m = getVal(t, 'url').match(/^https?:\/\/([^./]+)/); s = m ? m[1] : ''; }
+    s = s.replace(/[-_]/g, ' ').trim();
+    return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+  }
   A.views.settings = function () {
     return A.getFile('_config.yml').then(function (f) {
       cfg = { sha: f.sha, text: f.text };
       var h = '<h2>Impostazioni</h2><div class="card">';
-      KEYS.forEach(function (k) { h += '<label>' + k[1] + ' <small>(' + k[0] + ')</small></label><input id="c_' + k[0] + '" value="' + esc(getVal(f.text, k[0])) + '">'; });
+      KEYS.forEach(function (k) {
+        var v = getVal(f.text, k[0]), extra = '';
+        if (k[0] === 'title') { // 'blank' = automatico: campo vuoto, il segnaposto mostra il titolo che ne esce
+          var auto = autoTitle(f.text);
+          if (v.toLowerCase() === 'blank') v = '';
+          extra = ' placeholder="' + esc(auto) + '"';
+        }
+        h += '<label>' + k[1] + ' <small>(' + k[0] + ')</small></label><input id="c_' + k[0] + '" value="' + esc(v) + '"' + extra + '>';
+        if (k[0] === 'title') h += '<small>Vuoto = automatico dal baseurl (vedi anteprima nel campo). Scrivi un testo per cambiarlo.</small>';
+      });
       var ts = getVal(f.text, 'toc_style') === 'side' ? 'side' : 'box';
       h += '<label>Indice articoli <small>(toc_style)</small></label><select id="c_toc_style"><option value="box"' + (ts === 'box' ? ' selected' : '') + '>Cornice in alto</option><option value="side"' + (ts === 'side' ? ' selected' : '') + '>Laterale sinistro (su mobile va in alto)</option></select>';
       var pp = parseInt(getPer(f.text), 10) || 5, ppo = [5, 10, 20, 50, 100];
@@ -98,6 +115,7 @@
     var t = cfg.text;
     CFG_SAVE.forEach(function (k) {
       var nv = $('c_' + k[0]).value.trim();
+      if (k[0] === 'title' && !nv) nv = 'blank'; // vuoto = automatico dal baseurl
       if (nv !== getVal(cfg.text, k[0])) t = setVal(t, k[0], nv);
     });
     var npp = $('c_per_page').value; if (npp !== getPer(cfg.text)) t = setPer(t, npp);
