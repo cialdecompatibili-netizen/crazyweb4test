@@ -611,7 +611,7 @@ third_party_libraries:
     version: "5.5.0"
   google_fonts:
     url:
-      fonts: "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&display=swap"
+      fonts: "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" # solo Roboto: Roboto Slab e Material Icons non sono usati dal sito (verificato sul CSS)
   highlightjs:
     integrity:
       css:
@@ -776,3 +776,8 @@ jsonresume:
   - languages
   - interests
   - references
+
+# Performance: _plugins/performance.rb toglie dalle pagine le librerie non usate (MathJax, badge, Masonry, Academicons) e rende non bloccanti i font.
+# enabled: false = spegne tutto. Una pagina puo' forzare MathJax con `math: true` nel front matter.
+performance:
+  enabled: true
