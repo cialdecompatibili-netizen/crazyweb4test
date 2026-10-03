@@ -110,9 +110,25 @@ max_width: 930px
 # -----------------------------------------------------------------------------
 # Display links to the page with a preview object on social media.
 # see https://schema.org/docs/faq.html for more information
-serve_og_meta: false # Include Open Graph meta tags in the HTML head
-serve_schema_org: false # Include Schema.org in the HTML head
-og_image: # The site-wide (default for all links) Open Graph preview image
+serve_og_meta: true # Include Open Graph meta tags in the HTML head
+serve_schema_org: true # Include Schema.org in the HTML head (vedi _includes/metadata.liquid, CLAUDE.md punto 15)
+og_image: /assets/img/og-default.png # immagine di anteprima di default. Path SEMPRE con '/' iniziale (viene prefissato con url+baseurl)
+# Dati azienda per schema.org. Compila SOLO quelli veri: i campi vuoti NON vengono scritti nella pagina.
+# 'name' vuoto = nome del sito. Con 'street' compilato il tipo diventa LocalBusiness (override con 'type', es. ProfessionalService).
+schema_org:
+  name:
+  type:
+  logo: # path assoluto, es. /assets/img/logo.png
+  telephone:
+  email:
+  street:
+  city:
+  region:
+  postal_code:
+  country: # codice a 2 lettere, es. IT
+  area_served:
+  same_as: [] # profili ufficiali (LinkedIn, Facebook...), lista di URL
+  service_category: servizi # categoria dei post che diventano 'Service' in schema.org
 
 # -----------------------------------------------------------------------------
 # Analytics and search engine verification
