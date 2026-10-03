@@ -103,7 +103,16 @@ jobs:
           sudo apt-get update && sudo apt-get install -y imagemagick
           pip3 install --upgrade nbconvert
           export JEKYLL_ENV=production
-          bundle exec jekyll build
+          # URL e baseurl ricavati dal repo in cui gira il workflow: un clone si pubblica da solo col proprio nome.
+          # Dominio personalizzato: se esiste il file CNAME nella root si usa quello (baseurl vuoto).
+          # Repo <utente>.github.io: sito in root (baseurl vuoto). In locale valgono url/baseurl di _config.yml.
+          OWNER="${GITHUB_REPOSITORY%%/*}"; REPO="${GITHUB_REPOSITORY#*/}"
+          if [ -s CNAME ]; then SITE_URL="https://$(head -n1 CNAME | tr -d '[:space:]')"; BASE=""
+          elif [ "${REPO,,}" = "${OWNER,,}.github.io" ]; then SITE_URL="https://${OWNER}.github.io"; BASE=""
+          else SITE_URL="https://${OWNER}.github.io"; BASE="/${REPO}"; fi
+          printf 'url: "%s"\nbaseurl: "%s"\n' "$SITE_URL" "$BASE" > _ci_config.yml
+          cat _ci_config.yml
+          bundle exec jekyll build --config _config.yml,_ci_config.yml
       - name: Purge unused CSS 🧹
         run: |
           npm install -g purgecss

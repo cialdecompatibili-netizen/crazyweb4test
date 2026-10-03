@@ -46,10 +46,11 @@
   });
 
   /* ---- Impostazioni: solo campi semplici di _config.yml, edit chirurgico riga per riga ---- */
-  /* Nome/Secondo nome/Cognome/Nota contatti NON sono piu' in Impostazioni (logica da sito personale): restano in _config.yml come ripiego.
-     Titolo: vuoto = automatico dal baseurl (plugin _plugins/titolo_da_baseurl.rb); si salva come 'blank'. */
-  var KEYS = [['title', 'Titolo'], ['description', 'Descrizione'], ['footer_text', 'Testo footer'], ['keywords', 'Parole chiave'],
-    ['lang', 'Lingua (es. it)'], ['url', 'URL sito'], ['baseurl', 'Baseurl']];
+  /* Come WordPress: solo cio' che serve. Titolo, Descrizione (motto), Lingua; poi Lettura (articoli per pagina, indice).
+     NON in admin (restano in _config.yml): nome/cognome/nota contatti (logica da sito personale), parole chiave (i motori le ignorano),
+     testo footer, url e baseurl (li ricava deploy.yml dal repo: un clone funziona da solo, vedi CLAUDE.md).
+     Titolo: vuoto = automatico dal nome del repo/baseurl (plugin _plugins/titolo_da_baseurl.rb); si salva come 'blank'. */
+  var KEYS = [['title', 'Titolo'], ['description', 'Motto / descrizione breve'], ['lang', 'Lingua']];
   var CFG_SAVE = KEYS.concat([['toc_style', 'Indice articoli']]); // toc_style ha il suo <select> nella vista, non l'input generico
   var cfg = { sha: '', text: '' };
   function getVal(t, k) { // valore singola riga o blocco ">"
@@ -81,9 +82,11 @@
   var PER_RE = /(^pagination:[ \t]*\r?\n(?:[ \t]+[^\r\n]*\r?\n)*?[ \t]+per_page:[ \t]*)(\d+)/m;
   function getPer(t) { var q = t.match(PER_RE); return q ? q[2] : ''; }
   function setPer(t, n) { return t.replace(PER_RE, function (_q, a) { return a + n; }); }
-  /* Copia a mano della regola del plugin _plugins/titolo_da_baseurl.rb (serve solo al segnaposto): tenerle uguali. */
+  /* Copia a mano della regola del plugin _plugins/titolo_da_baseurl.rb (serve solo al segnaposto): tenerle uguali.
+     Il nome viene dall'indirizzo del sito (utente.github.io/<repo>/), che e' quello che usa il deploy; ripiego: baseurl del config. */
   function autoTitle(t) {
-    var s = getVal(t, 'baseurl').replace(/^\/+|\/+$/g, '').split('/').pop() || '';
+    var pm = location.pathname.match(/^\/([^\/]+)\//), s = (/\.github\.io$/i.test(location.hostname) && pm && pm[1] !== 'admin') ? pm[1] : '';
+    if (!s) s = getVal(t, 'baseurl').replace(/^\/+|\/+$/g, '').split('/').pop() || '';
     if (!s) { var m = getVal(t, 'url').match(/^https?:\/\/([^./]+)/); s = m ? m[1] : ''; }
     s = s.replace(/[-_]/g, ' ').trim();
     return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
@@ -91,23 +94,30 @@
   A.views.settings = function () {
     return A.getFile('_config.yml').then(function (f) {
       cfg = { sha: f.sha, text: f.text };
-      var h = '<h2>Impostazioni</h2><div class="card">';
+      var h = '<h2>Impostazioni</h2><div class="card"><h3>Generali</h3>';
       KEYS.forEach(function (k) {
         var v = getVal(f.text, k[0]), extra = '';
+        if (k[0] === 'lang') { // tendina invece del campo libero
+          var LG = [['it', 'Italiano'], ['en', 'English'], ['fr', 'Fran\u00e7ais'], ['de', 'Deutsch'], ['es', 'Espa\u00f1ol']];
+          if (!LG.some(function (x) { return x[0] === v; }) && v) LG.push([v, v]);
+          h += '<label>' + k[1] + '</label><select id="c_lang">' + LG.map(function (x) { return '<option value="' + esc(x[0]) + '"' + (x[0] === v ? ' selected' : '') + '>' + esc(x[1]) + '</option>'; }).join('') + '</select>';
+          return;
+        }
         if (k[0] === 'title') { // 'blank' = automatico: campo vuoto, il segnaposto mostra il titolo che ne esce
           var auto = autoTitle(f.text);
           if (v.toLowerCase() === 'blank') v = '';
           extra = ' placeholder="' + esc(auto) + '"';
         }
-        h += '<label>' + k[1] + ' <small>(' + k[0] + ')</small></label><input id="c_' + k[0] + '" value="' + esc(v) + '"' + extra + '>';
-        if (k[0] === 'title') h += '<small>Vuoto = automatico dal baseurl (vedi anteprima nel campo). Scrivi un testo per cambiarlo.</small>';
+        h += '<label>' + k[1] + '</label><input id="c_' + k[0] + '" value="' + esc(v) + '"' + extra + '>';
+        if (k[0] === 'title') h += '<small>Vuoto = automatico dal nome del sito (vedi anteprima nel campo). Scrivi un testo per cambiarlo.</small>';
       });
+      h += '<h3>Lettura</h3>';
       var ts = getVal(f.text, 'toc_style') === 'side' ? 'side' : 'box';
-      h += '<label>Indice articoli <small>(toc_style)</small></label><select id="c_toc_style"><option value="box"' + (ts === 'box' ? ' selected' : '') + '>Cornice in alto</option><option value="side"' + (ts === 'side' ? ' selected' : '') + '>Laterale sinistro (su mobile va in alto)</option></select>';
+      h += '<label>Indice articoli</label><select id="c_toc_style"><option value="box"' + (ts === 'box' ? ' selected' : '') + '>Cornice in alto</option><option value="side"' + (ts === 'side' ? ' selected' : '') + '>Laterale sinistro (su mobile va in alto)</option></select>';
       var pp = parseInt(getPer(f.text), 10) || 5, ppo = [5, 10, 20, 50, 100];
       if (ppo.indexOf(pp) < 0) { ppo.push(pp); ppo.sort(function (a, b) { return a - b; }); }
-      h += '<label>Articoli per pagina nel blog <small>(pagination.per_page)</small></label><select id="c_per_page">' + ppo.map(function (o) { return '<option' + (o === pp ? ' selected' : '') + '>' + o + '</option>'; }).join('') + '</select>';
-      h += '<p><button class="btn primary" onclick="A.cfgSave()">Salva</button></p><small>Attenzione: url e baseurl sbagliati rompono il sito. Modifica solo se sai cosa fai.</small></div>';
+      h += '<label>Articoli per pagina nel blog</label><select id="c_per_page">' + ppo.map(function (o) { return '<option' + (o === pp ? ' selected' : '') + '>' + o + '</option>'; }).join('') + '</select>';
+      h += '<p><button class="btn primary" onclick="A.cfgSave()">Salva</button></p></div>';
       M().innerHTML = h;
     });
   };

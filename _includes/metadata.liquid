@@ -42,6 +42,7 @@
 {% if seo_desc == null or seo_desc == '' %}{% assign seo_desc = site.description %}{% endif %}
 {% assign seo_desc = seo_desc | strip_html | normalize_whitespace | strip | escape %}
 {% assign seo_ttl = page.seo_title %}
+{% if seo_ttl %}{% assign seo_ttl = seo_ttl | replace: '{title}', site.title %}{% endif %}
 
 {% if site.enable_google_verification or site.enable_bing_verification %}
   <!-- Website verification -->
