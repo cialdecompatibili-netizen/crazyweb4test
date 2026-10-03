@@ -12,6 +12,12 @@ layout: default
   linkerebbe a un archivio blog inesistente invece di mostrare solo il testo semplice.
 {% endcomment %}
 {% assign url_beginning = page.url | slice: 0, 6 %}
+{% comment %}
+  I post veri (collection "posts") contano SEMPRE come blog, qualunque sia il loro URL: i post con
+  categoria "servizi" escono su /servizi/<slug>/ (plugin permalink_da_categoria) ma devono
+  continuare a linkare anno e categoria agli archivi /blog/<anno>/ e /blog/category/<cat>/.
+{% endcomment %}
+{% if page.collection == 'posts' %}{% assign url_beginning = '/blog/' %}{% endif %}
 
 {% if page._styles %}
   <!-- Page/Post style -->
