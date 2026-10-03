@@ -56,6 +56,12 @@ pagination:
   .post .thumb-link { display: block; } /* miniatura cliccabile: stesso indirizzo del titolo; tabindex -1 perche' il titolo e' gia' il link per tastiera/screen reader */
   .post .thumb-link:hover .card-img { opacity: .9; }
   .post .card-img { transition: opacity .2s; }
+  /* Mobile: la miniatura passa SOPRA il titolo (su desktop resta a destra). Solo ordine visivo, il testo resta primo nel codice per screen reader. */
+  @media (max-width: 575.98px) {
+    .post-list > li > .row { display: flex; flex-direction: column; }
+    .post-list > li > .row > .col-sm-3 { order: -1; width: 100%; max-width: 100%; flex: none; margin-bottom: .75rem; }
+    .post-list > li > .row > .col-sm-9 { width: 100%; max-width: 100%; flex: none; }
+  }
   .post > .tag-category-list li + li::before { content: "\00b7"; margin-right: .35rem; color: var(--global-text-color-light); }
 </style>
 {% assign blog_desc = site.blog_description | strip %}
