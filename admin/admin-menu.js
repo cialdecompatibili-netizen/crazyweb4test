@@ -168,9 +168,8 @@
   });
   /* A.pgDel: elimina il file. Effetti collaterali NON automatici: se la pagina era in un dropdown (children: di un'altra pagina) il link nel menu resta e punta a un 404; se era in nav resta il buco nell'ordine. L'admin avvisa solo con confirm(): controllare il Menu dopo. La pagina con permalink '/' (home) non ha il bottone Elimina: non rimuoverlo. */
   A.pgDel = A.wrap(function (name) {
-    if (!confirm('Eliminare ' + name + '? Controlla poi il menu.')) return;
-    var p = PG.filter(function (x) { return x.name === name; })[0];
-    return A.delFile('_pages/' + name, p.sha).then(function () { A.toast('Eliminato'); A.go('pages'); });
+    if (!confirm('Spostare ' + name + ' nel cestino? Controlla poi il menu.')) return;
+    return A.toTrash([{ dir: '_pages', name: name }], 'admin: cestino pagina ' + name).then(function () { A.toast('Spostata nel cestino'); A.go('pages'); });
   });
 
   /* ---- Menu ---- */

@@ -95,3 +95,15 @@ Other gates:
 ## Gem version pins
 
 `Gemfile` pins every `al-*` gem to an exact released version in `group :al_folio_plugins`, and `_config.yml` lists the same gems under `plugins:`. Read the current pins from the `Gemfile` rather than trusting any version quoted in prose — including here. To test a gem fix against this site, repoint the `Gemfile` at a sibling checkout (`path:`, `git:`, or `branch:`) and `bundle install`; see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md#working-on-a-gem-alongside-the-starter). Revert the pin before committing.
+
+## Cestino (admin)
+- "Elimina" di articoli, progetti, servizi, news e pagine sposta il file in `_cestino/<tipo>/<AAAAMMGGHHMM>__<nome>` (un commit, `A.toTrash` in admin/admin-cestino.js). `_cestino/` e' in `exclude` di `_config.yml`: non toglierlo.
+- Ripristino rifiutato se il nome esiste gia' nella cartella di origine. Immagini, gallerie, categorie e backup NON passano dal cestino.
+- "Elimina per sempre" e "Svuota" sono definitivi dall'admin (resta la cronologia GitHub).
+
+## Azioni di gruppo (admin)
+- admin/admin-bulk.js: checkbox sulle righe di Articoli, Progetti, Servizi, News + barra Nascondi / Mostra / Categoria / Cestino. Un solo commit per azione.
+- Categoria: sugli articoli cambia l'URL (/blog/<categoria>/...), i vecchi indirizzi non reindirizzano; rifiuta le categorie scritte su piu' righe.
+
+## Immagine in evidenza (articoli)
+- Campi `thumbnail` e `thumbnail_alt` nell'editor articoli. `_pages/blog.md` usa `thumbnail_alt` (fallback: titolo) come alt.

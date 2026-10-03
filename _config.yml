@@ -267,6 +267,7 @@ kramdown:
 # non verrebbe mai costruita: sparirebbero home, chi-siamo, servizi, ecc.
 include: ["_pages"]
 exclude:
+  - _cestino/
   - AGENTS.md
   - al-folio-upgrade-report.md
   - bin/

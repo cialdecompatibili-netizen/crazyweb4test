@@ -1,0 +1,78 @@
+/* Cestino: "Elimina" di articoli, progetti, servizi, news e pagine SPOSTA il file in _cestino/<tipo>/<AAAAMMGGHHMM>__<nome> invece di cancellarlo.
+   Da qui si ripristina (torna al posto di prima) o si elimina per sempre. Vedi CLAUDE.md > Cestino.
+   Spostare = UN commit (aggiunge il file nel cestino e toglie l'originale, A.commitFiles): un solo deploy, e il contenuto resta identico (si copia il base64).
+   PUNTI CRITICI: (1) _cestino/ e' escluso da Jekyll in _config.yml (exclude): se lo togli i file del cestino potrebbero comparire nel sito.
+   (2) il prefisso AAAAMMGGHHMM__ evita che due file con lo stesso nome si sovrascrivano nel cestino; il ripristino lo toglie.
+   (3) il ripristino si rifiuta se nella cartella di origine esiste gia' un file con quel nome. (4) immagini, gallerie, categorie e backup NON passano di qui.
+   (5) "Elimina per sempre" e "Svuota" sono definitivi dall'admin (resta solo la cronologia di GitHub). */
+(function (A) {
+  var esc = A.esc, M = function () { return A.main(); };
+  var SUB = { _posts: 'posts', _projects: 'projects', _servizi: 'servizi', _news: 'news', _pages: 'pages' };
+  var LAB = { posts: 'Articolo', projects: 'Progetto', servizi: 'Servizio', news: 'News', pages: 'Pagina' };
+  var TR = [];
+  function p2(n) { return (n < 10 ? '0' : '') + n; }
+  function stampNow() { return A.now().replace(/\D/g, '').slice(0, 12); }
+  function fmtStamp(s) { return s.slice(6, 8) + '/' + s.slice(4, 6) + '/' + s.slice(0, 4) + ' ' + s.slice(8, 10) + ':' + s.slice(10, 12); }
+
+  /* A.toTrash([{dir:'_posts', name:'x.md'}, ...], messaggio): sposta uno o piu' file nel cestino con UN commit. Legge i file uno alla volta (sequenziale apposta). */
+  A.toTrash = function (items, msg) {
+    var st = stampNow(), changes = [];
+    return items.reduce(function (pr, it) {
+      return pr.then(function () {
+        var sub = SUB[it.dir]; if (!sub) throw new Error('Cartella non gestita dal cestino: ' + it.dir);
+        return A.getFile(it.dir + '/' + it.name).then(function (f) {
+          changes.push({ path: '_cestino/' + sub + '/' + st + '__' + it.name, b64: f.content.replace(/\n/g, '') });
+          changes.push({ path: it.dir + '/' + it.name, del: true });
+        });
+      });
+    }, Promise.resolve()).then(function () { return A.commitFiles(changes, msg || ('admin: cestino ' + items.map(function (i) { return i.name; }).join(', ').slice(0, 120))); });
+  };
+
+  A.views.cestino = function () {
+    var subs = Object.keys(LAB), list = [];
+    return subs.reduce(function (pr, sub) {
+      return pr.then(function () {
+        return A.getDir('_cestino/' + sub).then(function (fs) {
+          fs.forEach(function (f) {
+            var m = f.type === 'file' && /^(\d{12})__(.+)$/.exec(f.name);
+            if (m) list.push({ sub: sub, path: '_cestino/' + sub + '/' + f.name, stamp: m[1], name: m[2] });
+          });
+        });
+      });
+    }, Promise.resolve()).then(function () {
+      list.sort(function (a, b) { return a.stamp < b.stamp ? 1 : a.stamp > b.stamp ? -1 : 0; });
+      TR = list;
+      var rows = list.map(function (r, i) {
+        return '<div class="it"><span>' + esc(r.name) + '<small>' + esc(LAB[r.sub] + ' \u00b7 eliminato il ' + fmtStamp(r.stamp)) + '</small></span>' +
+          '<div style="flex:none;white-space:nowrap"><button class="btn sm" onclick="A.trRestore(' + i + ')">Ripristina</button> ' +
+          '<button class="btn sm danger" onclick="A.trKill(' + i + ')">Elimina per sempre</button></div></div>';
+      }).join('');
+      M().innerHTML = '<h2>Cestino ' + (list.length ? '<button class="btn danger sm" onclick="A.trEmpty()">Svuota cestino</button>' : '') + '</h2>' +
+        '<div class="card"><p style="margin:0 0 12px;color:#787c82">Qui finiscono articoli, progetti, servizi e pagine eliminati. Ripristina li rimette al loro posto; Elimina per sempre li cancella (non si torna indietro dall\'admin).</p>' +
+        '<div class="list">' + (rows || 'Il cestino \u00e8 vuoto.') + '</div></div>';
+    });
+  };
+
+  A.trRestore = A.wrap(function (i) {
+    var r = TR[i]; if (!r) return;
+    var dir = '_' + r.sub;
+    return A.getDir(dir).then(function (fs) {
+      if (fs.some(function (f) { return f.name === r.name; })) { A.toast('Esiste gi\u00e0 un file ' + r.name + ' in ' + dir + ': non ripristinato', true); return null; }
+      return A.getFile(r.path).then(function (f) {
+        return A.commitFiles([{ path: dir + '/' + r.name, b64: f.content.replace(/\n/g, '') }, { path: r.path, del: true }], 'admin: ripristina dal cestino ' + r.name);
+      }).then(function () { A.toast('Ripristinato: ' + r.name); A.go('cestino'); });
+    });
+  });
+
+  A.trKill = A.wrap(function (i) {
+    var r = TR[i]; if (!r) return;
+    if (!confirm('Eliminare per sempre "' + r.name + '"? Non si pu\u00f2 annullare dall\'admin.')) return;
+    return A.getFile(r.path).then(function (f) { return A.delFile(r.path, f.sha); }).then(function () { A.toast('Eliminato per sempre'); A.go('cestino'); });
+  });
+
+  A.trEmpty = A.wrap(function () {
+    if (!TR.length) return;
+    if (!confirm('Svuotare il cestino? ' + TR.length + ' elementi verranno eliminati per sempre.')) return;
+    return A.commitFiles(TR.map(function (r) { return { path: r.path, del: true }; }), 'admin: svuota cestino').then(function () { A.toast('Cestino svuotato'); A.go('cestino'); });
+  });
+})(A);

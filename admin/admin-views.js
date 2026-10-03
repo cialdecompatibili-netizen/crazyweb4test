@@ -376,6 +376,9 @@
     });
     return out;
   }
+  /* azioni di gruppo (admin-bulk.js): A.sel = righe spuntate per collezione; lstNames = nomi file dopo i filtri */
+  A.sel = {};
+  A.lstNames = function (key) { return lstFiltered(key).map(function (r) { return r.name; }); };
   A.fltQ = function (key, v) { clearTimeout(qT); qT = setTimeout(function () { fltOf(key).q = v; A.pgn[key] = 1; A.lstRender(key); }, 150); };
   A.fltSet = function (key, k, v) { fltOf(key)[k] = v; A.pgn[key] = 1; A.lstRender(key); };
   A.fltReset = function (key) { A.flt[key] = null; A.pgn[key] = 1; A.go(key); };
@@ -395,7 +398,8 @@
     var star = key === 'posts' ? '<button class="btn sm star' + (r.feat ? ' on' : '') + '" data-n="' + n + '" title="' + (r.feat ? 'In evidenza: clic per togliere' : 'Metti in evidenza (in alto nel blog)') + '" onclick="A.feature(\'' + n + '\',' + (r.feat ? 'false' : 'true') + ',this)">' + (r.feat ? '&#9733;' : '&#9734;') + '</button>' : '';
     var catB = key === 'posts' ? '<em style="font-style:normal;font-size:.8em;white-space:nowrap;margin:0 .6em;padding:1px 9px;border-radius:10px;background:rgba(127,127,127,.18);' + (r.cats.length ? '' : 'opacity:.55;') + '" title="Categoria (la prima decide l\'URL)">' + (r.cats.length ? esc(r.cats.join(', ')) : 'senza categoria') + '</em>' : '';
     var eye = (key === 'posts' || key === 'projects' || key === 'servizi') ? A.eyeBtn(r.name, !!r.hid, key) : '';
-    return '<div class="it' + (r.hid ? ' hid' : '') + '">' + eye + star + home + '<span>' + esc(r.name) + (r.title ? '<small>' + esc(r.title) + '</small>' : '') + '</span>' + catB +
+    var chk = A.bulkBar ? '<input type="checkbox" style="width:auto;margin:0 8px 0 0;flex:none" title="Seleziona"' + ((A.sel[key] || {})[r.name] ? ' checked' : '') + ' onchange="A.selTog(\'' + key + '\',\'' + n + '\',this.checked)">' : '';
+    return '<div class="it' + (r.hid ? ' hid' : '') + '">' + chk + eye + star + home + '<span>' + esc(r.name) + (r.title ? '<small>' + esc(r.title) + '</small>' : '') + '</span>' + catB +
       '<button class="btn sm" onclick="A.edit(\'' + key + '\',\'' + n + '\')">Modifica</button>' +
       '<button class="btn sm danger" onclick="A.del(\'' + key + '\',\'' + n + '\')">Elimina</button></div>';
   }
@@ -408,6 +412,7 @@
     rows.slice((pg - 1) * PP, pg * PP).forEach(function (r) { h += lstRow(key, r); });
     box.innerHTML = h + A.pgBar(key, total, pg, pages, PP);
     A.lstStat(key);
+    var bb = document.getElementById('bulk_' + key); if (bb && A.bulkBar) bb.innerHTML = A.bulkBar(key);
   };
   function lstBar(key) {
     var f = fltOf(key), L = A.LST[key] || [], so = f.so || (C[key].sortDesc ? 'name_desc' : 'name_asc'), recent = !!C[key].sortDesc;
@@ -440,7 +445,7 @@
               hid: /^published:[ \t]*false\b/m.test(fm0), home: /^in_home:[ \t]*true\b/m.test(fm0), feat: /^featured:[ \t]*true\b/m.test(fm0)
             };
           });
-          M().innerHTML = '<h2>' + cfg.label + ' <button class="btn primary sm" onclick="A.edit(\'' + cfg.key + '\')">+ Nuovo</button></h2><div class="card list">' + lstBar(cfg.key) + '<div id="lst_' + cfg.key + '"></div></div>';
+          M().innerHTML = '<h2>' + cfg.label + ' <button class="btn primary sm" onclick="A.edit(\'' + cfg.key + '\')">+ Nuovo</button></h2><div class="card list">' + lstBar(cfg.key) + '<div id="bulk_' + cfg.key + '"></div><div id="lst_' + cfg.key + '"></div></div>';
           A.lstRender(cfg.key);
         });
       });
@@ -463,7 +468,7 @@
      anche il sottotitolo visibile nella pagina. Vedi admin/claude.md sez. 0d. */
   var SEO = [['seo_title', 'SEO Title (vuoto = usa il titolo)', 'text'], ['seo_description', 'SEO Description (vuoto = estratto automatico del testo)', 'text']];
   var FIELDS = {
-    posts: [['title', 'Titolo', 'text'], ['date', 'Data', 'date'], ['description', 'Descrizione', 'text'], ['tags', 'Tag (separati da spazio)', 'text'], ['categories', 'Categoria', 'cat']].concat(SEO),
+    posts: [['title', 'Titolo', 'text'], ['date', 'Data', 'date'], ['description', 'Descrizione', 'text'], ['thumbnail', 'Immagine in evidenza (es. assets/img/12.jpg, vuoto = nessuna)', 'text'], ['thumbnail_alt', 'Testo alternativo immagine (vuoto = usa il titolo)', 'text'], ['tags', 'Tag (separati da spazio)', 'text'], ['categories', 'Categoria', 'cat']].concat(SEO),
     projects: [['title', 'Titolo', 'text'], ['description', 'Descrizione', 'text'], ['img', 'Immagine (es. assets/img/12.jpg)', 'text'], ['importance', 'Ordine (numero)', 'text'], ['category', 'Categoria (deve stare in display_categories di projects)', 'cat'], ['redirect', 'Redirect esterno (opzionale)', 'text']].concat(SEO),
     servizi: [['title', 'Titolo', 'text'], ['description', 'Descrizione (breve: compare anche nella card in home)', 'text']].concat(SEO),
     news: [['title', 'Titolo (solo se non inline)', 'text'], ['date', 'Data', 'date'], ['inline', 'Inline (true = solo riga in home)', 'text']].concat(SEO)
@@ -681,9 +686,10 @@
     });
     return starBusy[name];
   };
+  /* A.del: "Elimina" = sposta nel cestino (admin-cestino.js), non cancella: si ripristina da admin > Cestino. */
   A.del = A.wrap(function (key, name) {
-    if (!confirm('Eliminare ' + name + '?')) return;
-    return A.getFile(C[key].dir + '/' + name).then(function (f) { return A.delFile(C[key].dir + '/' + name, f.sha); })
-      .then(function () { A.toast('Eliminato'); A.go(key); });
+    if (!confirm('Spostare ' + name + ' nel cestino?')) return;
+    return A.toTrash([{ dir: C[key].dir, name: name }], 'admin: cestino ' + name)
+      .then(function () { A.toast('Spostato nel cestino'); A.go(key); });
   });
 })(A);
