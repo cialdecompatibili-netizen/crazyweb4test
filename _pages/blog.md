@@ -53,6 +53,9 @@ pagination:
   .post .readmore:hover svg { transform: translateX(3px); }
   .post .readmore:focus-visible { outline: 2px solid var(--global-theme-color); outline-offset: 2px; }
   @media (prefers-reduced-motion: reduce) { .post .readmore, .post .readmore svg { transition: none; } }
+  .post .thumb-link { display: block; } /* miniatura cliccabile: stesso indirizzo del titolo; tabindex -1 perche' il titolo e' gia' il link per tastiera/screen reader */
+  .post .thumb-link:hover .card-img { opacity: .9; }
+  .post .card-img { transition: opacity .2s; }
   .post > .tag-category-list li + li::before { content: "\00b7"; margin-right: .35rem; color: var(--global-text-color-light); }
 </style>
 {% assign blog_desc = site.blog_description | strip %}
@@ -190,7 +193,8 @@ pagination:
 
   <div class="col-sm-3">
     {% comment %} alt = thumbnail_alt (campo dell'admin) o, se vuoto, il titolo: mai alt="immagine" generico (SEO/accessibilita). {% endcomment %}
-    <img class="card-img" src="{{ post.thumbnail | relative_url }}" loading="lazy" alt="{{ post.thumbnail_alt | default: post.title | escape }}">
+    {% if post.redirect == blank %}{% assign thumb_href = post.url | relative_url %}{% elsif post.redirect contains '://' %}{% assign thumb_href = post.redirect %}{% else %}{% assign thumb_href = post.redirect | relative_url %}{% endif %}
+    <a class="thumb-link" href="{{ thumb_href }}"{% if post.redirect contains '://' %} target="_blank" rel="noopener"{% endif %} tabindex="-1" aria-hidden="true"><img class="card-img" src="{{ post.thumbnail | relative_url }}" loading="lazy" alt="{{ post.thumbnail_alt | default: post.title | escape }}"></a>
   </div>
 </div>
 {% endif %}
