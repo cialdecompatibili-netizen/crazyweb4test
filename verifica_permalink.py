@@ -64,7 +64,17 @@ def file_per_url(site, base, url):
     if base and p.startswith(base):
         p = p[len(base):]
     q = os.path.join(site, p.lstrip("/"))
-    return q if "." in os.path.basename(q) else os.path.join(q, "index.html")
+    # e' un file solo se ha una vera estensione (uno slug tipo 'v1.2' resta una cartella)
+    return q if os.path.splitext(q)[1].lower() in (".xml", ".txt", ".html", ".json", ".pdf", ".ico", ".css", ".js") else os.path.join(q, "index.html")
+
+def is_redirect(p, qualsiasi_dimensione=False):
+    """URL di destinazione se p e' una pagina-redirect (meta refresh a 0 secondi), altrimenti None.
+    Di norma solo file piccoli (le pagine-redirect del plugin); con qualsiasi_dimensione=True anche pagine complete
+    (es. un articolo con 'redirect:' verso un PDF), che in sitemap non devono stare."""
+    if not os.path.isfile(p) or (not qualsiasi_dimensione and os.path.getsize(p) > 2500):
+        return None
+    m = re.search(r'http-equiv="refresh" content="0; url=([^"]+)"', open(p, encoding="utf-8", errors="ignore").read())
+    return m.group(1) if m else None
 
 def build(site):
     _, mb = regole_config()
@@ -89,6 +99,8 @@ def build(site):
     mancanti = [u for u in locs if not os.path.exists(file_per_url(site, base, u))]
     if dup: err.append(f"sitemap: {len(dup)} URL duplicati")
     if mancanti: err.append(f"sitemap: {len(mancanti)} URL senza file (es. {mancanti[0]})")
+    in_red = [u for u in locs if is_redirect(file_per_url(site, base, u), True)]
+    if in_red: err.append(f"sitemap: {len(in_red)} URL sono pagine-redirect, vanno esclusi (es. {in_red[0]})")
     ok.append(f"build: {nred} redirect (rotti {rotti}), sitemap {len(locs)} URL")
 
 if __name__ == "__main__":

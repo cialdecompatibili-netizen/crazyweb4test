@@ -51,6 +51,8 @@ sitemap: false
   {%- endunless -%}
 {%- endfor -%}
 {%- for post in site.posts -%}
+  {%- comment -%} Come per le pagine: un articolo con sitemap: false o con redirect: (rimanda altrove, es. a un PDF) non entra in sitemap. Senza questa riga sitemap: false sui post veniva ignorato. {%- endcomment -%}
+  {%- if post.redirect or post.sitemap == false -%}{%- continue -%}{%- endif -%}
   {%- assign sm_skip = false -%}
   {%- for x in sm_excl -%}
     {%- assign xt = x | strip -%}
