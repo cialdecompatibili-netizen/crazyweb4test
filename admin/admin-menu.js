@@ -36,7 +36,7 @@
   function load() {
     return lkLoad().then(function () { return A.getDir('_pages'); }).then(function (l) {
       l = l.filter(function (f) { return f.type === 'file' && /\.md$/.test(f.name); });
-      return Promise.all(l.map(function (f) { return A.getFile('_pages/' + f.name); }));
+      return A.getFiles('_pages', l, { strict: true }); /* una query GraphQL + cache per sha; strict = se una pagina non si legge l'errore resta visibile come prima */
     }).then(function (fs) {
       PG = fs.map(function (f) {
         var s = A.splitFM(f.text), fm = s.fm;

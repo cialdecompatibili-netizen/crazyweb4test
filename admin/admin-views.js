@@ -306,9 +306,9 @@
         /* Solo Articoli: stato "in evidenza" (featured: true nel front matter, letto da _pages/blog.md). getDir non da' il contenuto: leggo i file in parallelo una volta sola. */
         var hm = []; /* servizi: stato 'in home' (in_home: true), letto dalla stessa apertura dei file */
         var cats = []; /* categorie per riga, riempite dalla stessa lettura dei file (zero richieste in piu') */
-        var feat = (cfg.key === 'posts' || cfg.key === 'projects' || cfg.key === 'servizi') ? Promise.all(files.map(function (f, ix) {
-          return A.getFile(cfg.dir + '/' + f.name).then(function (r) { var fm0 = A.splitFM(r.text).fm; cats[ix] = (A.fmGet(fm0, 'categories') || A.fmGet(fm0, 'category') || '').replace(/[\[\]"']/g, '').split(/[ ,]+/).filter(Boolean); hm[ix] = /^in_home:[ \t]*true\b/m.test(fm0); return /^featured:[ \t]*true\b/m.test(fm0); }).catch(function () { return false; });
-        })) : Promise.resolve([]);
+        var feat = (cfg.key === 'posts' || cfg.key === 'projects' || cfg.key === 'servizi') ? A.getFiles(cfg.dir, files).then(function (rs) { return Promise.all(files.map(function (f, ix) {
+          return Promise.resolve(rs[ix]).then(function (r) { var fm0 = A.splitFM(r.text).fm; cats[ix] = (A.fmGet(fm0, 'categories') || A.fmGet(fm0, 'category') || '').replace(/[\[\]"']/g, '').split(/[ ,]+/).filter(Boolean); hm[ix] = /^in_home:[ \t]*true\b/m.test(fm0); return /^featured:[ \t]*true\b/m.test(fm0); }).catch(function () { return false; });
+        })); }) : Promise.resolve([]);
         return feat.then(function (fl) {
         var h = '<h2>' + cfg.label + ' <button class="btn primary sm" onclick="A.edit(\'' + cfg.key + '\')">+ Nuovo</button></h2><div class="card list">';
         if (!total) h += 'Nessun elemento.';
@@ -390,7 +390,7 @@
     var field = key === 'projects' ? 'category' : 'categories';
     return A.getDir(C[key].dir).then(function (files) {
       files = files.filter(function (f) { return f.type === 'file' && /\.md$/.test(f.name); });
-      return Promise.all(files.map(function (f) { return A.getFile(C[key].dir + '/' + f.name).catch(function () { return null; }); }));
+      return A.getFiles(C[key].dir, files); /* una query GraphQL + cache per sha invece di N richieste a ogni apertura dell'editor */
     }).then(function (fs) {
       var set = {};
       fs.forEach(function (f) {

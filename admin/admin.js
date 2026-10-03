@@ -26,6 +26,12 @@ var A = (function () {
   function api(method, path, body) {
     var o = { method: method, headers: { Authorization: 'token ' + TOK, Accept: 'application/vnd.github+json' } };
     if (body) { o.body = JSON.stringify(body); o.headers['Content-Type'] = 'application/json'; }
+    /* RICHIESTE CONDIZIONALI: cache:'no-cache' = il browser RIVALIDA sempre con GitHub mandando If-None-Match (ETag).
+       Se nulla e' cambiato GitHub risponde 304 e quella richiesta NON conta per il limite orario (5000/h), purche' sia
+       autenticata (lo e': header Authorization). In piu' evita i dati vecchi: GitHub manda 'Cache-Control: max-age=60', e senza
+       questa riga il browser poteva riservire per un minuto un elenco o un file letto prima di un salvataggio.
+       Solo per GET: PUT/DELETE/POST non sono condizionali. [FONTE: docs.github.com > REST API > Best practices > Use conditional requests] */
+    if (method === 'GET') o.cache = 'no-cache';
     return fetch('https://api.github.com/repos/' + REPO + path, o).then(function (r) {
       /* OROLOGIO: ogni risposta GitHub porta l'header "Date" (ora esatta del server, UTC). Lo confronto
          con l'orologio del PC e tengo lo scarto in SKEW. Cosi' un PC con l'ora sballata non altera
@@ -47,7 +53,51 @@ var A = (function () {
     return e.message;
   }
   function getDir(p) { return api('GET', '/contents/' + p + '?ref=' + BR).catch(function (e) { if (e.status === 404) return []; throw e; }); }
-  function getFile(p) { return api('GET', '/contents/' + p + '?ref=' + BR).then(function (j) { j.text = b64d(j.content); return j; }); }
+  function getFile(p) { return api('GET', '/contents/' + p + '?ref=' + BR).then(function (j) { j.text = b64d(j.content); if (j.sha) BLOB[j.sha] = j.text; return j; }); }
+  /* ---- LETTURA DI PIU' FILE INSIEME (ottimizzazione richieste API) ----
+     PRIMA: ogni vista che aveva bisogno del contenuto di N file faceva N richieste REST IN PARALLELO. Caso peggiore: l'editor di un
+     articolo (loadCats) e 'Categorie articoli' leggevano TUTTI i post a ogni apertura (60-100 richieste). Le richieste parallele in massa
+     sono anche quello che GitHub sconsiglia (limiti secondari). ORA getFiles(dir, files, opts):
+       1. CACHE PER SHA (BLOB): lo sha di un file identifica il suo contenuto in modo immutabile, quindi una voce in cache non puo' mai
+          essere vecchia. Dopo un salvataggio lo sha cambia e SOLO quel file viene riletto. Nessuna invalidazione da gestire.
+       2. I file mancanti in cache si leggono con UNA query GraphQL (un alias per file, a blocchi di 100) invece di N richieste REST.
+       3. Se GraphQL non risponde (token senza permesso, rete, errore) si ripiega sulle richieste REST singole, come prima ma a gruppi
+          di 6 invece che tutte insieme; per 5 minuti non si riprova GraphQL (GQL_OFF).
+     files = elenco di getDir (servono name, path, sha). Ritorna un array NELLO STESSO ORDINE di oggetti {...file, text}.
+     Un file illeggibile vale null, salvo opts.strict: allora la promessa fallisce al primo errore (come faceva Promise.all su getFile).
+     NON usare questa funzione prima di una scrittura: per putFile/delFile serve lo sha letto un attimo prima con getFile (vedi sotto). */
+  var BLOB = {}, GQL_OFF = 0;
+  function gqlTexts(items) {
+    var rp = REPO.split('/');
+    var q = 'query{repository(owner:' + JSON.stringify(rp[0]) + ',name:' + JSON.stringify(rp[1]) + '){' + items.map(function (it, i) {
+      return 'f' + i + ':object(expression:' + JSON.stringify(BR + ':' + it.path) + '){... on Blob{oid text isTruncated}}';
+    }).join('') + '}}';
+    return fetch('https://api.github.com/graphql', { method: 'POST', headers: { Authorization: 'token ' + TOK, 'Content-Type': 'application/json' }, body: JSON.stringify({ query: q }) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok || j.errors || !j.data || !j.data.repository) throw new Error('graphql'); return j.data.repository; }); })
+      .then(function (repo) { items.forEach(function (it, i) { var b = repo['f' + i]; if (b && b.oid && !b.isTruncated && typeof b.text === 'string') BLOB[b.oid] = b.text; }); });
+  }
+  function getFiles(dir, files, opts) {
+    var strict = opts && opts.strict, miss = files.filter(function (f) { return !(f.sha in BLOB); }), step = Promise.resolve();
+    if (miss.length && Date.now() > GQL_OFF) {
+      for (var i = 0; i < miss.length; i += 100) (function (part) { step = step.then(function () { return gqlTexts(part); }); })(miss.slice(i, i + 100));
+    }
+    return step.catch(function () { GQL_OFF = Date.now() + 300000; }).then(function () {
+      var out = new Array(files.length), todo = [];
+      files.forEach(function (f, i) {
+        if (f.sha in BLOB) { var c = {}; for (var k in f) c[k] = f[k]; c.text = BLOB[f.sha]; out[i] = c; } else todo.push(i);
+      });
+      var chain = Promise.resolve();
+      for (var j = 0; j < todo.length; j += 6) (function (grp) {
+        chain = chain.then(function () {
+          return Promise.all(grp.map(function (ix) {
+            var f = files[ix];
+            return getFile(f.path || (dir + '/' + f.name)).then(function (r) { out[ix] = r; }, function (e) { if (strict) throw e; out[ix] = null; });
+          }));
+        });
+      })(todo.slice(j, j + 6));
+      return chain.then(function () { return out; });
+    });
+  }
   /* GitHub Contents API usa concorrenza ottimistica: PUT/DELETE su un file esistente RICHIEDONO
      lo sha corrente (letto con getFile), altrimenti 409/422 "conflitto". Se due salvataggi sullo
      stesso file partono ravvicinati (doppio click, due tab aperte) il secondo puo' fallire con
@@ -240,19 +290,20 @@ var A = (function () {
   }
   function pollDeploy() {
     clearTimeout(pt); clearInterval(pf);
-    var pct = 5, n = 0, base = '', sha = '', vistaBuild = false;
+    var pct = 5, t0 = Date.now(), base = '', sha = '', vistaBuild = false, bl0 = null;
     setDeploy('run', 'Deploy in corso...', pct);
     // la barra avanza da sola fino all'85%: e' solo un segnale visivo, il verde arriva SOLO dai dati veri
     pf = setInterval(function () { if (pct < 85) { pct += pct < 40 ? 2 : 0.6; $('deployBar').style.width = pct + '%'; } }, 1500);
     Promise.all([buildLatest(), headSha()]).then(function (v) {
-      base = v[0] ? v[0].commit : ''; sha = v[1];
-      (function tick() {
+      base = v[0] ? v[0].commit : ''; sha = v[1]; bl0 = v[0];
+      (function tick(first) {
         /* Segue SEMPRE l'ultimo commit del branch (non quello preso all'avvio): se fai un secondo salvataggio (o una stella)
            mentre il deploy e' in corso, il primo deploy viene annullato da "concurrency" e ne parte uno nuovo con un altro SHA.
            Con lo SHA fisso il pallino aspettava un deploy cancellato e restava su "Pubblicazione..." per 6 minuti. */
-        headSha().then(function (s) { sha = s; return Promise.all([
+        /* PRIMO GIRO: sha e stato Pages sono appena stati letti qui sopra (stesso istante): niente richieste doppie. */
+        (first ? Promise.resolve(sha) : headSha()).then(function (s) { sha = s; return Promise.all([
           api('GET', '/actions/runs?head_sha=' + sha + '&per_page=10'),
-          buildLatest()
+          first ? Promise.resolve(bl0) : buildLatest()
         ]); }).then(function (v) {
           var runs = v[0].workflow_runs || [], bl = v[1];
           var b = runs.filter(function (x) { return x.name === 'Deploy site'; })[0];
@@ -268,13 +319,17 @@ var A = (function () {
             $('deployTxt').textContent = 'Pubblicazione...';
           } else if (b) {
             $('deployTxt').textContent = 'Build in corso...';
-          } else if (!vistaBuild && n >= 8) {
-            // 8 giri x 5s = 40s senza nessuna run: il salvataggio non ha toccato file che fanno partire il deploy
+          } else if (!vistaBuild && Date.now() - t0 >= 40000) {
+            // 40s senza nessuna run: il salvataggio non ha toccato file che fanno partire il deploy
             clearInterval(pf); setDeploy('ok', 'Nessun deploy necessario', 100); return;
           }
-          if (++n < 72) pt = setTimeout(tick, 5000); else { clearInterval(pf); setDeploy('', 'Controlla su GitHub', 0); }
+          /* INTERVALLI CRESCENTI: 5s nel primo minuto (e' li' che arriva il 'Nessun deploy necessario'), poi 8s fino a 3 minuti, poi 12s.
+             Stesso limite totale di prima (6 minuti), ma fino al 40% di giri in meno (circa 25% in un deploy tipico di 2-3 minuti): ogni giro sono 3 richieste. Con le richieste
+             condizionali (vedi api) quelle senza novita' non consumano comunque il limite. */
+          var el = Date.now() - t0;
+          if (el < 360000) pt = setTimeout(tick, el < 60000 ? 5000 : el < 180000 ? 8000 : 12000); else { clearInterval(pf); setDeploy('', 'Controlla su GitHub', 0); }
         }).catch(function () { clearInterval(pf); setDeploy('', 'Stato non disponibile', 0); });
-      })();
+      })(true);
     }).catch(function () { clearInterval(pf); setDeploy('', 'Stato non disponibile', 0); });
   }
   /* lastDeploy: stato del pallino all'apertura dell'admin (senza aver appena salvato).
@@ -356,7 +411,7 @@ var A = (function () {
   }
 
   var views = {};
-  var api_ = { $: $, esc: esc, toast: toast, getDir: getDir, getFile: getFile, putFile: putFile, delFile: delFile,
+  var api_ = { $: $, esc: esc, toast: toast, getDir: getDir, getFile: getFile, getFiles: getFiles, putFile: putFile, delFile: delFile,
     commitFiles: commitFiles, splitFM: splitFM, fmGet: fmGet, fmSet: fmSet, fmDel: fmDel, yq: yq, slugify: slugify,
     today: today, now: now, wrap: wrap, views: views, go: go, off: off, main: function () { return main; }, errMsg: errMsg, api: api,
     baseurl: function () { return BASEURL; }, siteUrl: function () { return SITEURL; } };

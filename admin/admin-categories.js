@@ -12,7 +12,7 @@
   function load() {
     return A.getDir('_posts').then(function (l) {
       l = l.filter(function (f) { return f.type === 'file' && /\.md$/.test(f.name); });
-      return Promise.all(l.map(function (f) { return A.getFile('_posts/' + f.name).catch(function () { return null; }); }));
+      return A.getFiles('_posts', l); /* una query GraphQL + cache per sha invece di N richieste */
     }).then(function (fs) {
       POSTS = fs.filter(Boolean).map(function (f) {
         var s = A.splitFM(f.text);
