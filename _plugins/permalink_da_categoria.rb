@@ -71,6 +71,31 @@ Jekyll::Hooks.register :site, :post_read do |site|
   raise Jekyll::Errors::FatalException, "collisione di URL (elenco sopra)" unless site.config["permalink_collisioni_fatali"] == false
 end
 
+# REDIRECT DA CAMBIO SLUG (campo "Indirizzo" dell'admin): 'slug_precedenti: [a, b]' nel front matter = vecchi slug.
+# Per ognuno si genera una pagina-redirect sul vecchio URL (stesso modello dell'URL attuale, col vecchio slug).
+# Vale per post e per ogni collection (progetti, servizi). Un vecchio URL gia' occupato da un'altra pagina viene saltato (niente collisione).
+Jekyll::Hooks.register :site, :post_read do |site|
+  docs = site.posts.docs.dup
+  site.collections.each { |nome, c| docs.concat(c.docs) unless nome == "posts" }
+  occupati = docs.map { |d| d.url.to_s } + site.pages.map { |pg| pg.url.to_s }
+  site.config["_redirect_vecchi"] ||= []
+  docs.each do |doc|
+    prec = doc.data["slug_precedenti"]
+    prec = prec.to_s.split(/[\s,\[\]]+/) unless prec.is_a?(Array)
+    prec = prec.map(&:to_s).reject(&:empty?)
+    next if prec.empty?
+    attuale = Jekyll::Utils.slugify(doc.data["slug"].to_s)
+    nuovo = doc.url.to_s
+    next if attuale.empty? || !nuovo.end_with?("/#{attuale}/")
+    base = nuovo[0...(nuovo.length - attuale.length - 1)]
+    prec.each do |vecchio|
+      url_vecchio = "#{base}#{Jekyll::Utils.slugify(vecchio)}/"
+      next if url_vecchio == nuovo || occupati.include?(url_vecchio)
+      site.config["_redirect_vecchi"] << [url_vecchio, nuovo]
+    end
+  end
+end
+
 module PermalinkDaCategoria
   class PaginaRedirect < Jekyll::PageWithoutAFile
     def initialize(site, vecchio, nuovo)

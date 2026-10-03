@@ -536,9 +536,9 @@
   /* IMMAGINE IN EVIDENZA (solo articoli): 'thumbnail' e 'thumbnail_alt' sono letti da _pages/blog.md (elenco blog e articoli in evidenza).
      Vuoti = la riga sparisce (A.save usa fmDel) e il blog non mostra l'immagine; alt vuoto = il blog usa il titolo. Il percorso e' relativo al sito (relative_url nel template). */
   var FIELDS = {
-    posts: [['title', 'Titolo', 'text'], ['date', 'Data', 'date'], ['description', 'Descrizione', 'text'], ['thumbnail', 'Immagine in evidenza', 'img'], ['thumbnail_alt', 'Testo alternativo immagine (vuoto = usa il titolo)', 'text'], ['tags', 'Tag (separati da spazio)', 'text'], ['categories', 'Categoria', 'cat']].concat(SEO),
-    projects: [['title', 'Titolo', 'text'], ['description', 'Descrizione', 'text'], ['img', 'Immagine', 'img'], ['importance', 'Ordine (numero)', 'text'], ['category', 'Categoria (deve stare in display_categories di projects)', 'cat'], ['redirect', 'Redirect esterno (opzionale)', 'text']].concat(SEO),
-    servizi: [['title', 'Titolo', 'text'], ['description', 'Descrizione (breve: compare anche nella card in home)', 'text']].concat(SEO),
+    posts: [['title', 'Titolo', 'text'], ['slug', 'Indirizzo (slug)', 'slug'], ['date', 'Data', 'date'], ['description', 'Descrizione', 'text'], ['thumbnail', 'Immagine in evidenza', 'img'], ['thumbnail_alt', 'Testo alternativo immagine (vuoto = usa il titolo)', 'text'], ['tags', 'Tag (separati da spazio)', 'text'], ['categories', 'Categoria', 'cat']].concat(SEO),
+    projects: [['title', 'Titolo', 'text'], ['slug', 'Indirizzo (slug)', 'slug'], ['description', 'Descrizione', 'text'], ['img', 'Immagine', 'img'], ['importance', 'Ordine (numero)', 'text'], ['category', 'Categoria (deve stare in display_categories di projects)', 'cat'], ['redirect', 'Redirect esterno (opzionale)', 'text']].concat(SEO),
+    servizi: [['title', 'Titolo', 'text'], ['slug', 'Indirizzo (slug)', 'slug'], ['description', 'Descrizione (breve: compare anche nella card in home)', 'text']].concat(SEO),
     news: [['title', 'Titolo (solo se non inline)', 'text'], ['date', 'Data', 'date'], ['inline', 'Inline (true = solo riga in home)', 'text']].concat(SEO)
   };
   var LAYOUT = { posts: 'post', projects: 'page', news: 'post', servizi: 'servizio' };
@@ -637,7 +637,8 @@
         if (!f && fd[0] === 'importance') v = '1';
         if (!f && key === 'posts' && fd[0] === 'categories') v = 'senza-categoria'; /* default nuovi articoli */
         var one;
-        if (fd[2] === 'cat') one = catField(fd, v);
+        if (fd[2] === 'slug') one = '<label>' + fd[1] + '</label><input id="f_slug" value="' + esc(f ? (String(v).replace(/^["']|["']$/g, '') || name.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace(/\.md$/, '')) : '') + '" placeholder="automatico dal titolo"><small style="display:block;color:#666;margin-top:2px">Se lo cambi, il vecchio indirizzo porta in automatico al nuovo (redirect).</small>';
+        else if (fd[2] === 'cat') one = catField(fd, v);
         else if (fd[2] === 'date') one = dateField(fd, v);
         else if (fd[2] === 'img') one = imgField(fd, v);
         else one = '<label>' + fd[1] + '</label><input id="f_' + fd[0] + '" value="' + esc(v) + '">';
@@ -655,7 +656,7 @@
     var key = cur.key, fm = cur.fm || 'layout: ' + LAYOUT[key], name = cur.name;
     fm = A.fmSet(fm, 'layout', LAYOUT[key]);
     FIELDS[key].forEach(function (fd) {
-      var k = fd[0], v;
+      var k = fd[0], v; if (fd[2] === 'slug') return; /* lo slug si gestisce dopo il ciclo (vedi sotto) */
       if (fd[2] === 'cat') {
         var sel = $('f_' + k).value;
         v = (sel === '__new__' ? $('f_' + k + '_new').value : sel).trim();
@@ -680,6 +681,32 @@
       else if (key === 'projects' || key === 'servizi') { if (!t) return A.toast('Titolo obbligatorio', true); name = A.slugify(t) + '.md'; }
       else { return A.getDir('_news').then(function (l) { var n = 1; l.forEach(function (x) { var m = x.name.match(/announcement_(\d+)/); if (m) n = Math.max(n, +m[1] + 1); }); doPut('announcement_' + n + '.md'); }); }
     }
+    /* INDIRIZZO (slug). Il nome file NON cambia (cronologia git e collegamenti restano): l'URL segue 'slug:' del front matter
+       (il plugin permalink_da_categoria e Jekyll lo usano al posto del nome file). Quando lo slug cambia il vecchio finisce in
+       'slug_precedenti: [a, b]' e il plugin genera una pagina-redirect per ognuno (non 301 vero: GitHub Pages non lo permette,
+       e' meta refresh + canonical). Se lo slug torna uguale al nome file, 'slug:' sparisce. Doppioni: si controlla il nome file degli altri. */
+    var effSl = '', slugCh = false, si = $('f_slug');
+    if (si) {
+      var fileSl = (cur.name || '').replace(/^\d{4}-\d{2}-\d{2}-/, '').replace(/\.md$/, '');
+      if (cur.name) {
+        var oldSl = (A.fmGet(cur.fm, 'slug') || '').replace(/^["']|["']$/g, '') || fileSl;
+        var ns = A.slugify(si.value.trim()) || oldSl;
+        var prev = (A.fmGet(cur.fm, 'slug_precedenti') || '').replace(/[\[\]"']/g, '').split(/[ ,]+/).filter(Boolean);
+        if (ns !== oldSl && prev.indexOf(oldSl) < 0) prev.push(oldSl);
+        prev = prev.filter(function (x) { return x !== ns; });
+        fm = ns === fileSl ? A.fmDel(fm, 'slug') : A.fmSet(fm, 'slug', ns);
+        fm = prev.length ? A.fmSet(fm, 'slug_precedenti', '[' + prev.join(', ') + ']') : A.fmDel(fm, 'slug_precedenti');
+        effSl = ns; slugCh = ns !== oldSl;
+      } else {
+        var ns2 = A.slugify(si.value.trim()), tt = A.slugify(($('f_title') || { value: '' }).value.trim());
+        if (ns2 && ns2 !== tt) { fm = A.fmSet(fm, 'slug', ns2); effSl = ns2; }
+      }
+    }
+    if (slugCh) return A.getDir(C[key].dir).then(function (l) {
+      var clash = (l || []).some(function (x) { return x.name !== name && x.name.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace(/\.md$/, '') === effSl; });
+      if (clash) return A.toast('Indirizzo gia\' usato da un altro elemento: scegline un altro', true);
+      return doPut(name);
+    });
     return doPut(name);
     function doPut(nm) {
       var txt = '---\n' + fm.replace(/\n+$/, '') + '\n---\n\n' + $('body').value.replace(/^\n+/, '');
@@ -687,13 +714,13 @@
       var lbl = nm;
       if (key === 'posts') {
         var c0 = (A.fmGet(fm, 'categories') || A.fmGet(fm, 'category')).replace(/[\[\]]/g, '').split(/[ ,]+/).filter(Boolean)[0];
-        var cs = c0 ? A.slugify(c0) : '', sl = nm.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace(/\.md$/, '') + '/';
+        var cs = c0 ? A.slugify(c0) : '', sl = (effSl || nm.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace(/\.md$/, '')) + '/';
         /* SPECCHIO a mano di permalink_per_categoria (_config.yml) e di repos.json > sito.permalink_servizio: i servizi stanno in /servizi/ (senza /blog/).
            Serve SOLO per il nome della run in Actions: l'URL vero lo calcola il plugin Jekyll. Se aggiungi/cambi una regola nel config, aggiorna anche questa riga. */
         lbl = '/blog/' + (cs ? cs + '/' : '') + sl;
       } else if (key === 'servizi') {
         /* SPECCHIO a mano del permalink della collection 'servizi' in _config.yml (e di repos.json > sito.permalink_servizio). Serve solo per il nome della run in Actions. */
-        lbl = '/servizi/' + nm.replace(/\.md$/, '') + '/';
+        lbl = '/servizi/' + (effSl || nm.replace(/\.md$/, '')) + '/';
       }
       return A.putFile(C[key].dir + '/' + nm, txt, cur.sha, 'admin: ' + (cur.sha ? 'aggiorna ' : 'crea ') + lbl).then(function () {
         A.toast(hid ? 'Salvato (nascosto: non visibile al pubblico)' : 'Salvato: pubblicazione in corso'); A.go(key);
