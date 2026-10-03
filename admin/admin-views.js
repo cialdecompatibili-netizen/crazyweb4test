@@ -259,6 +259,7 @@
       '<button class="btn sm" onclick="mdIns(\'\\n- \',\'\')">Lista</button>' +
       '<button class="btn sm" onclick="mdIns(\'[\',\'](https://)\')">Link</button>' +
       '<button class="btn sm" onclick="mdIns(\'![\',\'](\' + A.baseurl() + \'/assets/img/)\')">Img</button>' +
+      '<button class="btn sm" onclick="mdGal()">Galleria</button>' +
       '</div>';
   }
   function ymlList(fm) { return fm; }
