@@ -6,7 +6,7 @@
    PUNTI CRITICI: (1) mai force:true sull'aggiornamento di main. (2) il ripristino annulla TUTTO quello che e' stato fatto dopo il backup,
    anche gli articoli scritti dall'admin. (3) se il backup differisce dallo stato attuale nei file di .github/workflows GitHub puo' rifiutare
    senza il permesso "workflow" sul token: l'errore viene mostrato com'e'. (4) dopo il ripristino il sito si ricostruisce (2-3 minuti).
-   (5) non c'e' ancora l'eliminazione dei backup: si cancellano a mano come branch su GitHub. */
+   (5) l'eliminazione cancella solo il branch backup (pulsante Elimina, con conferma); il sito non cambia. */
 (function (A) {
   var esc = A.esc, M = function () { return A.main(); };
   var BRN = 'main', LIST = [], INFO = {};
@@ -57,7 +57,8 @@
         var same = b.sha === head, inf = INFO[b.sha] || {}, parts = [fmt(inf.when), b.sha.slice(0, 7)];
         if (same) parts.push('identico allo stato attuale'); if (inf.msg) parts.push(inf.msg);
         return '<div class="it"><span>' + esc(b.name) + '<small title="' + esc(inf.msg || '') + '">' + esc(parts.filter(Boolean).join(' \u00b7 ')) + '</small></span>' +
-          (same ? '' : '<button class="btn sm danger" onclick="A.bkRestore(' + i + ')">Ripristina</button>') + '</div>';
+          '<span>' + (same ? '' : '<button class="btn sm danger" onclick="A.bkRestore(' + i + ')">Ripristina</button> ') +
+          '<button class="btn sm" onclick="A.bkDelete(' + i + ')">Elimina</button></span></div>';
       }).join('');
       M().innerHTML = '<h2>Backup <button class="btn primary sm" onclick="A.bkNew()">+ Crea backup ora</button></h2>' +
         '<div class="card"><p style="margin:0 0 12px;color:#787c82">Un backup \u00e8 una copia dello stato attuale del sito (un branch <code>backup-\u2026</code> su GitHub). ' +
@@ -75,6 +76,15 @@
         if (e.status === 422) { A.toast('Esiste gi\u00e0 un backup di questo minuto (' + nm + ')', true); return; }
         throw e;
       });
+  });
+
+  /* Elimina = cancella SOLO il branch backup (DELETE /git/refs/heads/<nome>). I commit restano su GitHub finche' un altro branch o tag li raggiunge;
+     il sito non cambia. Si rifiuta tutto cio' che non inizia per "backup-" e il branch del sito. */
+  A.bkDelete = A.wrap(function (i) {
+    var b = LIST[i]; if (!b || b.name.indexOf('backup-') !== 0 || b.name === BRN) return;
+    if (!confirm('Eliminare il backup "' + b.name + '"?\n\nIl sito non cambia. Non potrai pi\u00f9 ripristinare questo backup dall\'admin.')) return;
+    return A.api('DELETE', '/git/refs/heads/' + b.name)
+      .then(function () { A.toast('Backup eliminato: ' + b.name); A.go('backup'); });
   });
 
   A.bkRestore = A.wrap(function (i) {
