@@ -7,7 +7,7 @@ Per le regole del sito e dell'admin vedi CLAUDE.md (punti numerati).
 
 Obiettivo di Mirco: gestire un e-commerce gratis, stabile, sfruttando piu' risorse gratuite possibile.
 
-Perche' non GitHub Pages: la documentazione di GitHub dice che Pages non e' permesso come hosting gratuito per attivita' online ed e' commerciali/e-commerce. Perche' non Vercel: il piano gratuito vieta l'uso commerciale. Netlify gratuito: 300 crediti al mese, limite rigido, banda e deploy consumano crediti. Node come server sempre acceso gratis (es. Render): si spegne dopo 15 minuti, disco effimero, non adatto alla produzione.
+Perche' non GitHub Pages: la documentazione di GitHub dice che Pages non e' pensato ne' permesso come hosting gratuito per attivita' online, siti e-commerce o siti rivolti soprattutto alle transazioni commerciali. Perche' non Vercel: il piano gratuito vieta l'uso commerciale. Netlify gratuito: 300 crediti al mese, limite rigido, banda e deploy consumano crediti. Node come server sempre acceso gratis (es. Render): si spegne dopo 15 minuti, disco effimero, non adatto alla produzione.
 
 Stack scelto (tutto su un account Cloudflare, piu' Stripe):
 - Sito e catalogo statico: Cloudflare Pages (richieste statiche illimitate, 500 build al mese, 1 build alla volta, timeout 20 min).
