@@ -141,7 +141,7 @@ pagination:
       <p>{{ post.description }}</p>
       <p class="post-meta">
         {{ read_time }} min di lettura &nbsp; &middot; &nbsp;
-        {{ post.date | date: '%d %B %Y' }}
+        {{ post.date | data_it: '%d %B %Y' }}
         {% if post.external_source %}
         &nbsp; &middot; &nbsp; {{ post.external_source }}
         {% endif %}

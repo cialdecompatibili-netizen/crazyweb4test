@@ -5,7 +5,7 @@
     <a href="{{ site.url }}{{ site.baseurl }}{{ site.impressum_path }}">Note legali</a>.
   {% endif %}
   {% if site.last_updated %}
-    Ultimo aggiornamento: {{ 'now' | date: '%d %B %Y' }}.
+    Ultimo aggiornamento: {{ 'now' | data_it: '%d %B %Y' }}.
   {% endif %}
 {% endcapture %}
 
