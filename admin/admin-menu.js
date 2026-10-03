@@ -195,8 +195,8 @@
       h += '</div><p><button class="btn primary" onclick="A.mnSave()">Salva menu</button></p></div>';
       var off = PG.filter(function (p) { return !p.nav && p.permalink && !/404/.test(p.permalink); });
       if (off.length) {
-        h += '<div class="card"><h3>Pagine fuori dal menu</h3><div class="list">';
-        off.forEach(function (p) { h += '<div class="it"><span>' + esc(p.title || p.name) + '<small>' + esc(p.permalink) + '</small></span><button class="btn sm" onclick="A.mnOn(\'' + A.jq(p.name) + '\')">Aggiungi al menu</button></div>'; });
+        A.ofAllOn = false; h += '<div class="card"><h3>Pagine fuori dal menu (' + off.length + ')</h3><p><input id="of_q" placeholder="Cerca pagina..." oninput="A.ofF()"> <button class="btn sm" id="of_m" onclick="A.ofM()"' + (off.length <= 8 ? ' style="display:none"' : '') + '>Mostra tutte (' + off.length + ')</button></p><div class="list" id="of_l">';
+        off.forEach(function (p, i) { h += '<div class="it" data-s="' + esc(((p.title || p.name) + ' ' + p.permalink).toLowerCase()) + '"' + (i >= 8 ? ' style="display:none"' : '') + '><span>' + esc(p.title || p.name) + '<small>' + esc(p.permalink) + '</small></span><button class="btn sm" onclick="A.mnOn(\'' + A.jq(p.name) + '\')">Aggiungi al menu</button></div>'; });
         h += '</div></div>';
       }
       h += '<div class="card"><h3>Voci link personalizzate</h3><p>Voci di menu che puntano a un URL qualsiasi (pagina del sito o link esterno). Non creano pagine: puoi avere piu voci verso la stessa destinazione senza conflitti.</p><div id="lk">';
@@ -208,6 +208,16 @@
       M().innerHTML = h;
     });
   };
+  /* Pagine fuori dal menu: elenco compatto. Mostra le prime 8, ricerca per titolo/indirizzo, 'Mostra tutte' le apre. Solo filtro visivo (nessuna richiesta). */
+  A.ofF = function () {
+    var q = ($('of_q').value || '').toLowerCase().trim(), rows = document.querySelectorAll('#of_l .it'), m = $('of_m');
+    Array.prototype.forEach.call(rows, function (r, i) {
+      r.style.display = (q ? r.getAttribute('data-s').indexOf(q) >= 0 : (A.ofAllOn || i < 8)) ? '' : 'none';
+    });
+    m.style.display = (q || rows.length <= 8) ? 'none' : '';
+    m.textContent = A.ofAllOn ? 'Mostra meno' : 'Mostra tutte (' + rows.length + ')';
+  };
+  A.ofM = function () { A.ofAllOn = !A.ofAllOn; A.ofF(); };
   A.kAdd = function (btn, div) {
     var d = document.createElement('div'); d.className = 'mrow k';
     d.innerHTML = div ? '<input class="k_t" value="divider" readonly><input class="k_p" value="" readonly><span></span><button class="btn sm danger" onclick="this.parentNode.remove()">x</button>'
