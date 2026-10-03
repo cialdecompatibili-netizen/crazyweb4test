@@ -297,6 +297,55 @@
     var sel = '<select onchange="A.setPP(\'' + key + '\',this.value)">' + PP_OPT.map(function (o) { return '<option' + (o === PP ? ' selected' : '') + '>' + o + '</option>'; }).join('') + '</select>';
     return '<div class="pgbar" style="display:flex;flex-wrap:wrap;gap:.6em;align-items:center;justify-content:space-between;margin:.6em 0"><small>' + ((pg - 1) * PP + 1) + '-' + Math.min(total, pg * PP) + ' di ' + total + '</small><span>' + b + '</span><span><small>Mostra</small> ' + sel + ' <small>per pagina</small></span></div>';
   };
+  /* ---- NASCONDI / PUBBLICA (occhio) -------------------------------------------------------------
+     Usa il flag NATIVO di Jekyll "published: false" nel front matter: con quello la pagina non viene nemmeno generata
+     (niente URL, niente sitemap, niente elenchi, niente ricerca Ctrl+K, niente menu automatico). Verificato con una build
+     su articolo, progetto, servizio e pagina. Il file resta nel repo: si lavora in tranquillita' e poi si pubblica.
+     PUNTI CRITICI: (1) il flag e' "published" e NON "draft": le bozze _drafts/ di Jekyll sono un'altra cosa. (2) un link scritto
+     a mano (voce di Menu, altro testo) verso una pagina nascosta da' 404: controllare il Menu. (3) lo stesso file puo' avere anche
+     stella/casetta: tutte condividono la coda starBusy[nome], cosi' i commit sullo stesso file non vanno in conflitto (sha). */
+  var EYE_SVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+  function eyeSvg(off) {
+    return EYE_SVG + (off ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>' : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>') + '</svg>';
+  }
+  A.eyeBtn = function (name, hidden, key) {
+    return '<button class="btn sm eye' + (hidden ? ' off' : '') + '" data-n="' + esc(name) + '" data-k="' + key + '" title="' + (hidden ? 'Nascosto al pubblico: clic per pubblicare' : 'Visibile: clic per nascondere') + '" onclick="A.pub(\'' + esc(name) + '\',' + (hidden ? 'false' : 'true') + ',this,\'' + key + '\')">' + eyeSvg(hidden) + '</button>';
+  };
+  function paintEye(btn, hidden) {
+    btn.className = 'btn sm eye' + (hidden ? ' off' : '');
+    btn.title = hidden ? 'Nascosto al pubblico: clic per pubblicare' : 'Visibile: clic per nascondere';
+    btn.innerHTML = eyeSvg(hidden);
+    btn.setAttribute('onclick', 'A.pub(\'' + btn.getAttribute('data-n') + '\',' + (hidden ? 'false' : 'true') + ',this,\'' + btn.getAttribute('data-k') + '\')');
+    if (btn.parentNode && btn.parentNode.classList) btn.parentNode.classList.toggle('hid', hidden);
+  }
+  var PUBDIR = { posts: '_posts/', projects: '_projects/', servizi: '_servizi/', news: '_news/', pages: '_pages/' };
+  /* A.pub: REATTIVA come stella/casetta: l'occhio cambia subito, il commit parte in background, se fallisce torna com'era. */
+  A.pub = function (name, hide, btn, key) {
+    if (btn) paintEye(btn, hide);
+    var prev = starBusy[name] || Promise.resolve();
+    starBusy[name] = prev.then(function () {
+      var p = PUBDIR[key] + name;
+      return A.getFile(p).then(function (f) {
+        var s = A.splitFM(f.text);
+        if (!s.fm) throw new Error('Front matter non trovato in ' + name);
+        var fm = hide ? A.fmSet(s.fm, 'published', 'false') : A.fmDel(s.fm, 'published');
+        var nl = f.text.indexOf('\r\n') >= 0 ? '\r\n' : '\n';
+        var out = '---' + nl + fm.replace(/\r?\n+$/, '') + nl + '---' + nl + s.body;
+        return A.putFile(p, out, f.sha, 'admin: ' + (hide ? 'nascosto ' : 'pubblicato ') + name);
+      }).then(function () { A.toast(hide ? 'Nascosto al pubblico (aggiornamento in corso)' : 'Visibile (pubblicazione in corso)'); });
+    }).catch(function (e) {
+      if (btn) paintEye(btn, !hide);
+      A.toast('Non salvato: ' + A.errMsg(e), true);
+    }).then(function () { if (A.afterPub) return A.afterPub(key); });
+    return starBusy[name];
+  };
+  /* spunta "Nascondi al pubblico" nell'editor (articoli, progetti, servizi, news, pagine) + etichetta del pulsante Salva */
+  A.saveLbl = function (hidden) { return hidden ? 'Salva (resta nascosto)' : 'Salva e pubblica'; };
+  window.pubLbl = function (c) { Array.prototype.forEach.call(document.querySelectorAll('.svb'), function (b) { b.textContent = A.saveLbl(c); }); };
+  A.hideBox = function (hidden, id) {
+    return '<label style="display:flex;gap:8px;align-items:center;margin:16px 0 4px;font-weight:600;cursor:pointer"><input type="checkbox" id="' + (id || 'f__hidden') + '"' + (hidden ? ' checked' : '') + ' onchange="pubLbl(this.checked)" style="width:auto;margin:0"> Nascondi al pubblico (bozza)</label>' +
+      '<small style="display:block;margin:0 0 14px;color:#787c82">Si salva ma non e\' visibile sul sito: sparisce da elenchi, menu, ricerca e Google. Togli la spunta per pubblicarlo.</small>';
+  };
   function collection(cfg) {
     A.views[cfg.key] = function () {
       return A.getDir(cfg.dir).then(function (files) {
@@ -306,9 +355,10 @@
         files = files.slice((pg - 1) * PP, pg * PP); /* da qui in poi solo la pagina corrente: gli altri file non vengono nemmeno letti */
         /* Solo Articoli: stato "in evidenza" (featured: true nel front matter, letto da _pages/blog.md). getDir non da' il contenuto: leggo i file in parallelo una volta sola. */
         var hm = []; /* servizi: stato 'in home' (in_home: true), letto dalla stessa apertura dei file */
+        var hid = []; /* stato 'nascosto' (published: false), dalla stessa lettura */
         var cats = []; /* categorie per riga, riempite dalla stessa lettura dei file (zero richieste in piu') */
         var feat = (cfg.key === 'posts' || cfg.key === 'projects' || cfg.key === 'servizi') ? A.getFiles(cfg.dir, files).then(function (rs) { return Promise.all(files.map(function (f, ix) {
-          return Promise.resolve(rs[ix]).then(function (r) { var fm0 = A.splitFM(r.text).fm; cats[ix] = (A.fmGet(fm0, 'categories') || A.fmGet(fm0, 'category') || '').replace(/[\[\]"']/g, '').split(/[ ,]+/).filter(Boolean); hm[ix] = /^in_home:[ \t]*true\b/m.test(fm0); return /^featured:[ \t]*true\b/m.test(fm0); }).catch(function () { return false; });
+          return Promise.resolve(rs[ix]).then(function (r) { var fm0 = A.splitFM(r.text).fm; cats[ix] = (A.fmGet(fm0, 'categories') || A.fmGet(fm0, 'category') || '').replace(/[\[\]"']/g, '').split(/[ ,]+/).filter(Boolean); hm[ix] = /^in_home:[ \t]*true\b/m.test(fm0); hid[ix] = /^published:[ \t]*false\b/m.test(fm0); return /^featured:[ \t]*true\b/m.test(fm0); }).catch(function () { return false; });
         })); }) : Promise.resolve([]);
         return feat.then(function (fl) {
         var h = '<h2>' + cfg.label + ' <button class="btn primary sm" onclick="A.edit(\'' + cfg.key + '\')">+ Nuovo</button></h2><div class="card list">';
@@ -319,7 +369,8 @@
           var home = isSrv ? '<button class="btn sm home' + (hm[i] ? ' on' : '') + '" data-n="' + esc(f.name) + '" data-k="' + cfg.key + '" title="' + (hm[i] ? 'In home page: clic per togliere' : 'Mostra in home page') + '" onclick="A.inHome(\'' + esc(f.name) + '\',' + (hm[i] ? 'false' : 'true') + ',this,\'' + cfg.key + '\')">&#127968;</button>' : '';
           var star = cfg.key === 'posts' ? '<button class="btn sm star' + (fl[i] ? ' on' : '') + '" data-n="' + esc(f.name) + '" title="' + (fl[i] ? 'In evidenza: clic per togliere' : 'Metti in evidenza (in alto nel blog)') + '" onclick="A.feature(\'' + esc(f.name) + '\',' + (fl[i] ? 'false' : 'true') + ',this)">' + (fl[i] ? '&#9733;' : '&#9734;') + '</button>' : '';
           var catB = cfg.key === 'posts' ? '<em style="font-style:normal;font-size:.8em;white-space:nowrap;margin:0 .6em;padding:1px 9px;border-radius:10px;background:rgba(127,127,127,.18);' + ((cats[i] || []).length ? '' : 'opacity:.55;') + '" title="Categoria (la prima decide l\'URL)">' + ((cats[i] || []).length ? esc(cats[i].join(', ')) : 'senza categoria') + '</em>' : '';
-          h += '<div class="it">' + star + home + '<span>' + esc(f.name) + '</span>' + catB +
+          var eye = (cfg.key === 'posts' || cfg.key === 'projects' || cfg.key === 'servizi') ? A.eyeBtn(f.name, !!hid[i], cfg.key) : '';
+          h += '<div class="it' + (hid[i] ? ' hid' : '') + '">' + eye + star + home + '<span>' + esc(f.name) + '</span>' + catB +
             '<button class="btn sm" onclick="A.edit(\'' + cfg.key + '\',\'' + esc(f.name) + '\')">Modifica</button>' +
             '<button class="btn sm danger" onclick="A.del(\'' + cfg.key + '\',\'' + esc(f.name) + '\')">Elimina</button></div>';
         });
@@ -422,6 +473,7 @@
     Promise.all([p, loadCats(key)]).then(function (r) {
       var f = r[0]; cur = { key: key, name: name || '', sha: f ? f.sha : '', fm: f ? A.splitFM(f.text).fm : '', cats: r[1] };
       var body = f ? A.splitFM(f.text).body : '';
+      var hidn = !!f && /^published:[ \t]*false\b/m.test(cur.fm);
       var h = '<h2>' + (name ? 'Modifica ' + esc(name) : 'Nuovo in ' + C[key].label) + '</h2><div class="card">';
       /* ORDINE nell'editor: i campi normali stanno SOPRA il Corpo, quelli in BELOW ('tags' + i due SEO)
          stanno SOTTO, nell'ordine di FIELDS. Solo l'ordine visivo: save() legge ogni campo per id
@@ -444,7 +496,7 @@
         if (BELOW.indexOf(fd[0]) >= 0) below += one; else top += one;
       });
       h += top + '<label>Corpo (Markdown)</label>' + toolbar() + '<textarea id="body">' + esc(body) + '</textarea><div id="mdPrev" class="mdprev" style="display:none"></div>' + below +
-        '<p><button class="btn primary" onclick="A.save()">Salva e pubblica</button><button class="btn" onclick="A.go(\'' + key + '\')">Annulla</button></p></div>';
+        A.hideBox(hidn) + '<p><button class="btn primary svb" onclick="A.save()">' + A.saveLbl(hidn) + '</button><button class="btn" onclick="A.go(\'' + key + '\')">Annulla</button></p></div>';
       M().innerHTML = h;
       window.mdStart();
     }).catch(function (e) { A.toast(A.errMsg(e), true); });
@@ -470,6 +522,8 @@
       if (k === 'inline' || k === 'importance' || k === 'date') fm = A.fmSet(fm, k, v);
       else fm = A.fmSet(fm, k, A.yq(v));
     });
+    var hc = $('f__hidden'), hid = !!(hc && hc.checked); /* nascosto = published: false (vedi A.pub) */
+    if (hc) fm = hid ? A.fmSet(fm, 'published', 'false') : A.fmDel(fm, 'published');
     if (key === 'news' && !/^related_posts:/m.test(fm)) fm = A.fmSet(fm, 'related_posts', 'false');
     if (key === 'posts' && !/^toc:/m.test(fm)) fm = fm.replace(/\n*$/, '') + '\ntoc:\n  beginning: true';
     if (!name) {
@@ -494,7 +548,7 @@
         lbl = '/servizi/' + nm.replace(/\.md$/, '') + '/';
       }
       return A.putFile(C[key].dir + '/' + nm, txt, cur.sha, 'admin: ' + (cur.sha ? 'aggiorna ' : 'crea ') + lbl).then(function () {
-        A.toast('Salvato: pubblicazione in corso'); A.go(key);
+        A.toast(hid ? 'Salvato (nascosto: non visibile al pubblico)' : 'Salvato: pubblicazione in corso'); A.go(key);
       });
     }
   });

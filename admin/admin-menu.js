@@ -42,7 +42,7 @@
         var s = A.splitFM(f.text), fm = s.fm;
         return { name: f.path.split('/').pop(), sha: f.sha, fm: fm, body: s.body, title: A.fmGet(fm, 'title'),
           nav: A.fmGet(fm, 'nav') === 'true', order: parseFloat(A.fmGet(fm, 'nav_order')),
-          dropdown: A.fmGet(fm, 'dropdown') === 'true', permalink: A.fmGet(fm, 'permalink') };
+          dropdown: A.fmGet(fm, 'dropdown') === 'true', permalink: A.fmGet(fm, 'permalink'), hidden: /^published:[ \t]*false\b/m.test(fm) };
       });
       return PG;
     });
@@ -83,11 +83,13 @@
   }
 
   /* ---- Pagine ---- */
+  /* dopo aver nascosto/pubblicato una pagina l'elenco in memoria (PG, con sha) va riletto: altrimenti 'Modifica' userebbe uno sha vecchio e darebbe conflitto */
+  A.afterPub = function (key) { if (key === 'pages') return load(); };
   A.views.pages = function () {
     return load().then(function () {
       var h = '<h2>Pagine <button class="btn primary sm" onclick="A.pgEdit()">+ Nuova</button></h2><div class="card list">';
       PG.slice().sort(function (a, b) { return a.name < b.name ? -1 : 1; }).forEach(function (p) {
-        h += '<div class="it"><span>' + esc(p.title || p.name) + '<small>' + esc(p.name) + (p.nav ? ' - nel menu' : '') + '</small></span>' +
+        h += '<div class="it' + (p.hidden ? ' hid' : '') + '">' + (p.permalink === '/' ? '' : A.eyeBtn(p.name, p.hidden, 'pages')) + '<span>' + esc(p.title || p.name) + '<small>' + esc(p.name) + (p.nav ? ' - nel menu' : '') + '</small></span>' +
           '<button class="btn sm" onclick="A.pgEdit(\'' + esc(p.name) + '\')">Modifica</button>' +
           (p.permalink === '/' ? '' : '<button class="btn sm danger" onclick="A.pgDel(\'' + esc(p.name) + '\')">Elimina</button>') + '</div>';
       });
@@ -101,7 +103,8 @@
     /* LAYOUT "WORDPRESS": prima quello che si scrive (Titolo + Corpo con toolbar), poi le impostazioni.
        Il front matter YAML NON sparisce: sta in <details> "Impostazioni avanzate" (chiuso), cosi' non
        copre piu' il testo. pgSave() lo legge comunque per id (p_fm), quindi nulla cambia nel salvataggio. */
-    var save = '<button class="btn primary" onclick="A.pgSave()">Salva e pubblica</button><button class="btn" onclick="A.go(\'pages\')">Annulla</button>';
+    var pHid = !!(p && p.hidden), pHome = !!(p && p.permalink === '/'); /* la home non si nasconde */
+    var save = '<button class="btn primary svb" onclick="A.pgSave()">' + A.saveLbl(pHid) + '</button><button class="btn" onclick="A.go(\'pages\')">Annulla</button>';
     var h = '<h2>' + (p ? 'Modifica ' + esc(p.name) : 'Nuova pagina') + '</h2><div class="card">' +
       '<p style="position:sticky;top:0;background:inherit;z-index:2;margin:0 0 10px">' + save + '</p>' +
       (p ? '' : '<label>Nome file (senza .md)</label><input id="p_name" placeholder="chi-siamo">') +
@@ -116,7 +119,7 @@
       /* SEO sotto il Corpo (stesso ordine dell'editor articoli). Solo posizione: pgSave() li legge per id. */
       '<label>SEO Title (vuoto = usa il titolo)</label><input id="p_seot" value="' + esc(A.fmGet(curP.fm, 'seo_title')) + '">' +
       '<label>SEO Description (vuoto = estratto automatico del testo)</label><input id="p_seod" value="' + esc(A.fmGet(curP.fm, 'seo_description')) + '">' +
-      '<details style="margin:14px 0"><summary style="cursor:pointer;font-weight:600">Impostazioni avanzate (front matter YAML)</summary>' +
+      (pHome ? '' : A.hideBox(pHid, 'p_hidden')) + '<details style="margin:14px 0"><summary style="cursor:pointer;font-weight:600">Impostazioni avanzate (front matter YAML)</summary>' +
       '<p style="margin:6px 0"><small>Layout, permalink, menu, ecc. Se rompi il YAML la pagina sparisce dal sito senza errore visibile.</small></p>' +
       '<textarea id="p_fm" style="min-height:200px">' + esc(curP.fm) + '</textarea></details>' +
       '<p>' + save + '</p></div>';
@@ -159,6 +162,7 @@
       var v = ($(s[1]).value || '').trim();
       pfm = v ? A.fmSet(pfm, s[0], A.yq(v)) : A.fmDel(pfm, s[0]);
     });
+    if ($('p_hidden')) pfm = $('p_hidden').checked ? A.fmSet(pfm, 'published', 'false') : A.fmDel(pfm, 'published'); /* nascosta = published: false */
     var txt = '---\n' + pfm.replace(/\n+$/, '') + '\n---\n\n' + $('body').value.replace(/^\n+/, '');
     return A.putFile('_pages/' + name + '.md', txt, curP.sha, 'admin: pagina ' + name).then(function () { A.toast('Salvato'); A.go('pages'); });
   });
