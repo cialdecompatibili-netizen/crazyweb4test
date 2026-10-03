@@ -207,17 +207,13 @@ disqus_shortname: al-folio # put your disqus shortname
 # If you have blog posts published on medium.com or other external sources,
 # you can display them in your blog by adding a link to the RSS feed.
 # Optional: Set default categories and tags for posts from each source.
-external_sources:
-  - name: medium.com
-    rss_url: https://medium.com/@al-folio/feed
-    categories: [external-posts]
-    tags: [medium]
-  - name: Google Blog
-    posts:
-      - url: https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/
-        published_date: 2024-05-14
-    categories: [external-posts]
-    tags: [google]
+# SPENTI (erano i feed di esempio del tema: Medium @al-folio e un articolo Google). Per riattivarne uno, rimetti le voci sotto
+# la chiave, per esempio:
+#   - name: medium.com
+#     rss_url: https://medium.com/@tuo-utente/feed
+#     categories: [external-posts]
+#     tags: [medium]
+external_sources: []
 
 # -----------------------------------------------------------------------------
 # Newsletter
