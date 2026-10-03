@@ -109,3 +109,8 @@ Other gates:
 
 ## Immagine in evidenza (articoli)
 - Campi `thumbnail` e `thumbnail_alt` nell'editor articoli. `_pages/blog.md` usa `thumbnail_alt` (fallback: titolo) come alt.
+
+
+## Estratto e Leggi tutto (elenco blog)
+- L'elenco in _pages/blog.md usa _includes/estratto.liquid (NON piu' post.description). Con <!--more--> nel testo l'estratto e' tutto cio' che sta prima; senza, taglia a fine frase (~260 caratteri) o per parole con '...'.
+- Pulsante 'Leggi tutto' nella toolbar (mdMore in admin-views.js, anche pgToolbar in admin-menu.js): inserisce <!--more--> come blocco protetto (regola in mdRender, riga sul Liquid). Uno solo per testo.

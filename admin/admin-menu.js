@@ -140,7 +140,8 @@
       '<button class="btn sm" onclick="mdIns(\'\\n- \',\'\')">Lista</button>' +
       '<button class="btn sm" onclick="mdIns(\'[\',\'](https://)\')">Link</button>' +
       '<button class="btn sm" onclick="mdIns(\'![\',\'](\' + A.baseurl() + \'/assets/img/)\')">Img</button>' +
-      '<button class="btn sm" onclick="mdGal()">Galleria</button></div>';
+      '<button class="btn sm" onclick="mdGal()">Galleria</button>' +
+      '<button class="btn sm" onclick="mdMore()" title="Nell\'elenco del blog l\'estratto finisce qui">Leggi tutto</button></div>';
   }
   /* A.pgSave: salva una pagina di _pages/. Il YAML puo' essere modificato a mano dall'utente: se lo rompe (indentazione, due punti non quotati) la pagina SPARISCE dal build, senza errore visibile. Le pagine hanno 'layout' e 'permalink' [DOC al-folio CUSTOMIZE.md: 'change the layout attribute ... and the path to access it by changing the permalink']. sha e' obbligatorio per aggiornare un file esistente (vedi putFile). Eliminare o rinominare permalink '/' rompe la home. */
   A.pgSave = A.wrap(function () {

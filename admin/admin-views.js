@@ -121,7 +121,7 @@
         var tb = []; while (i < lines.length && /^\s*\|.*\|\s*$/.test(lines[i])) { tb.push(lines[i]); i++; }
         protect('table', tb); continue;
       }
-      if (/^\s*\{%[^%]*%\}\s*$/.test(l) || /^\s*\{:[^}]*\}\s*$/.test(l) || /^\s*\[\^[^\]]+\]:/.test(l)) { protect('liquid', [l]); i++; continue; }
+      if (/^\s*\{%[^%]*%\}\s*$/.test(l) || /^\s*\{:[^}]*\}\s*$/.test(l) || /^\s*\[\^[^\]]+\]:/.test(l) || /^\s*<!--more-->\s*$/.test(l)) { protect('liquid', [l]); i++; continue; }  /* <!--more--> = taglio dell'estratto nell'elenco blog (vedi _includes/estratto.liquid) */
       if (HTML_BLOCK.test(l)) {                               /* HTML / custom element: fino a chiusura bilanciata + riga vuota */
         var hb = [l], depth = tagDepth(l); i++;
         while (i < lines.length && (depth > 0 || !/^\s*$/.test(lines[i]))) { hb.push(lines[i]); depth += tagDepth(lines[i]); i++; }
@@ -250,6 +250,22 @@
     else if (a === '![') { var src = prompt('URL immagine:', A.baseurl() + '/assets/img/'); if (src) document.execCommand('insertImage', false, src); }
     visSync();
   };
+  /* mdMore: pulsante "Leggi tutto". Inserisce <!--more--> dove sta il cursore (in Visuale come blocco protetto, in Sorgente come testo).
+     Nell'elenco del blog l'estratto e' tutto quello che sta PRIMA del marcatore. Ne basta uno per testo: se c'e' gia', avvisa invece di duplicarlo. */
+  window.mdMore = function () {
+    var t = $('body'); if (!t) return;
+    if (visActive()) {
+      var p = $('mdPrev'); visSync();
+      if (/<!--more-->/.test(t.value)) { A.toast('Il taglio "Leggi tutto" e\' gia nel testo', true); return; }
+      p.focus(); var s = window.getSelection();
+      if (!s.rangeCount || !p.contains(s.anchorNode)) { var r = document.createRange(); r.selectNodeContents(p); r.collapse(false); s.removeAllRanges(); s.addRange(r); }
+      document.execCommand('insertHTML', false, window.mdRender('<!--more-->'));
+      visSync();
+    } else {
+      if (/<!--more-->/.test(t.value)) { A.toast('Il taglio "Leggi tutto" e\' gia nel testo', true); return; }
+      origIns('\n\n<!--more-->\n\n', '');
+    }
+  };
   function toolbar() {
     return '<div class="tools">' +
       '<button class="btn sm" id="mdPrevBtn" onclick="mdPrev()">Sorgente</button>' +
@@ -260,6 +276,7 @@
       '<button class="btn sm" onclick="mdIns(\'[\',\'](https://)\')">Link</button>' +
       '<button class="btn sm" onclick="mdIns(\'![\',\'](\' + A.baseurl() + \'/assets/img/)\')">Img</button>' +
       '<button class="btn sm" onclick="mdGal()">Galleria</button>' +
+      '<button class="btn sm" onclick="mdMore()" title="Nell\'elenco del blog l\'estratto finisce qui">Leggi tutto</button>' +
       '</div>';
   }
   function ymlList(fm) { return fm; }
