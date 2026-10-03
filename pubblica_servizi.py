@@ -71,7 +71,7 @@ CSS_HOME_PREFIX = "display:block;color:inherit;text-decoration:none;"
 RE_TD = re.compile(r"^<td><b>(?P<t>.*?)</b>(?P<resto>.*)</td>(?P<cr>\r?)$", re.M)
 RE_HOME = re.compile(
     r'<div class="srv-home-card"><b>(?P<t>.*?)</b>(?P<resto>.*?)</div>')
-RE_LINK = re.compile(r"/(?:blog/\d{4}|servizi)/([a-z0-9-]+)/")
+RE_LINK = re.compile(r"/(?:blog/(?:\d{4}|servizi)|servizi)/([a-z0-9-]+)/")
 
 
 def leggi(p):
@@ -111,7 +111,7 @@ def assicura_permalink(percorso, slug):
     scrivi(percorso, t)
 
 
-RE_VECCHIO = re.compile(r"\{\{ '/blog/\d{4}/([a-z0-9-]+)/' \| relative_url \}\}")
+RE_VECCHIO = re.compile(r"\{\{ '/(?:blog/\d{4}|servizi)/([a-z0-9-]+)/' \| relative_url \}\}")
 
 
 def riallinea(testo, scelti, stat):
