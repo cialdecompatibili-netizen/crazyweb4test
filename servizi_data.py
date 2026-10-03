@@ -1,4 +1,4 @@
-"""
+﻿"""
 servizi_data.py
 ================
 UNICO file che devi editare per aggiungere/modificare un servizio.
@@ -6,7 +6,7 @@ Non tocca nulla da solo: e' solo la lista dati che genera_servizi.py legge.
 
 Ogni servizio e' un dizionario con questi campi:
 
-  slug        : usato nell'URL (es. "consulenza-seo" -> /blog/2026/consulenza-seo/)
+  slug        : usato nell'URL (es. "consulenza-seo" -> /blog/servizi/consulenza-seo/)
                 SOLO minuscolo, senza spazi, trattini al posto degli spazi.
   titolo      : titolo mostrato in pagina e nei menu
   descrizione : 1 riga, usata come meta description (SEO) e anteprima blog
