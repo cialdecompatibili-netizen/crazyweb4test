@@ -57,8 +57,8 @@
         var same = b.sha === head, inf = INFO[b.sha] || {}, parts = [fmt(inf.when), b.sha.slice(0, 7)];
         if (same) parts.push('identico allo stato attuale'); if (inf.msg) parts.push(inf.msg);
         return '<div class="it"><span>' + esc(b.name) + '<small title="' + esc(inf.msg || '') + '">' + esc(parts.filter(Boolean).join(' \u00b7 ')) + '</small></span>' +
-          '<div style="flex:none;white-space:nowrap">' + (same ? '' : '<button class="btn sm danger" onclick="A.bkRestore(' + i + ')">Ripristina</button> ') +
-          '<button class="btn sm" onclick="A.bkDelete(' + i + ')">Elimina</button></div></div>';
+          '<span>' + (same ? '' : '<button class="btn sm danger" onclick="A.bkRestore(' + i + ')">Ripristina</button> ') +
+          '<button class="btn sm" onclick="A.bkDelete(' + i + ')">Elimina</button></span></div>';
       }).join('');
       M().innerHTML = '<h2>Backup <button class="btn primary sm" onclick="A.bkNew()">+ Crea backup ora</button></h2>' +
         '<div class="card"><p style="margin:0 0 12px;color:#787c82">Un backup \u00e8 una copia dello stato attuale del sito (un branch <code>backup-\u2026</code> su GitHub). ' +
