@@ -1,16 +1,19 @@
 """
 genera_servizi.py
 ==================
-Genera/aggiorna i post-servizio (uno per ogni voce in servizi_data.py) nella
-cartella _posts del repo LOCALE crazyweb4test_local. Non tocca GitHub: scrive
-solo file locali. Il push va fatto a mano dopo aver controllato il risultato
-(git add / commit / push, oppure con git a riga di comando).
+Genera/aggiorna le pagine-servizio (una per ogni voce in servizi_data.py) nella
+cartella _servizi/ del repo LOCALE di TEST (collection "servizi", NON piu' _posts).
+Non tocca GitHub: scrive solo file locali. Il push va fatto a mano dopo aver
+controllato il risultato (git add / commit / push, oppure via pubblica_servizi.py).
+ATTENZIONE: _servizi/ esiste SOLO su TEST. Su PROD (crazyweb4) la collection non c'e':
+i file creati la' non verrebbero pubblicati (vedi CLAUDE.md punti 10 e 18).
 
 USO:
-    python genera_servizi.py            -> crea/aggiorna i post servizio
-    python genera_servizi.py --clean    -> sposta i post di test/sporcizia
+    python genera_servizi.py            -> crea/aggiorna le pagine servizio
+    python genera_servizi.py --clean    -> sposta i vecchi post di test/sporcizia
                                             in _posts/_backup_test (NON li
-                                            cancella mai per davvero)
+                                            cancella mai per davvero; riguarda
+                                            _posts, non _servizi)
     python genera_servizi.py --dry-run  -> mostra cosa farebbe, senza
                                             scrivere nulla
 

@@ -128,7 +128,7 @@ schema_org:
   country: # codice a 2 lettere, es. IT
   area_served:
   same_as: [] # profili ufficiali (LinkedIn, Facebook...), lista di URL
-  service_category: servizi # categoria dei post che diventano 'Service' in schema.org
+  service_category: servizi # OBSOLETO, non letto da nessuno: i servizi sono la collection 'servizi' e metadata.liquid li riconosce da page.collection (non dalla categoria). Lasciato per compatibilita'; non serve modificarlo.
 
 # -----------------------------------------------------------------------------
 # Analytics and search engine verification

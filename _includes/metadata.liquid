@@ -157,7 +157,7 @@
   <!-- Schema.org -->
   {% comment %}
     Un solo @graph. Dati azienda SOLO da _config.yml > schema_org; i campi vuoti NON vengono emessi (niente dati inventati).
-    Nodi: Organization + WebSite (su ogni pagina, @id fissi); poi UNO tra Service (categoria schema_org.service_category),
+    Nodi: Organization + WebSite (su ogni pagina, @id fissi); poi UNO tra Service (pagine della collection 'servizi', is_service: NON dipende dalla categoria; se cambi la collection aggiorna is_service qui sopra),
     BlogPosting (altri post) e WebPage; poi BreadcrumbList (non in home). Ordine dei campi: prima gli opzionali (con virgola
     finale), per ultimi quelli sempre presenti: cosi' il JSON resta valido qualunque campo sia vuoto.
   {% endcomment %}

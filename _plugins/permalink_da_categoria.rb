@@ -2,7 +2,9 @@
 
 # URL dei post presi dalla CATEGORIA (la data NON e' nell'URL).
 #  - permalink_da_categoria (_config.yml): modello di default, es. /blog/:categoria/:title/
-#  - permalink_per_categoria (_config.yml): eccezioni per categoria, es. { servizi: /servizi/:title/ }
+#  - permalink_per_categoria (_config.yml): eccezioni per categoria, es. { prodotti: /negozio/:title/ }. Oggi VUOTO:
+#    i servizi NON passano di qui, sono la collection 'servizi' (permalink in _config.yml > collections, /servizi/:title/).
+#    Questo plugin lavora SOLO sui post (site.posts): non tocca mai _servizi/.
 #    La regola vince sul modello di default. Chiave = categoria slugificata come negli archivi.
 # Segnaposto: :categoria = prima categoria del post (slugificata), :title = nome file senza data.
 # Post senza categoria: permalink globale di _config.yml (/blog/:title/).
