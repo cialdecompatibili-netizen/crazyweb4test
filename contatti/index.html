@@ -58,11 +58,15 @@
   var form = document.getElementById('cf-form');
   var esito = document.getElementById('cf-esito');
   var btn = document.getElementById('cf-btn');
+  
   var ENDPOINT = "https://contatti-form.evabomboniere.workers.dev";
   var SITEKEY = "0x4AAAAAAFNJy_IB22gVYOuB";
+  
   var t0 = Date.now();
   var wid = null;
+  
   function mostra(m, ok) { esito.textContent = m; esito.style.color = ok ? '' : '#b00020'; }
+  
   function avvia() {
     if (window.turnstile) { wid = window.turnstile.render('#cf-ts', { sitekey: SITEKEY }); }
     else { setTimeout(avvia, 200); }
@@ -70,9 +74,11 @@
   avvia();
   form.addEventListener('submit', function (ev) {
     ev.preventDefault();
+    
     if (!form.checkValidity()) { mostra('Compila nome, email e messaggio.', false); return; }
     var token = window.turnstile && wid !== null ? window.turnstile.getResponse(wid) : '';
     if (!token) { mostra('Completa la verifica di sicurezza.', false); return; }
+    
     var d = new URLSearchParams(new FormData(form));
     d.set('cf-turnstile-response', token);
     d.set('t', String(t0));
@@ -83,6 +89,7 @@
     fetch(ENDPOINT, { method: 'POST', body: d })
       .then(function (r) { return r.json(); })
       .then(function (j) {
+        
         if (j.status === 'ok') { form.reset(); mostra('Messaggio inviato, grazie! Ti risponderemo presto.', true); }
         else { mostra('Invio non riuscito. Riprova tra poco.', false); }
         if (window.turnstile) { window.turnstile.reset(wid); }
