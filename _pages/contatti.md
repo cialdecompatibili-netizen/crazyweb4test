@@ -6,6 +6,6 @@ permalink: /contatti/
 nav_order: 20
 ---
 
-Hai un progetto in mente? Sito, e-commerce, SEO o pubblicità: raccontaci da dove parti e ti diciamo come possiamo aiutarti.
+<p class="cf-intro">Hai un progetto in mente? Sito, e-commerce, SEO o pubblicità: raccontaci da dove parti e ti diciamo come possiamo aiutarti.</p>
 
 {% include contatti_form.liquid %}
