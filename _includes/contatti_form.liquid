@@ -1,6 +1,33 @@
-<!-- Form contatti riusabile. Config in _config.yml > contatti (endpoint, turnstile_sitekey): nessun nome di sito scritto qui.
-     Antispam: honeypot "website" + tempo minimo + Turnstile verificato lato Apps Script. Codice server: claudetemp/contatti/contatti-apps-script.gs
-     Nei commenti di questo file non scrivere le parentesi graffe-percento (Liquid le eseguirebbe). -->
+{% comment %}
+  =====================================================================================================================
+  FORM CONTATTI RIUSABILE  (_includes/contatti_form.liquid)  -  si inserisce in una pagina con il tag include (vedi _pages/contatti.md)
+  =====================================================================================================================
+  COSA FA
+  Mostra nome / email / messaggio + il riquadro Turnstile (il "sei un umano?" di Cloudflare) e, all'invio, manda i dati al
+  Worker Cloudflare "contatti-form", che li controlla e li scrive nel foglio Google. Questi commenti Liquid NON finiscono nella
+  pagina pubblicata (a differenza di quelli HTML): si leggono solo qui.
+
+  CONFIGURAZIONE (nessun nome di sito e' scritto in questo file) - _config.yml, sezione "contatti":
+    endpoint          = indirizzo del Worker (https://contatti-form.evabomboniere.workers.dev)
+    turnstile_sitekey = chiave PUBBLICA di Turnstile (la segreta sta solo nel Worker)
+  Se uno dei due e' vuoto il form non compare e si legge "non e' ancora attivo": e' il modo per SPEGNERE il form senza toccare il codice.
+  Si possono anche passare al volo:  include contatti_form.liquid endpoint="..." sitekey="..."  (per un form con un Worker diverso).
+
+  ANTISPAM (3 livelli, il codice che li controlla e' in claudetemp/contatti-worker/worker.js):
+    1. campo trappola "website", nascosto fuori schermo: gli umani non lo vedono, i bot lo compilano
+    2. tempo minimo: la pagina manda in "t" quando e' stata aperta; il Worker scarta gli invii sotto i 3 secondi
+    3. Turnstile: il token del riquadro viene verificato dal Worker con la chiave segreta
+
+  PUNTI CRITICI
+    (1) I NOMI dei campi (nome, email, messaggio, website, t, cf-turnstile-response, tipo, sito, pagina) sono un accordo con worker.js:
+        se ne cambi uno qui, cambialo anche la'.
+    (2) Il dominio su cui sta il sito deve essere registrato nel widget Turnstile (Cloudflare > Turnstile > Hostname Management),
+        altrimenti il riquadro non compare. github.io e' gia' registrato; un dominio personalizzato va aggiunto (max 10 gratis per widget).
+    (3) Usa una sola volta per pagina: gli id (cf-form, cf-ts, ...) sono fissi.
+    (4) Non usare le parentesi graffe con la percentuale dentro i commenti: Liquid le eseguirebbe.
+  Per togliere del tutto il sistema vedi le istruzioni in cima a claudetemp/contatti-worker/worker.js.
+  =====================================================================================================================
+{% endcomment %}
 {% assign cf_endpoint = include.endpoint | default: site.contatti.endpoint %}
 {% assign cf_sitekey = include.sitekey | default: site.contatti.turnstile_sitekey %}
 {% if cf_endpoint == nil or cf_endpoint == '' or cf_sitekey == nil or cf_sitekey == '' %}
@@ -19,25 +46,32 @@
     <label for="cf-msg" class="form-label">Messaggio</label>
     <textarea class="form-control" id="cf-msg" name="messaggio" rows="5" maxlength="3000" required></textarea>
   </div>
+  {% comment %} Campo trappola (honeypot): fuori schermo e fuori dalla tabulazione. NON metterlo con display:none, alcuni bot lo ignorano. {% endcomment %}
   <div style="position:absolute;left:-9999px;height:0;overflow:hidden" aria-hidden="true">
     <label for="cf-web">Non compilare</label>
     <input type="text" id="cf-web" name="website" tabindex="-1" autocomplete="off">
   </div>
+  {% comment %} Qui Turnstile disegna il suo riquadro (render esplicito nello script sotto). {% endcomment %}
   <div id="cf-ts" class="mb-3"></div>
   <button type="submit" class="btn btn-primary" id="cf-btn">Invia</button>
   <p id="cf-esito" class="mt-3" role="status" aria-live="polite"></p>
 </form>
+{% comment %} Libreria Turnstile di Cloudflare (render=explicit: la avviamo noi con turnstile.render). Se sostituisci Turnstile, togli anche la funzione avvia(). {% endcomment %}
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 <script>
 (function () {
   var form = document.getElementById('cf-form');
   var esito = document.getElementById('cf-esito');
   var btn = document.getElementById('cf-btn');
+  {% comment %} jsonify scrive i valori tra virgolette e con gli escape giusti: non sostituirlo con la variabile "nuda". {% endcomment %}
   var ENDPOINT = {{ cf_endpoint | jsonify }};
   var SITEKEY = {{ cf_sitekey | jsonify }};
+  {% comment %} t0 = istante di apertura della pagina, spedito come "t": il Worker scarta gli invii sotto i 3 secondi. Si riazzera dopo ogni invio. {% endcomment %}
   var t0 = Date.now();
   var wid = null;
+  {% comment %} mostra(testo, ok): scrive l'esito sotto il bottone; in rosso se ok e' falso. {% endcomment %}
   function mostra(m, ok) { esito.textContent = m; esito.style.color = ok ? '' : '#b00020'; }
+  {% comment %} avvia(): la libreria Turnstile e' caricata in modo asincrono, quindi riprovo ogni 200 ms finche' esiste window.turnstile. {% endcomment %}
   function avvia() {
     if (window.turnstile) { wid = window.turnstile.render('#cf-ts', { sitekey: SITEKEY }); }
     else { setTimeout(avvia, 200); }
@@ -45,9 +79,11 @@
   avvia();
   form.addEventListener('submit', function (ev) {
     ev.preventDefault();
+    {% comment %} Controlli veloci lato browser (solo comodita': quelli veri sono nel Worker, perche' il browser si aggira). {% endcomment %}
     if (!form.checkValidity()) { mostra('Compila nome, email e messaggio.', false); return; }
     var token = window.turnstile && wid !== null ? window.turnstile.getResponse(wid) : '';
     if (!token) { mostra('Completa la verifica di sicurezza.', false); return; }
+    {% comment %} Corpo "x-www-form-urlencoded": e' una richiesta semplice, il browser non fa il controllo preventivo (preflight). Il Worker legge questi stessi nomi. {% endcomment %}
     var d = new URLSearchParams(new FormData(form));
     d.set('cf-turnstile-response', token);
     d.set('t', String(t0));
@@ -58,6 +94,7 @@
     fetch(ENDPOINT, { method: 'POST', body: d })
       .then(function (r) { return r.json(); })
       .then(function (j) {
+        {% comment %} Risposta del Worker: status "ok" oppure "error". Dopo ogni invio il token Turnstile e' consumato, quindi lo si rigenera con reset. {% endcomment %}
         if (j.status === 'ok') { form.reset(); mostra('Messaggio inviato, grazie! Ti risponderemo presto.', true); }
         else { mostra('Invio non riuscito. Riprova tra poco.', false); }
         if (window.turnstile) { window.turnstile.reset(wid); }
