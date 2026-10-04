@@ -2,6 +2,8 @@
 layout: servizio
 title: Frontend editing
 description: Modifiche e interventi sul frontend del sito.
+gruppo: Sviluppo web
+ordine: 9
 ---
 
 ## Cosa include il servizio

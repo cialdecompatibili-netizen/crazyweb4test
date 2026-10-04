@@ -2,6 +2,8 @@
 layout: servizio
 title: Web design
 description: Progettazione grafica di siti web efficaci e coerenti col brand.
+gruppo: Design e brand
+ordine: 2
 ---
 
 ## Cosa include il servizio

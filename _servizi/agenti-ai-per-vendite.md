@@ -2,6 +2,8 @@
 layout: servizio
 title: Agenti AI per vendite
 description: Agenti AI dedicati al supporto delle vendite.
+gruppo: AI e automazione
+ordine: 2
 ---
 
 ## Cosa include il servizio

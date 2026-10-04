@@ -2,6 +2,8 @@
 layout: servizio
 title: Podcast
 description: Produzione e strategia di un podcast per il tuo brand.
+gruppo: Social e contenuti
+ordine: 8
 ---
 
 ## Cosa include il servizio

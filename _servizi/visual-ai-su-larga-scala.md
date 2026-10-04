@@ -2,6 +2,8 @@
 layout: servizio
 title: Visual AI su larga scala
 description: Produzione di contenuti visivi con AI su larga scala.
+gruppo: AI e automazione
+ordine: 10
 ---
 
 ## Cosa include il servizio

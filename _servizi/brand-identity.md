@@ -3,6 +3,8 @@ layout: servizio
 title: Brand identity
 description: Costruzione dell'identita' visiva e valoriale del tuo brand.
 in_home: true
+gruppo: Design e brand
+ordine: 1
 ---
 
 ## Cosa include il servizio

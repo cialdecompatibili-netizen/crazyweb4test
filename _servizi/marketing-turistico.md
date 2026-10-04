@@ -2,6 +2,9 @@
 layout: servizio
 title: Marketing turistico
 description: Marketing digitale per hotel, OTA e tour operator.
+gruppo: Settori verticali
+ordine: 1
+sottotitolo: Hotel, OTA, tour operator
 ---
 
 ## Cosa include il servizio

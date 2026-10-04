@@ -2,6 +2,8 @@
 layout: servizio
 title: Agenti AI per aziende
 description: Agenti AI su misura per i processi della tua azienda.
+gruppo: AI e automazione
+ordine: 1
 ---
 
 ## Cosa include il servizio

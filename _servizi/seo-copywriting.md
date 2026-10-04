@@ -2,6 +2,8 @@
 layout: servizio
 title: SEO copywriting
 description: Testi ottimizzati per i motori di ricerca e per chi legge.
+gruppo: SEO, GEO e visibilità
+ordine: 11
 ---
 
 ## Cosa include il servizio

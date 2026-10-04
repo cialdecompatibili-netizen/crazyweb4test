@@ -2,6 +2,8 @@
 layout: servizio
 title: GEO Audit e Strategy
 description: Audit e strategia per la visibilita' sui motori di risposta AI.
+gruppo: SEO, GEO e visibilità
+ordine: 7
 ---
 
 ## Cosa include il servizio

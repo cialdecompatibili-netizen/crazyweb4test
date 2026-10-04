@@ -2,6 +2,8 @@
 layout: servizio
 title: Dashboard e business intelligence
 description: Dashboard su misura per monitorare in tempo reale i dati chiave della tua attivita'.
+gruppo: Strategia e consulenza
+ordine: 6
 ---
 
 ## Cosa include il servizio

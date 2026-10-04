@@ -2,6 +2,8 @@
 layout: servizio
 title: Marketing per professionisti
 description: Marketing digitale pensato per studi e liberi professionisti.
+gruppo: Settori verticali
+ordine: 2
 ---
 
 ## Cosa include il servizio

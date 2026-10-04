@@ -2,6 +2,8 @@
 layout: servizio
 title: Web analytics e CRO
 description: Analisi dei dati e ottimizzazione del tasso di conversione del sito.
+gruppo: Strategia e consulenza
+ordine: 4
 ---
 
 ## Cosa include il servizio

@@ -2,6 +2,8 @@
 layout: servizio
 title: Manutenzione e infrastruttura
 description: Manutenzione continuativa e gestione dell'infrastruttura del sito.
+gruppo: Sviluppo web
+ordine: 11
 ---
 
 ## Cosa include il servizio

@@ -2,6 +2,8 @@
 layout: servizio
 title: Consulenza eCommerce
 description: Consulenza per far crescere vendite, conversioni e marginalita' del tuo negozio online.
+gruppo: Strategia e consulenza
+ordine: 2
 ---
 
 ## Cosa include il servizio

@@ -2,6 +2,9 @@
 layout: servizio
 title: Workflow automation
 description: Automazione dei processi aziendali con strumenti come n8n e Make.
+gruppo: AI e automazione
+ordine: 6
+sottotitolo: n8n, Make
 ---
 
 ## Cosa include il servizio

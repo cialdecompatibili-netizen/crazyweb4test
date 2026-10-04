@@ -2,6 +2,8 @@
 layout: servizio
 title: SEO AI-driven
 description: Strategie SEO che integrano strumenti e processi basati su AI.
+gruppo: SEO, GEO e visibilità
+ordine: 8
 ---
 
 ## Cosa include il servizio

@@ -2,6 +2,8 @@
 layout: servizio
 title: Sito multilingua
 description: Realizzazione di siti in piu' lingue.
+gruppo: Sviluppo web
+ordine: 8
 ---
 
 ## Cosa include il servizio

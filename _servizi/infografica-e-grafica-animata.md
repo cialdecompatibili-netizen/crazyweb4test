@@ -2,6 +2,8 @@
 layout: servizio
 title: Infografica e grafica animata
 description: Contenuti visivi e animati per comunicare dati e concetti.
+gruppo: Social e contenuti
+ordine: 6
 ---
 
 ## Cosa include il servizio

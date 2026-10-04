@@ -2,6 +2,8 @@
 layout: servizio
 title: Social ads per eCommerce
 description: Advertising sui social pensato per vendere prodotti online.
+gruppo: Advertising (PPC)
+ordine: 6
 ---
 
 ## Cosa include il servizio

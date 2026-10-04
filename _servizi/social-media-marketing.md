@@ -3,6 +3,8 @@ layout: servizio
 title: Social media marketing
 description: Gestione strategica dei canali social del tuo brand.
 in_home: true
+gruppo: Social e contenuti
+ordine: 1
 ---
 
 ## Cosa include il servizio

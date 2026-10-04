@@ -2,6 +2,8 @@
 layout: servizio
 title: PPC per eCommerce
 description: Campagne a pagamento pensate per negozi online.
+gruppo: Advertising (PPC)
+ordine: 5
 ---
 
 ## Cosa include il servizio

@@ -2,6 +2,8 @@
 layout: servizio
 title: Agenti AI vocali
 description: Agenti AI per interazioni vocali con i clienti.
+gruppo: AI e automazione
+ordine: 4
 ---
 
 ## Cosa include il servizio

@@ -2,6 +2,8 @@
 layout: servizio
 title: Lead scoring con AI
 description: Valutazione automatica della qualita' dei lead tramite AI.
+gruppo: AI e automazione
+ordine: 7
 ---
 
 ## Cosa include il servizio

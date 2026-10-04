@@ -2,6 +2,9 @@
 layout: servizio
 title: Email marketing
 description: DEM, newsletter e automation via email per fidelizzare i clienti.
+gruppo: Social e contenuti
+ordine: 4
+sottotitolo: DEM, newsletter, automation
 ---
 
 ## Cosa include il servizio

@@ -2,6 +2,8 @@
 layout: servizio
 title: TikTok Ads
 description: Campagne pubblicitarie su TikTok.
+gruppo: Advertising (PPC)
+ordine: 3
 ---
 
 ## Cosa include il servizio

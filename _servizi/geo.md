@@ -2,6 +2,9 @@
 layout: servizio
 title: GEO
 description: Ottimizzazione della visibilita' su ChatGPT, Gemini e Perplexity.
+gruppo: SEO, GEO e visibilità
+ordine: 6
+sottotitolo: ChatGPT, Gemini, Perplexity
 ---
 
 ## Cosa include il servizio

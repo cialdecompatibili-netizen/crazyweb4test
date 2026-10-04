@@ -2,6 +2,9 @@
 layout: servizio
 title: Lead generation
 description: Generazione di contatti qualificati con marketing e CRM integrati.
+gruppo: Strategia e consulenza
+ordine: 3
+sottotitolo: Marketing + CRM
 ---
 
 ## Cosa include il servizio

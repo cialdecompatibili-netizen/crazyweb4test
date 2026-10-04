@@ -2,6 +2,9 @@
 layout: servizio
 title: Web marketing strategico
 description: Analisi di target e concorrenti per costruire una strategia di web marketing solida e misurabile.
+gruppo: Strategia e consulenza
+ordine: 1
+sottotitolo: Analisi target e concorrenti
 ---
 
 ## Cosa include il servizio

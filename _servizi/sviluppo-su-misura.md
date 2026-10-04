@@ -2,6 +2,8 @@
 layout: servizio
 title: Sviluppo su misura
 description: Sviluppo di soluzioni web personalizzate.
+gruppo: Sviluppo web
+ordine: 10
 ---
 
 ## Cosa include il servizio

@@ -2,6 +2,8 @@
 layout: servizio
 title: Chatbot e assistenti virtuali
 description: Sviluppo di chatbot e assistenti virtuali.
+gruppo: AI e automazione
+ordine: 5
 ---
 
 ## Cosa include il servizio

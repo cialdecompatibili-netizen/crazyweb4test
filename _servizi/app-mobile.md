@@ -2,6 +2,9 @@
 layout: servizio
 title: App mobile
 description: Sviluppo di app mobile per iOS e Android.
+gruppo: Software e applicazioni
+ordine: 1
+sottotitolo: iOS e Android
 ---
 
 ## Cosa include il servizio

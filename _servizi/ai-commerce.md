@@ -2,6 +2,8 @@
 layout: servizio
 title: AI Commerce
 description: Applicazione dell'AI ai processi di vendita online.
+gruppo: AI e automazione
+ordine: 14
 ---
 
 ## Cosa include il servizio

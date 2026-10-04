@@ -2,6 +2,8 @@
 layout: servizio
 title: Content creation e marketing
 description: Creazione di contenuti e strategia editoriale per i tuoi canali.
+gruppo: Social e contenuti
+ordine: 3
 ---
 
 ## Cosa include il servizio

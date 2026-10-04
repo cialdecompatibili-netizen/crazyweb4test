@@ -2,6 +2,8 @@
 layout: servizio
 title: Landing page e funnel
 description: Landing page e funnel pensati per convertire i visitatori.
+gruppo: Sviluppo web
+ordine: 2
 ---
 
 ## Cosa include il servizio

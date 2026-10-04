@@ -2,6 +2,8 @@
 layout: servizio
 title: CRO con AI
 description: Ottimizzazione del tasso di conversione con strumenti di AI.
+gruppo: AI e automazione
+ordine: 15
 ---
 
 ## Cosa include il servizio

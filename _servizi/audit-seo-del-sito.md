@@ -2,6 +2,8 @@
 layout: servizio
 title: Audit SEO del sito
 description: Analisi tecnica e strategica completa dello stato SEO del tuo sito.
+gruppo: SEO, GEO e visibilità
+ordine: 2
 ---
 
 ## Cosa include il servizio

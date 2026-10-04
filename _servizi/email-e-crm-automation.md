@@ -2,6 +2,8 @@
 layout: servizio
 title: Email e CRM automation
 description: Automazione dei flussi email e del CRM.
+gruppo: AI e automazione
+ordine: 8
 ---
 
 ## Cosa include il servizio

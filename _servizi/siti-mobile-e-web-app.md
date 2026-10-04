@@ -2,6 +2,8 @@
 layout: servizio
 title: Siti mobile e web app
 description: Sviluppo di siti responsive e web app.
+gruppo: Sviluppo web
+ordine: 7
 ---
 
 ## Cosa include il servizio

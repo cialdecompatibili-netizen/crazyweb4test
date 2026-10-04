@@ -2,6 +2,8 @@
 layout: servizio
 title: Data strategy
 description: Strategia per raccogliere, organizzare e usare i dati della tua azienda.
+gruppo: Strategia e consulenza
+ordine: 7
 ---
 
 ## Cosa include il servizio

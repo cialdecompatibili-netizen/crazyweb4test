@@ -2,6 +2,9 @@
 layout: servizio
 title: Gestionali e intranet
 description: Sviluppo di gestionali e intranet, anche con ERP e AI.
+gruppo: Software e applicazioni
+ordine: 2
+sottotitolo: Anche con ERP e AI
 ---
 
 ## Cosa include il servizio

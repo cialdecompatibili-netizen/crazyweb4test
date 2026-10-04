@@ -3,6 +3,9 @@ layout: servizio
 title: Sviluppo eCommerce
 description: Sviluppo eCommerce su Shopify, WooCommerce, Magento e PrestaShop.
 in_home: true
+gruppo: Sviluppo web
+ordine: 4
+sottotitolo: Shopify, WooCommerce, Magento, PrestaShop
 ---
 
 ## Cosa include il servizio

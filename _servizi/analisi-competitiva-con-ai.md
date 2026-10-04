@@ -2,6 +2,8 @@
 layout: servizio
 title: Analisi competitiva con AI
 description: Analisi dei concorrenti automatizzata con strumenti di intelligenza artificiale.
+gruppo: Strategia e consulenza
+ordine: 9
 ---
 
 ## Cosa include il servizio

@@ -2,6 +2,8 @@
 layout: servizio
 title: Reputazione online
 description: Monitoraggio e gestione della reputazione online del tuo brand.
+gruppo: Strategia e consulenza
+ordine: 5
 ---
 
 ## Cosa include il servizio

@@ -2,6 +2,8 @@
 layout: servizio
 title: Amazon SEO
 description: Ottimizzazione delle schede prodotto per la ricerca interna di Amazon.
+gruppo: SEO, GEO e visibilità
+ordine: 12
 ---
 
 ## Cosa include il servizio

@@ -2,6 +2,9 @@
 layout: servizio
 title: LinkedIn Ads
 description: Campagne pubblicitarie B2B su LinkedIn.
+gruppo: Advertising (PPC)
+ordine: 4
+sottotitolo: B2B
 ---
 
 ## Cosa include il servizio

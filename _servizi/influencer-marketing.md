@@ -2,6 +2,8 @@
 layout: servizio
 title: Influencer marketing
 description: Collaborazioni con creator per aumentare visibilita' e credibilita'.
+gruppo: Social e contenuti
+ordine: 2
 ---
 
 ## Cosa include il servizio

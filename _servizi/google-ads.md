@@ -3,6 +3,9 @@ layout: servizio
 title: Google Ads
 description: Campagne Search, Shopping, Display, YouTube e PMax su Google Ads.
 in_home: true
+gruppo: Advertising (PPC)
+ordine: 1
+sottotitolo: Search, Shopping, Display, YouTube, PMax
 ---
 
 ## Cosa include il servizio

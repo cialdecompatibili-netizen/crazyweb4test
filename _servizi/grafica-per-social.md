@@ -2,6 +2,8 @@
 layout: servizio
 title: Grafica per social
 description: Grafica coordinata per i tuoi profili social.
+gruppo: Social e contenuti
+ordine: 7
 ---
 
 ## Cosa include il servizio

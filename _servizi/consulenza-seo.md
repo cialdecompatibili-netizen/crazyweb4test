@@ -3,6 +3,8 @@ layout: servizio
 title: Consulenza SEO
 description: Audit, strategia e ottimizzazione SEO per far crescere il traffico organico del tuo sito.
 in_home: true
+gruppo: SEO, GEO e visibilità
+ordine: 1
 ---
 
 ## Cosa include il servizio

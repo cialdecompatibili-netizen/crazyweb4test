@@ -2,6 +2,8 @@
 layout: servizio
 title: SEO per aziende
 description: Percorsi SEO pensati per le esigenze di aziende strutturate.
+gruppo: SEO, GEO e visibilità
+ordine: 3
 ---
 
 ## Cosa include il servizio

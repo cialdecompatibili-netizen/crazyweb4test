@@ -2,6 +2,8 @@
 layout: servizio
 title: Brand voice AI
 description: Definizione e applicazione di una voce del brand coerente tramite AI.
+gruppo: AI e automazione
+ordine: 12
 ---
 
 ## Cosa include il servizio

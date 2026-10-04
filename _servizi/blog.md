@@ -2,6 +2,8 @@
 layout: servizio
 title: Blog
 description: Realizzazione e gestione di un blog aziendale.
+gruppo: Sviluppo web
+ordine: 6
 ---
 
 ## Cosa include il servizio

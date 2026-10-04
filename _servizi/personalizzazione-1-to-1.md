@@ -2,6 +2,8 @@
 layout: servizio
 title: Personalizzazione 1-to-1
 description: Esperienze personalizzate per ogni singolo utente o cliente.
+gruppo: AI e automazione
+ordine: 13
 ---
 
 ## Cosa include il servizio

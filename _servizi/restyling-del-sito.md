@@ -2,6 +2,8 @@
 layout: servizio
 title: Restyling del sito
 description: Rinnovamento grafico e funzionale di un sito esistente.
+gruppo: Sviluppo web
+ordine: 3
 ---
 
 ## Cosa include il servizio

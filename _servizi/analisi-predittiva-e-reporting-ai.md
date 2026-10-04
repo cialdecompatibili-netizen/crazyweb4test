@@ -2,6 +2,8 @@
 layout: servizio
 title: Analisi predittiva e reporting AI
 description: Report e previsioni basate su AI per anticipare l'andamento del business.
+gruppo: Strategia e consulenza
+ordine: 8
 ---
 
 ## Cosa include il servizio

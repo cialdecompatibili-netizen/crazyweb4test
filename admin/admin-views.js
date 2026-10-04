@@ -538,7 +538,9 @@
   var FIELDS = {
     posts: [['title', 'Titolo', 'text'], ['slug', 'Indirizzo (slug)', 'slug'], ['date', 'Data', 'date'], ['description', 'Descrizione', 'text'], ['thumbnail', 'Immagine in evidenza', 'img'], ['thumbnail_alt', 'Testo alternativo immagine (vuoto = usa il titolo)', 'text'], ['tags', 'Tag (separati da spazio)', 'text'], ['categories', 'Categoria', 'cat']].concat(SEO),
     projects: [['title', 'Titolo', 'text'], ['slug', 'Indirizzo (slug)', 'slug'], ['description', 'Descrizione', 'text'], ['img', 'Immagine', 'img'], ['importance', 'Ordine (numero)', 'text'], ['category', 'Categoria (deve stare in display_categories di projects)', 'cat'], ['redirect', 'Redirect esterno (opzionale)', 'text']].concat(SEO),
-    servizi: [['title', 'Titolo', 'text'], ['slug', 'Indirizzo (slug)', 'slug'], ['description', 'Descrizione (breve: compare anche nella card in home)', 'text']].concat(SEO),
+    /* gruppo/sottotitolo/ordine: pagina /servizi/ DINAMICA (_pages/servizi.md + _includes/servizi_tabella.liquid). 'gruppo' = sezione, scelta dall'elenco di _data/servizi_gruppi.yml
+       (tipo 'grp', vedi grpField e loadCats); vuoto = finisce in "Altri servizi". 'ordine' = numero (scritto SENZA virgolette, vedi A.save: quotato diventerebbe testo e l'ordinamento Liquid sbaglierebbe). */
+    servizi: [['title', 'Titolo', 'text'], ['slug', 'Indirizzo (slug)', 'slug'], ['description', 'Descrizione (breve: compare anche nella card in home)', 'text'], ['gruppo', 'Sezione nella pagina Servizi', 'grp'], ['sottotitolo', 'Riga sotto il titolo nella pagina Servizi (opzionale)', 'text'], ['ordine', 'Posizione nella sezione (numero, opzionale: vuoto = in fondo, in ordine alfabetico)', 'text']].concat(SEO),
     news: [['title', 'Titolo (solo se non inline)', 'text'], ['date', 'Data', 'date'], ['inline', 'Inline (true = solo riga in home)', 'text']].concat(SEO)
   };
   var LAYOUT = { posts: 'post', projects: 'page', news: 'post', servizi: 'servizio' };
@@ -578,7 +580,13 @@
      (vedi commento su categories/tags in admin.js), quindi una categoria con spazio nel nome NON
      e' rappresentabile in questa forma. */
   function loadCats(key) {
-    if (key === 'servizi') return Promise.resolve([]); /* i servizi non hanno categorie */
+    /* SERVIZI: niente categorie, ma l'elenco delle SEZIONI di /servizi/ (righe "- nome" di _data/servizi_gruppi.yml) per la tendina 'gruppo'.
+       Se il file manca o non si legge, tendina vuota: il servizio resta valido e finisce in "Altri servizi". */
+    if (key === 'servizi') return Promise.resolve().then(function () { return A.getFile('_data/servizi_gruppi.yml'); }).then(function (f) {
+      var out = [];
+      ((f && f.text) || '').split(/\r?\n/).forEach(function (r) { var m = r.match(/^\s*-\s+(.+?)\s*$/); if (m) out.push(m[1].replace(/^["']|["']$/g, '')); });
+      return out;
+    }).catch(function () { return []; });
     var field = key === 'projects' ? 'category' : 'categories';
     return A.getDir(C[key].dir).then(function (files) {
       files = files.filter(function (f) { return f.type === 'file' && /\.md$/.test(f.name); });
@@ -615,6 +623,16 @@
     return h;
   }
 
+  /* grpField: tendina delle sezioni di /servizi/ (elenco da loadCats). Stesso id 'f_gruppo' dei campi di testo, quindi A.save lo legge senza codice dedicato.
+     Un valore gia' salvato ma non piu' in elenco (sezione rinominata) resta selezionabile: non si perde in silenzio. */
+  function grpField(fd, v) {
+    var id = 'f_' + fd[0], list = (cur.cats || []).slice();
+    if (v && list.indexOf(v) < 0) list.push(v);
+    var h = '<label>' + fd[1] + '</label><select id="' + id + '"><option value="">-- nessuna (finisce in "Altri servizi") --</option>';
+    list.forEach(function (c) { h += '<option value="' + esc(c) + '"' + (c === v ? ' selected' : '') + '>' + esc(c) + '</option>'; });
+    return h + '</select>';
+  }
+
   A.edit = function (key, name) {
     var p = name ? Promise.resolve(A.getFile(C[key].dir + '/' + name)) : Promise.resolve(null);
     Promise.all([p, loadCats(key)]).then(function (r) {
@@ -639,6 +657,7 @@
         var one;
         if (fd[2] === 'slug') one = '<label>' + fd[1] + '</label><input id="f_slug" value="' + esc(f ? (String(v).replace(/^["']|["']$/g, '') || name.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace(/\.md$/, '')) : '') + '" placeholder="automatico dal titolo"><small style="display:block;color:#666;margin-top:2px">Se lo cambi, il vecchio indirizzo porta in automatico al nuovo (redirect).</small>';
         else if (fd[2] === 'cat') one = catField(fd, v);
+        else if (fd[2] === 'grp') one = grpField(fd, v);
         else if (fd[2] === 'date') one = dateField(fd, v);
         else if (fd[2] === 'img') one = imgField(fd, v);
         else one = '<label>' + fd[1] + '</label><input id="f_' + fd[0] + '" value="' + esc(v) + '">';
@@ -664,11 +683,12 @@
         var d = $('f_' + k + '_d').value, t = $('f_' + k + '_t').value || '00:00', tz = $('f_' + k + '_tz').value;
         v = d ? d + ' ' + t + ':00' + (tz ? ' ' + tz : '') : '';
       } else v = $('f_' + k).value.trim();
+      if (k === 'ordine') v = v.replace(/\D/g, ''); /* servizi: solo cifre; vuoto = la riga sparisce e il servizio va in fondo alla sua sezione */
       if (v === '') { if (k !== 'title' || key !== 'news') fm = k === 'img' ? A.fmSet(fm, k, '') : A.fmDel(fm, k); else fm = A.fmDel(fm, k); return; }
       /* inline/importance/date vanno scritti SENZA virgolette (fmSet diretto, non yq()):
          "inline: true" deve restare booleano, "importance: 2" numero, "date: 2026-09-20 14:47:00"
          un timestamp YAML che Jekyll legge come Time. Quotarli li trasformerebbe in stringhe. */
-      if (k === 'inline' || k === 'importance' || k === 'date') fm = A.fmSet(fm, k, v);
+      if (k === 'inline' || k === 'importance' || k === 'date' || k === 'ordine') fm = A.fmSet(fm, k, v);
       else fm = A.fmSet(fm, k, A.yq(v));
     });
     var hc = $('f__hidden'), hid = !!(hc && hc.checked); /* nascosto = published: false (vedi A.pub) */

@@ -2,6 +2,8 @@
 layout: servizio
 title: Video marketing
 description: Produzione di video per comunicare il tuo brand e i tuoi prodotti.
+gruppo: Social e contenuti
+ordine: 5
 ---
 
 ## Cosa include il servizio

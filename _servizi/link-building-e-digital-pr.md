@@ -2,6 +2,8 @@
 layout: servizio
 title: Link building e Digital PR
 description: Acquisizione di link e visibilita' editoriale di qualita'.
+gruppo: SEO, GEO e visibilità
+ordine: 10
 ---
 
 ## Cosa include il servizio

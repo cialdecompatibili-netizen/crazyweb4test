@@ -2,6 +2,8 @@
 layout: servizio
 title: Agenti AI customer service
 description: Agenti AI per l'assistenza clienti.
+gruppo: AI e automazione
+ordine: 3
 ---
 
 ## Cosa include il servizio

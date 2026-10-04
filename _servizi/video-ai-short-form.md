@@ -2,6 +2,9 @@
 layout: servizio
 title: Video AI short-form
 description: Produzione di video brevi generati con AI per Reel, TikTok e Shorts.
+gruppo: AI e automazione
+ordine: 9
+sottotitolo: Reel, TikTok, Shorts
 ---
 
 ## Cosa include il servizio

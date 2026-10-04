@@ -2,6 +2,9 @@
 layout: servizio
 title: Meta Ads
 description: Campagne pubblicitarie su Facebook e Instagram.
+gruppo: Advertising (PPC)
+ordine: 2
+sottotitolo: Facebook e Instagram
 ---
 
 ## Cosa include il servizio

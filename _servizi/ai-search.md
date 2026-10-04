@@ -2,6 +2,9 @@
 layout: servizio
 title: AI Search
 description: Ottimizzazione della presenza su TikTok, Amazon e YouTube come motori di ricerca.
+gruppo: SEO, GEO e visibilità
+ordine: 9
+sottotitolo: TikTok, Amazon, YouTube
 ---
 
 ## Cosa include il servizio

@@ -2,6 +2,8 @@
 layout: servizio
 title: Copy multilingua con AI
 description: Produzione di testi in piu' lingue con l'ausilio dell'AI.
+gruppo: AI e automazione
+ordine: 11
 ---
 
 ## Cosa include il servizio

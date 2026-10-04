@@ -2,6 +2,8 @@
 layout: servizio
 title: SEO per eCommerce
 description: Ottimizzazione SEO specifica per negozi online e schede prodotto.
+gruppo: SEO, GEO e visibilità
+ordine: 4
 ---
 
 ## Cosa include il servizio

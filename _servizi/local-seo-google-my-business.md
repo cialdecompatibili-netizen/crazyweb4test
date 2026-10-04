@@ -2,6 +2,8 @@
 layout: servizio
 title: Local SEO / Google My Business
 description: Ottimizzazione della presenza locale su Google per attirare clienti vicini.
+gruppo: SEO, GEO e visibilità
+ordine: 5
 ---
 
 ## Cosa include il servizio
