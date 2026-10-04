@@ -786,5 +786,5 @@ performance:
 # Form contatti (include contatti_form.liquid). Endpoint = URL Apps Script, sitekey = chiave PUBBLICA Turnstile.
 # La chiave segreta sta SOLO nelle proprieta' dello Apps Script, mai qui. Vuoti = il form non compare.
 contatti:
-  endpoint: ""
+  endpoint: "https://script.google.com/macros/s/AKfycbzS_BXbhdL5lonAPSMcLF0d0zxBgf4L38mxBrhGMSsKrDKp-vlYMCxuWmcUURnu6Vxn/exec"
   turnstile_sitekey: ""

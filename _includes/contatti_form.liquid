@@ -51,6 +51,7 @@
     var d = new URLSearchParams(new FormData(form));
     d.set('cf-turnstile-response', token);
     d.set('t', String(t0));
+    d.set('tipo', 'contatto-web');
     d.set('sito', location.hostname);
     d.set('pagina', location.pathname);
     btn.disabled = true; mostra('Invio in corso...', true);
