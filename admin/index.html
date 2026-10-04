@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>Admin</title>
-<link rel="stylesheet" href="admin.css?v=202610050010">
+<link rel="stylesheet" href="admin.css?v=202610050020">
 </head>
 <body>
 
@@ -25,6 +25,7 @@
 <div id="app" class="app" style="display:none">
   <div class="topbar">
     <button class="burger" onclick="A.toggleMenu()" aria-label="Menu">&#9776;</button>
+    <b id="topRepo" class="repochip" title="Repository su cui stai lavorando"></b>
     <span id="topTitle">Bacheca</span>
     <a id="siteLink" class="tlink" href="#" target="_blank" rel="noopener">&#8599; Sito</a>
     <a id="deployLink" class="tlink" href="#" target="_blank" rel="noopener">&#9881; Deploy</a>
@@ -65,7 +66,7 @@
 <div id="toast" class="toast"></div>
 <div id="overlay" class="overlay" onclick="A.toggleMenu(false)"></div>
 
-<script src="admin.js?v=202610050010"></script>
+<script src="admin.js?v=202610050020"></script>
 <script src="admin-views.js?v=202610040433"></script>
 <script src="admin-categories.js?v=202610042330"></script>
 <script src="admin-menu.js?v=202610032108"></script>
