@@ -15,7 +15,14 @@
 (function (A) {
   var $ = A.$, esc = A.esc;
   var DEF = '\u269B\uFE0F'; // emoji di partenza del tema
-  var QUICK = [DEF, '\uD83D\uDE80', '\uD83C\uDF10', '\uD83D\uDCA1', '\u2B50', '\uD83D\uDD25', '\uD83C\uDFA8', '\uD83D\uDED2', '\u26A1', '\uD83D\uDCBB'];
+  /* ELENCO EMOJI (si apre col pulsante, chiuso di default). Scritte con gli escape \u per non dipendere dalla codifica del file. Per aggiungerne una:
+     metti qui il suo codice \u; resta entro 4 caratteri (punto critico 2). Le prime 10 sono quelle storiche. */
+  var QUICK = [DEF, '\uD83D\uDE80', '\uD83C\uDF10', '\uD83D\uDCA1', '\u2B50', '\uD83D\uDD25', '\uD83C\uDFA8', '\uD83D\uDED2', '\u26A1', '\uD83D\uDCBB',
+    '\uD83C\uDF1F', '\u2728', '\uD83C\uDFAF', '\uD83D\uDC8E', '\uD83C\uDFC6', '\uD83D\uDCC8', '\uD83D\uDCF1', '\uD83D\uDDA5\uFE0F', '\uD83D\uDEE0\uFE0F', '\u2699\uFE0F',
+    '\uD83D\uDD27', '\uD83D\uDD12', '\uD83D\uDD0D', '\uD83D\uDCE3', '\uD83D\uDCE2', '\u2709\uFE0F', '\uD83D\uDCE7', '\uD83D\uDCDE', '\uD83C\uDFE0', '\uD83C\uDFE2',
+    '\uD83C\uDF0D', '\uD83C\uDF31', '\uD83C\uDF3F', '\uD83C\uDF38', '\uD83C\uDF40', '\u2600\uFE0F', '\uD83C\uDF19', '\u2764\uFE0F', '\uD83D\uDC9C', '\uD83D\uDC99',
+    '\uD83D\uDC9A', '\uD83E\uDDE1', '\uD83E\uDD16', '\uD83E\uDDE0', '\uD83C\uDFAE', '\uD83C\uDFB5', '\uD83D\uDCF7', '\uD83C\uDFAC', '\uD83D\uDCDA', '\u270F\uFE0F',
+    '\uD83E\uDDE9', '\uD83E\uDD84', '\uD83D\uDC31', '\uD83D\uDC36', '\uD83C\uDF08', '\uD83C\uDF55', '\u2615'];
   var PFX = 'assets/img/';
   var ICON_RE = /^icon:[ \t]*(.*)$/m;
   var st = { tipo: 'emoji', emoji: DEF, img: '', url: '', fb: '', orig: '' };
@@ -73,19 +80,22 @@
       if (v && len(v) > 4) { st.tipo = 'img'; st.img = v; st.emoji = DEF; }
       else { st.tipo = 'emoji'; st.emoji = v || DEF; st.img = ''; }
       return (st.img ? resolveImg(st.img) : Promise.resolve()).then(function () {
-        var q = QUICK.map(function (e, i) { return '<button type="button" class="btn sm" data-q="' + i + '" style="font-size:18px;padding:2px 8px">' + e + '</button>'; }).join(' ');
+        var q = QUICK.map(function (e, i) { return '<button type="button" class="btn sm" data-q="' + i + '" style="font-size:20px;padding:2px 6px;min-width:38px">' + e + '</button>'; }).join(' ');
         A.main().innerHTML = '<h2>Tema</h2><div class="card"><h3>Favicon</h3>' +
           '<p style="margin-top:0;color:#787c82">E\' la piccola icona che compare nella scheda del browser e nei preferiti.</p>' +
           '<div id="tm_prev" style="padding:14px;border:1px solid #e3e3e3;border-radius:6px;background:#fafafa;margin-bottom:14px"></div>' +
           '<label>Tipo di icona</label><select id="tm_tipo" style="width:auto"><option value="emoji">Emoji</option><option value="img">Immagine</option></select>' +
           '<div id="tm_boxE" style="margin-top:12px"><label>Emoji</label><input id="tm_emo" maxlength="8" style="width:90px;font-size:20px" autocomplete="off"> ' +
-            '<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px">' + q + '</div></div>' +
+            '<p style="margin:8px 0 0"><button type="button" class="btn sm" id="tm_more">Scegli tra ' + QUICK.length + ' emoji &#9662;</button></p>' +
+            '<div id="tm_grid" style="display:none;margin-top:8px;padding:8px;border:1px solid #e3e3e3;border-radius:6px;max-height:190px;overflow:auto;gap:4px;flex-wrap:wrap">' + q + '</div></div>' +
           '<div id="tm_boxI" style="margin-top:12px"><label>Immagine</label><button type="button" class="btn" id="tm_pick">Scegli o carica immagine</button> <small id="tm_imgname"></small>' +
             '<p><small style="color:#787c82">Meglio un\'immagine quadrata, png o svg. Se carichi un png serve anche per l\'icona su iPhone.</small></p></div>' +
           '<p style="margin-top:16px"><button type="button" class="btn primary" id="tm_save">Salva favicon</button> <small style="color:#787c82">Il sito si aggiorna in 2-3 minuti; il browser puo\' tenere la vecchia icona finche\' non ricarichi (Ctrl+F5).</small></p></div>';
         $('tm_tipo').onchange = function () { st.tipo = this.value; paint(); };
         $('tm_emo').oninput = function () { st.emoji = this.value.trim(); paint(); };
-        $('tm_boxE').addEventListener('click', function (e) { var b = e.target.closest ? e.target.closest('[data-q]') : null; if (b) { st.emoji = QUICK[+b.getAttribute('data-q')]; $('tm_emo').value = st.emoji; paint(); } });
+        /* l'elenco emoji e' chiuso all'apertura: il pulsante lo apre/chiude, e la scelta di una emoji lo richiude */
+        $('tm_more').onclick = function () { var g = $('tm_grid'), on = g.style.display === 'none'; g.style.display = on ? 'flex' : 'none'; this.innerHTML = 'Scegli tra ' + QUICK.length + ' emoji ' + (on ? '&#9652;' : '&#9662;'); };
+        $('tm_boxE').addEventListener('click', function (e) { var b = e.target.closest ? e.target.closest('[data-q]') : null; if (b) { st.emoji = QUICK[+b.getAttribute('data-q')]; $('tm_emo').value = st.emoji; $('tm_grid').style.display = 'none'; $('tm_more').innerHTML = 'Scegli tra ' + QUICK.length + ' emoji &#9662;'; paint(); } });
         $('tm_pick').onclick = function () {
           A.imgPick(null, { onPick: function (sel) {
             var name = String(sel).replace(/^assets\/img\//, '');
