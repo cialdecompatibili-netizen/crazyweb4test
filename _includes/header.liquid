@@ -57,6 +57,43 @@
             le altre: compare nel menu solo con "nav: true" e si ordina con "nav_order". Gestita da /admin/.
           {% endcomment %}
 
+{% comment %}
+          ===== COME SI GESTISCE IL MENU (leggere prima di modificare) =====
+          Il menu NON ha un file suo: questo ciclo scorre site.pages ordinate per nav_order e stampa
+          ogni pagina con "nav: true". Una voce di menu = una pagina. Le voci-link senza pagina stanno
+          in _data/menu_links.yml (admin > Menu).
+
+          VOCE SEMPLICE (front matter della pagina):
+            nav: true
+            nav_order: 4          (numero: ordine crescente; due pagine con lo stesso numero = ordine casuale)
+            permalink: /foto/
+          Per nascondere la voce: nav: false.
+
+          TENDINA (front matter della pagina PADRE):
+            dropdown: true
+            children:
+              - title: "Matrimonio civile"
+                permalink: /servizi/matrimonio-civile/
+              - title: "divider"
+                permalink: "#"
+              - title: "Meeting aziendali"
+                permalink: /servizi/meeting-aziendali/
+          - La freccetta accanto al padre e' NATIVA del tema (.dropdown-toggle:after): basta dropdown: true, non va disegnata.
+          - Il padre NON e' cliccabile (href="#"), apre solo la tendina; la sua pagina deve comunque esistere.
+          - RIGHE DIVISORIE: una voce con title "divider" stampa il div dropdown-divider (stile nativo). N voci = N-1 divider:
+            mai in coda, mai due di fila. Lo stile viene generato dal tema solo se la classe e' usata nel sito.
+          - Il title del figlio deve essere IDENTICO al title della pagina collegata: la voce attiva si trova confrontando i titoli.
+          - Il permalink del figlio SENZA baseurl (/servizi/x/, non /nomesito/servizi/x/): ci pensa relative_url. Link esterni: URL completo con ://
+          - Un solo livello: niente sottomenu dentro i sottomenu.
+          - Gli id delle tendine sono univoci (navbarDropdown- + numero del ciclo): non rimettere un id fisso uguale per tutte.
+          - chi-siamo.md e' rigenerata da pubblica_chi_siamo.py (chi_siamo.json): il suo menu si cambia nel JSON, non nel .md.
+
+          ERRORI TIPICI: title del figlio diverso dalla pagina (mai evidenziata); permalink con baseurl (link doppio);
+          dropdown senza children (tendina vuota); divider in coda; stesso nav_order su due pagine.
+          Documentazione estesa: CLAUDE.md > MENU E SOTTOMENU.
+          ==================================================================
+          {% endcomment %}
+
           <!-- Other pages -->
           {% assign sorted_pages = site.pages | sort: 'nav_order' %}
           {% for p in sorted_pages %}

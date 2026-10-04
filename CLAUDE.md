@@ -134,3 +134,34 @@ Other gates:
 32. **FORM CONTATTI + CAPTCHA (Turnstile / ALTCHA).** Worker Cloudflare `contatti-form` in `C:\Users\mirco\Desktop\claudetemp\contatti-worker` (NON nel repo): `worker.js` (leggi l'intestazione, punti critici 1-8), `wrangler.toml`, `crea_widget.ps1` e `crea_altcha.ps1` (una tantum, gia' eseguiti). Il form e' `_includes/contatti_form.liquid`; la scelta e' `_config.yml > contatti.captcha` (turnstile|altcha), interruttore in admin > Impostazioni (`getCap/setCap` in `admin/admin-media.js`, regex sulla chiave annidata). ALTCHA = calcolo SHA-256 nel browser, sfida firmata con il secret `ALTCHA_HMAC`; funziona su qualsiasi clone/dominio senza registrazioni, ma non e' monouso (10 min) e l'host e' dichiarato dal form. Pubblicare il Worker: `cd claudetemp\contatti-worker; npx wrangler deploy`. Senza `ALTCHA_HMAC` la modalita' altcha non invia. Provare altcha scrive una riga vera nel foglio ("TEST ALTCHA"). In Liquid niente `and/or` misti (usa cf_ok) e il blocco if/else va chiuso con endif, non unless. La build locale di Jekyll puo' essere bloccata dal criterio di sicurezza di Windows (stringio.so): in quel caso verificare dalla Action su GitHub.
 
 33. **TEMA > FAVICON (admin > Sito > Tema, `admin/admin-tema.js`).** Cambia la chiave `icon:` di `_config.yml` (commit 'admin: favicon'). La gem al_folio_core la tratta come EMOJI se ha al massimo 4 caratteri, altrimenti come NOME FILE in `assets/img/` (aggiunge lei il prefisso: nel config va solo `logo.png`, MAI `assets/img/logo.png`); un png/jpg fa anche da apple-touch-icon. Emoji: 57 in un elenco che si apre col pulsante (array `QUICK` in admin-tema.js, scritte con escape \u, max 4 caratteri ciascuna). L'anteprima (scheda browser, 32 px, grande) e il selettore grafico riusano `A.imgPick` con `onPick`. Se la riga `icon:` sparisce dal config la vista non la ricrea. I browser tengono la favicon in cache: Ctrl+F5 o riaprire la scheda. La vista e' predisposta per altre voci di tema in futuro. Non provato nel browser, solo sintassi. Solo TEST.
+
+34. **MENU E SOTTOMENU (header.liquid, nessun file di menu separato).** Il menu NON ha un file suo: `_includes/header.liquid` scorre `site.pages` ordinate per `nav_order` e stampa ogni pagina con `nav: true`. Una voce = una pagina. Le voci-link senza pagina stanno in `_data/menu_links.yml` (admin > Menu).
+    - **Voce semplice:** front matter `nav: true`, `nav_order: 4`, `permalink: /foto/`. L'ordine e' il numero (Home 0.3, La villa 1, Servizi 2, Eventi 3, Foto 4, Blog 5, Location 6, Contatti 20). Per nascondere: `nav: false`.
+    - **Tendina:** sulla pagina padre si aggiunge `dropdown: true` e `children:` (lista di `title` + `permalink`). Il padre NON e' cliccabile (href="#"): apre solo la tendina. La pagina padre deve comunque esistere (anche solo come elenco), altrimenti la voce non compare.
+    - **Righe divisorie:** tra due voci si inserisce una voce speciale con `title: "divider"` (stampa `<div class="dropdown-divider">`, stile nativo del tema). MAI la riga dopo l'ultima voce e MAI due divider di fila. N voci = N-1 divider.
+    - **Freccetta del padre:** e' nativa (`.dropdown-toggle:after` del tema). Non si disegna a mano: basta `dropdown: true`.
+    - **Il titolo del figlio deve essere IDENTICO al `title` della pagina collegata:** il tema evidenzia la voce attiva confrontando i titoli (`page.title == child.title`).
+    - **Il permalink del figlio va scritto SENZA baseurl** (`/servizi/la-villa/`): il tema aggiunge `relative_url`. Link esterni: URL completo con `://`.
+    - **Un solo livello:** niente sottomenu dentro i sottomenu.
+    - **Il CSS del divider esce solo se la classe e' usata** (il tema genera gli stili dalle classi presenti): un menu senza divider non ha neanche lo stile. Se un clone non mostra le righe, controllare che il front matter contenga davvero `title: "divider"`.
+    - **Id univoci:** ogni tendina ha `id="navbarDropdown-{{ forloop.index }}"` (prima era uguale per tutte). Non rimettere id fissi.
+    - **Pagina gestita da script:** `chi_siamo.json` rigenera `_pages/chi-siamo.md` (nav, nav_order, permalink). Per cambiare il menu di quella pagina si modifica il JSON e si rilancia `pubblica_chi_siamo.py`, non il .md.
+    - **Esempio completo (`_pages/eventi.md`):**
+      ```
+      ---
+      layout: page
+      title: Eventi
+      nav: true
+      nav_order: 3
+      permalink: /eventi/
+      dropdown: true
+      children:
+        - title: "Matrimonio civile"
+          permalink: /servizi/matrimonio-civile/
+        - title: "divider"
+          permalink: "#"
+        - title: "Meeting aziendali"
+          permalink: /servizi/meeting-aziendali/
+      ---
+      ```
+    - **Errori tipici:** titolo del figlio diverso dalla pagina (voce mai evidenziata); permalink con `/villatrecolli/` davanti (link doppio); `dropdown: true` senza `children` (tendina vuota); `nav: true` su due pagine con lo stesso `nav_order` (ordine casuale); divider in coda (riga finale inutile).
