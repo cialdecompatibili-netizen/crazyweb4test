@@ -88,6 +88,15 @@ layout: default
       stampa l'indice. Un singolo post puo' disattivarlo mettendo "toc: false" nel proprio front
       matter, che ha sempre la precedenza sul default globale.
     {% endcomment %}
+    {% comment %}
+      COPERTINA DELL'ARTICOLO: l'immagine in evidenza (front matter "thumbnail") compare di default anche dentro l'articolo, sopra il testo.
+      Si nasconde con "thumbnail_hide: true" (spunta "Non visualizzarla nell'articolo" nell'editor admin): resta nell'elenco del blog.
+      Vale solo per i post veri (collection posts); alt = thumbnail_alt, se vuoto il titolo.
+    {% endcomment %}
+    {% if page.collection == 'posts' and page.thumbnail and page.thumbnail_hide != true and page.thumbnail_hide != 'true' %}
+      {% assign cop_alt = page.thumbnail_alt | default: page.title %}
+      {% include immagine.liquid src=page.thumbnail alt=cop_alt align="center" %}
+    {% endif %}
     {% if page.toc and page.toc.beginning %}
       <div id="table-of-contents">
         {% toc %}

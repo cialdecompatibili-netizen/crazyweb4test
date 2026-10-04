@@ -536,7 +536,7 @@
   /* IMMAGINE IN EVIDENZA (solo articoli): 'thumbnail' e 'thumbnail_alt' sono letti da _pages/blog.md (elenco blog e articoli in evidenza).
      Vuoti = la riga sparisce (A.save usa fmDel) e il blog non mostra l'immagine; alt vuoto = il blog usa il titolo. Il percorso e' relativo al sito (relative_url nel template). */
   var FIELDS = {
-    posts: [['title', 'Titolo', 'text'], ['slug', 'Indirizzo (slug)', 'slug'], ['date', 'Data', 'date'], ['description', 'Descrizione', 'text'], ['thumbnail', 'Immagine in evidenza', 'img'], ['thumbnail_alt', 'Testo alternativo immagine (vuoto = usa il titolo)', 'text'], ['tags', 'Tag (separati da spazio)', 'text'], ['categories', 'Categoria', 'cat']].concat(SEO),
+    posts: [['title', 'Titolo', 'text'], ['slug', 'Indirizzo (slug)', 'slug'], ['date', 'Data', 'date'], ['description', 'Descrizione', 'text'], ['thumbnail', 'Immagine in evidenza', 'img'], ['thumbnail_alt', 'Testo alternativo immagine (vuoto = usa il titolo)', 'text'], ['thumbnail_hide', 'Non visualizzarla nell\'articolo', 'chk'], ['tags', 'Tag (separati da spazio)', 'text'], ['categories', 'Categoria', 'cat']].concat(SEO),
     projects: [['title', 'Titolo', 'text'], ['slug', 'Indirizzo (slug)', 'slug'], ['description', 'Descrizione', 'text'], ['img', 'Immagine', 'img'], ['importance', 'Ordine (numero)', 'text'], ['category', 'Categoria (deve stare in display_categories di projects)', 'cat'], ['redirect', 'Redirect esterno (opzionale)', 'text']].concat(SEO),
     /* gruppo/sottotitolo/ordine: pagina /servizi/ DINAMICA (_pages/servizi.md + _includes/servizi_tabella.liquid). 'gruppo' = sezione, scelta dall'elenco di _data/servizi_gruppi.yml
        (tipo 'grp', vedi grpField e loadCats); vuoto = finisce in "Altri servizi". 'ordine' = numero (scritto SENZA virgolette, vedi A.save: quotato diventerebbe testo e l'ordinamento Liquid sbaglierebbe). */
@@ -660,6 +660,7 @@
         else if (fd[2] === 'grp') one = grpField(fd, v);
         else if (fd[2] === 'date') one = dateField(fd, v);
         else if (fd[2] === 'img') one = imgField(fd, v);
+        else if (fd[2] === 'chk') one = '<label style="display:flex;gap:8px;align-items:center;margin:4px 0 14px;font-weight:600;cursor:pointer"><input type="checkbox" id="f_' + fd[0] + '"' + (/^["\']?true["\']?$/i.test(String(v).trim()) ? ' checked' : '') + ' style="width:auto;margin:0"> ' + fd[1] + '</label><small style="display:block;margin:-10px 0 14px;color:#787c82">Di default l\'immagine in evidenza compare anche in cima all\'articolo. Con la spunta resta solo nell\'elenco del blog.</small>';
         else one = '<label>' + fd[1] + '</label><input id="f_' + fd[0] + '" value="' + esc(v) + '">';
         if (BELOW.indexOf(fd[0]) >= 0) below += one; else top += one;
       });
@@ -682,13 +683,15 @@
       } else if (fd[2] === 'date') {
         var d = $('f_' + k + '_d').value, t = $('f_' + k + '_t').value || '00:00', tz = $('f_' + k + '_tz').value;
         v = d ? d + ' ' + t + ':00' + (tz ? ' ' + tz : '') : '';
+      } else if (fd[2] === 'chk') {
+        v = $('f_' + k).checked ? 'true' : ''; /* casella: spuntata = true (booleano), non spuntata = riga rimossa */
       } else v = $('f_' + k).value.trim();
       if (k === 'ordine') v = v.replace(/\D/g, ''); /* servizi: solo cifre; vuoto = la riga sparisce e il servizio va in fondo alla sua sezione */
       if (v === '') { if (k !== 'title' || key !== 'news') fm = k === 'img' ? A.fmSet(fm, k, '') : A.fmDel(fm, k); else fm = A.fmDel(fm, k); return; }
       /* inline/importance/date vanno scritti SENZA virgolette (fmSet diretto, non yq()):
          "inline: true" deve restare booleano, "importance: 2" numero, "date: 2026-09-20 14:47:00"
          un timestamp YAML che Jekyll legge come Time. Quotarli li trasformerebbe in stringhe. */
-      if (k === 'inline' || k === 'importance' || k === 'date' || k === 'ordine') fm = A.fmSet(fm, k, v);
+      if (k === 'inline' || k === 'importance' || k === 'date' || k === 'ordine' || k === 'thumbnail_hide') fm = A.fmSet(fm, k, v);
       else fm = A.fmSet(fm, k, A.yq(v));
     });
     var hc = $('f__hidden'), hid = !!(hc && hc.checked); /* nascosto = published: false (vedi A.pub) */
