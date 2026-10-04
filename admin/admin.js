@@ -431,7 +431,13 @@ var A = (function () {
   /* start: eseguita dopo il login. Qui si leggono da _config.yml (async) baseurl e timezone. Finche' la Promise non e' risolta BASEURL e SITE_TZ sono vuoti: vedi commento piu' sotto e sez. 0e claude.md. */
   function start() {
     $('login').style.display = 'none'; $('app').style.display = 'block';
-    var rn = $('repoName'), rp = REPO.split('/'); rn.textContent = ''; rn.appendChild(document.createTextNode(rp[0] + '/')); var hl = document.createElement('b'); hl.textContent = rp[1] || ''; rn.appendChild(hl); /* nome repo in giallo: si vede subito su quale sito si sta lavorando (evita errori tra siti cloni) */ main = $('main'); go('dash');
+    /* NOME DEL REPO IN EVIDENZA (punto critico: serve a non scrivere sul sito sbagliato, i cloni sono identici).
+       - Si costruisce col DOM (createTextNode/textContent), MAI con innerHTML: REPO arriva da localStorage/campo di login,
+         cioe' da testo scritto dall'utente, e in innerHTML sarebbe un varco XSS.
+       - Compare in DUE posti: nel menu laterale (#repoName) e in una pastiglia gialla nella barra in alto (#topRepo),
+         perche' su mobile il menu laterale e' chiuso. Anche il titolo della scheda del browser porta il nome del repo.
+       - Il giallo e' solo CSS (.brand small b, .repochip): niente nomi nel codice, vale per qualsiasi clone. */
+    var rn = $('repoName'), rp = REPO.split('/'); rn.textContent = ''; rn.appendChild(document.createTextNode(rp[0] + '/')); var hl = document.createElement('b'); hl.textContent = rp[1] || ''; rn.appendChild(hl); var tr = $('topRepo'); if (tr) tr.textContent = rp[1] || REPO; document.title = 'Admin \u00b7 ' + (rp[1] || REPO); main = $('main'); go('dash');
     var parts = REPO.split('/'), user = parts[0], repoName = parts[1];
     SITEURL = 'https://' + user + '.github.io/' + repoName + '/'; // vedi A.siteUrl(): usato dai moduli con file root/ (es. sitemap.xml) per mostrare l'URL pubblico completo
     $('siteLink').href = SITEURL;
