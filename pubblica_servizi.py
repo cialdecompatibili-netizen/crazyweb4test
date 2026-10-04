@@ -41,6 +41,7 @@ except Exception:
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import genera_servizi as G
+from repos_auto import completa
 from servizi_data import SERVIZI
 
 import json
@@ -52,6 +53,9 @@ def carica_cfg():
         c = json.load(f)
     for r in c["repos"].values():
         r["dir"] = os.path.normpath(os.path.join(HERE, r["dir"]))
+        # PUNTO CRITICO: remoto/baseurl mancanti o "auto" vengono ricavati dal git origin (repos_auto.py,
+        # stessa regola di deploy.yml). NON riscriverli a mano nel codice: un clone deve funzionare da solo.
+        completa(r)
     return c
 
 
@@ -247,6 +251,9 @@ def git(cartella, *args):
 def pubblica(cartella, files, msg):
     """git add + commit + push SOLO dei file indicati. Ritorna True se ok."""
     rc, out = git(cartella, "remote", "get-url", "origin")
+    # PUNTO CRITICO: se "remoto" in repos.json e' "auto", e' ricavato proprio da questo origin, quindi il
+    # controllo qui sotto passa SEMPRE (non protegge niente). Protegge solo dove "remoto" e' scritto a mano
+    # (es. un PROD): li' un origin sbagliato blocca il push. Per un repo protetto scrivi il remoto esplicito.
     atteso = next((r["remoto"] for r in REPOS.values() if r["dir"] == cartella), "")
     if rc != 0 or not atteso or not re.search(re.escape(atteso) + r"(\.git)?/?$", out):
         print("  STOP: remoto inatteso (%s), non pubblico." % out)
