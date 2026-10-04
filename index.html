@@ -102,7 +102,7 @@ html[data-theme="dark"] .prj-home-more a{border-color:rgba(255,255,255,.3)}
 (function(){
   var o=document.querySelector('.marte-orbita'); if(!o) return;
   var y=o.querySelector('.marte-y'), cv=o.querySelector('.marte'); if(!y||!cv) return;
-  var ridotto=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var ridotto=false /* ignorato di proposito: animazione lenta e minima, deve partire sempre (era matchMedia prefers-reduced-motion) */;
   /* PARAMETRI DA RITOCCARE (in millisecondi):
      PX = periodo del moto orizzontale (andata+ritorno = 2*PX)   PY = idem verticale (diverso da PX di proposito)
      GIRO = tempo di un giro completo di Marte su se stesso (45000 = 45 s; piu' basso = piu' veloce)
@@ -200,7 +200,7 @@ html[data-theme="dark"] .prj-home-more a{border-color:rgba(255,255,255,.3)}
 </script> <script>
 (function(){
   var box=document.getElementById('rete-box'), cv=document.getElementById('rete-cv'); if(!box||!cv) return;
-  var ctx=cv.getContext('2d'), ridotto=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var ctx=cv.getContext('2d'), ridotto=false /* ignorato di proposito: animazione lenta e minima, deve partire sempre (era matchMedia prefers-reduced-motion) */;
   var punti=[], w=0, h=0, mouse={x:0,y:0,on:false}, raf=null, visibile=true;
   var DIST=140, DIST_M=190;
   function colore(){
