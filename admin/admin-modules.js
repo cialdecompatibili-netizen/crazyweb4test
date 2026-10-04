@@ -216,7 +216,8 @@
       M().innerHTML = h;
     });
   };
-  A.mdConfig = function (slug) { A.go('modules'); A.views.mdconfig(slug).catch(function (e) { M().innerHTML = '<div class="card">Errore: ' + esc(A.errMsg(e)) + '</div>'; }); };
+  /* NIENTE A.go('modules') qui (bug 04/10/2026): A.go lancia in parallelo la lista Moduli, che finiva DOPO e copriva la pagina Configura (si apriva e si richiudeva dopo un secondo). */
+  A.mdConfig = function (slug) { M().innerHTML = '<div class="card">Caricamento...</div>'; A.views.mdconfig(slug).catch(function (e) { M().innerHTML = '<div class="card">Errore: ' + esc(A.errMsg(e)) + '</div>'; }); };
 
   /* mdConfigSave: legge i valori dai campi del form, carica eventuali immagini nuove (assets/modules/<slug>/,
      stesso principio base64 diretto da FileReader di A.upload in admin-media.js: niente riscrittura,
