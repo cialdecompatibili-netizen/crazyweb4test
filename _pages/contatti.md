@@ -6,4 +6,6 @@ permalink: /contatti/
 nav_order: 20
 ---
 
-contatti
+Scrivici: ti rispondiamo il prima possibile.
+
+{% include contatti_form.liquid %}

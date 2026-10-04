@@ -1,0 +1,73 @@
+<!-- Form contatti riusabile. Config in _config.yml > contatti (endpoint, turnstile_sitekey): nessun nome di sito scritto qui.
+     Antispam: honeypot "website" + tempo minimo + Turnstile verificato lato Apps Script. Codice server: claudetemp/contatti/contatti-apps-script.gs
+     Nei commenti di questo file non scrivere le parentesi graffe-percento (Liquid le eseguirebbe). -->
+{% assign cf_endpoint = include.endpoint | default: site.contatti.endpoint %}
+{% assign cf_sitekey = include.sitekey | default: site.contatti.turnstile_sitekey %}
+{% if cf_endpoint == nil or cf_endpoint == '' or cf_sitekey == nil or cf_sitekey == '' %}
+<p class="text-muted"><em>Il modulo di contatto non è ancora attivo.</em></p>
+{% else %}
+<form id="cf-form" class="cf-form" novalidate>
+  <div class="mb-3">
+    <label for="cf-nome" class="form-label">Nome</label>
+    <input type="text" class="form-control" id="cf-nome" name="nome" maxlength="100" required autocomplete="name">
+  </div>
+  <div class="mb-3">
+    <label for="cf-email" class="form-label">Email</label>
+    <input type="email" class="form-control" id="cf-email" name="email" maxlength="150" required autocomplete="email">
+  </div>
+  <div class="mb-3">
+    <label for="cf-msg" class="form-label">Messaggio</label>
+    <textarea class="form-control" id="cf-msg" name="messaggio" rows="5" maxlength="3000" required></textarea>
+  </div>
+  <div style="position:absolute;left:-9999px;height:0;overflow:hidden" aria-hidden="true">
+    <label for="cf-web">Non compilare</label>
+    <input type="text" id="cf-web" name="website" tabindex="-1" autocomplete="off">
+  </div>
+  <div id="cf-ts" class="mb-3"></div>
+  <button type="submit" class="btn btn-primary" id="cf-btn">Invia</button>
+  <p id="cf-esito" class="mt-3" role="status" aria-live="polite"></p>
+</form>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+<script>
+(function () {
+  var form = document.getElementById('cf-form');
+  var esito = document.getElementById('cf-esito');
+  var btn = document.getElementById('cf-btn');
+  var ENDPOINT = {{ cf_endpoint | jsonify }};
+  var SITEKEY = {{ cf_sitekey | jsonify }};
+  var t0 = Date.now();
+  var wid = null;
+  function mostra(m, ok) { esito.textContent = m; esito.style.color = ok ? '' : '#b00020'; }
+  function avvia() {
+    if (window.turnstile) { wid = window.turnstile.render('#cf-ts', { sitekey: SITEKEY }); }
+    else { setTimeout(avvia, 200); }
+  }
+  avvia();
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    if (!form.checkValidity()) { mostra('Compila nome, email e messaggio.', false); return; }
+    var token = window.turnstile && wid !== null ? window.turnstile.getResponse(wid) : '';
+    if (!token) { mostra('Completa la verifica di sicurezza.', false); return; }
+    var d = new URLSearchParams(new FormData(form));
+    d.set('cf-turnstile-response', token);
+    d.set('t', String(t0));
+    d.set('sito', location.hostname);
+    d.set('pagina', location.pathname);
+    btn.disabled = true; mostra('Invio in corso...', true);
+    fetch(ENDPOINT, { method: 'POST', body: d })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (j.status === 'ok') { form.reset(); mostra('Messaggio inviato, grazie! Ti risponderemo presto.', true); }
+        else { mostra('Invio non riuscito. Riprova tra poco.', false); }
+        if (window.turnstile) { window.turnstile.reset(wid); }
+        btn.disabled = false; t0 = Date.now();
+      })
+      .catch(function () {
+        mostra('Errore di rete. Riprova.', false);
+        if (window.turnstile) { window.turnstile.reset(wid); }
+        btn.disabled = false;
+      });
+  });
+})();
+</script>
+{% endif %}

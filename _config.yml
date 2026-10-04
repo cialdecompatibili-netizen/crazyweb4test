@@ -782,3 +782,9 @@ jsonresume:
 # enabled: false = spegne tutto. Una pagina puo' forzare MathJax con `math: true` nel front matter.
 performance:
   enabled: true
+
+# Form contatti (include contatti_form.liquid). Endpoint = URL Apps Script, sitekey = chiave PUBBLICA Turnstile.
+# La chiave segreta sta SOLO nelle proprieta' dello Apps Script, mai qui. Vuoti = il form non compare.
+contatti:
+  endpoint: ""
+  turnstile_sitekey: ""
