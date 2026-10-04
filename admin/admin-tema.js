@@ -89,7 +89,7 @@
             '<p style="margin:8px 0 0"><button type="button" class="btn sm" id="tm_more">Scegli tra ' + QUICK.length + ' emoji &#9662;</button></p>' +
             '<div id="tm_grid" style="display:none;margin-top:8px;padding:8px;border:1px solid #e3e3e3;border-radius:6px;max-height:190px;overflow:auto;gap:4px;flex-wrap:wrap">' + q + '</div></div>' +
           '<div id="tm_boxI" style="margin-top:12px"><label>Immagine</label><button type="button" class="btn" id="tm_pick">Scegli o carica immagine</button> <small id="tm_imgname"></small>' +
-            '<p><small style="color:#787c82">Meglio un\'immagine quadrata, png o svg. Se carichi un png serve anche per l\'icona su iPhone.</small></p></div>' +
+            '<p><small style="color:#787c82"><b>Misure consigliate da Google (risultati di ricerca):</b> immagine quadrata (1:1), almeno 48x48 px e meglio un multiplo di 48 (96, 144, 192). Ideale: png 192x192, oppure svg quadrato. Il png serve anche per l\'icona su iPhone.</small></p></div>' +
           '<p style="margin-top:16px"><button type="button" class="btn primary" id="tm_save">Salva favicon</button> <small style="color:#787c82">Il sito si aggiorna in 2-3 minuti; il browser puo\' tenere la vecchia icona finche\' non ricarichi (Ctrl+F5).</small></p></div>';
         $('tm_tipo').onchange = function () { st.tipo = this.value; paint(); };
         $('tm_emo').oninput = function () { st.emoji = this.value.trim(); paint(); };
