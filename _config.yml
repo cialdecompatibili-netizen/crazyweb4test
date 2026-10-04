@@ -789,3 +789,4 @@ performance:
 contatti:
   endpoint: "https://contatti-form.evabomboniere.workers.dev"
   turnstile_sitekey: "0x4AAAAAAFNJy_IB22gVYOuB"
+  captcha: "turnstile" # "turnstile" oppure "altcha" (calcolo nel browser, senza servizi esterni). Per altcha serve il secret ALTCHA_HMAC nel Worker (crea_altcha.ps1)

@@ -9,7 +9,8 @@
 
   CONFIGURAZIONE (nessun nome di sito e' scritto in questo file) - _config.yml, sezione "contatti":
     endpoint          = indirizzo del Worker (https://contatti-form.evabomboniere.workers.dev)
-    turnstile_sitekey = chiave PUBBLICA di Turnstile (la segreta sta solo nel Worker)
+    turnstile_sitekey = chiave PUBBLICA di Turnstile (la segreta sta solo nel Worker). Non serve se captcha e' altcha
+    captcha           = "turnstile" (default) oppure "altcha" (calcolo nel browser, senza servizi esterni; vedi worker.js). Interruttore in admin > Impostazioni
   Se uno dei due e' vuoto il form non compare e si legge "non e' ancora attivo": e' il modo per SPEGNERE il form senza toccare il codice.
   Si possono anche passare al volo:  include contatti_form.liquid endpoint="..." sitekey="..."  (per un form con un Worker diverso).
 
@@ -30,7 +31,13 @@
 {% endcomment %}
 {% assign cf_endpoint = include.endpoint | default: site.contatti.endpoint %}
 {% assign cf_sitekey = include.sitekey | default: site.contatti.turnstile_sitekey %}
-{% if cf_endpoint == nil or cf_endpoint == '' or cf_sitekey == nil or cf_sitekey == '' %}
+{% assign cf_mode = include.captcha | default: site.contatti.captcha | default: 'turnstile' %}
+{% if cf_mode != 'altcha' %}{% assign cf_mode = 'turnstile' %}{% endif %}
+{% comment %} cf_ok: Liquid non ha parentesi negli if, quindi calcolo il "form attivo" a passi (endpoint sempre; sitekey solo in modalita' turnstile). {% endcomment %}
+{% assign cf_ok = true %}
+{% if cf_endpoint == nil or cf_endpoint == '' %}{% assign cf_ok = false %}{% endif %}
+{% if cf_mode == 'turnstile' %}{% if cf_sitekey == nil or cf_sitekey == '' %}{% assign cf_ok = false %}{% endif %}{% endif %}
+{% if cf_ok == false %}
 <p class="text-muted"><em>Il modulo di contatto non è ancora attivo.</em></p>
 {% else %}
 <form id="cf-form" class="cf-form" novalidate>
@@ -52,12 +59,12 @@
     <input type="text" id="cf-web" name="website" tabindex="-1" autocomplete="off">
   </div>
   {% comment %} Qui Turnstile disegna il suo riquadro (render esplicito nello script sotto). {% endcomment %}
-  <div id="cf-ts" class="mb-3"></div>
+  {% if cf_mode == 'turnstile' %}<div id="cf-ts" class="mb-3"></div>{% endif %}
   <button type="submit" class="btn btn-primary" id="cf-btn">Invia</button>
   <p id="cf-esito" class="mt-3" role="status" aria-live="polite"></p>
 </form>
 {% comment %} Libreria Turnstile di Cloudflare (render=explicit: la avviamo noi con turnstile.render). Se sostituisci Turnstile, togli anche la funzione avvia(). {% endcomment %}
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+{% if cf_mode == 'turnstile' %}<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>{% endif %}
 <script>
 (function () {
   var form = document.getElementById('cf-form');
@@ -66,6 +73,7 @@
   {% comment %} jsonify scrive i valori tra virgolette e con gli escape giusti: non sostituirlo con la variabile "nuda". {% endcomment %}
   var ENDPOINT = {{ cf_endpoint | jsonify }};
   var SITEKEY = {{ cf_sitekey | jsonify }};
+  var MODE = {{ cf_mode | jsonify }};
   {% comment %} t0 = istante di apertura della pagina, spedito come "t": il Worker scarta gli invii sotto i 3 secondi. Si riazzera dopo ogni invio. {% endcomment %}
   var t0 = Date.now();
   var wid = null;
@@ -73,38 +81,68 @@
   function mostra(m, ok) { esito.textContent = m; esito.style.color = ok ? '' : '#b00020'; }
   {% comment %} avvia(): la libreria Turnstile e' caricata in modo asincrono, quindi riprovo ogni 200 ms finche' esiste window.turnstile. {% endcomment %}
   function avvia() {
+    if (MODE !== 'turnstile') return;
     if (window.turnstile) { wid = window.turnstile.render('#cf-ts', { sitekey: SITEKEY }); }
     else { setTimeout(avvia, 200); }
   }
   avvia();
+  {% comment %} ALTCHA: il Worker da' una sfida (GET ?challenge=1), il browser prova i numeri da 0 a maxnumber finche' lo SHA-256 di salt+numero
+     coincide con la sfida, poi rimanda il risultato (base64 di un JSON). Parte in background al caricamento, cosi' al clic su Invia e' gia' pronto.
+     Le sfide scadono dopo 10 minuti: se e' passato troppo tempo se ne calcola una nuova. {% endcomment %}
+  var pre = null, preT = 0;
+  function hex(b) { return Array.prototype.map.call(new Uint8Array(b), function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); }
+  async function altcha() {
+    var sep = ENDPOINT.indexOf('?') < 0 ? '?' : '&';
+    var c = await (await fetch(ENDPOINT + sep + 'challenge=1')).json();
+    if (!c.challenge) throw new Error('altcha');
+    var enc = new TextEncoder();
+    for (var n = 0; n <= c.maxnumber; n++) {
+      if (hex(await crypto.subtle.digest('SHA-256', enc.encode(c.salt + n))) === c.challenge) {
+        return btoa(JSON.stringify({ algorithm: c.algorithm, challenge: c.challenge, number: n, salt: c.salt, signature: c.signature }));
+      }
+    }
+    throw new Error('altcha');
+  }
+  function prepara() { preT = Date.now(); pre = altcha().catch(function () { return ''; }); }
+  if (MODE === 'altcha') prepara();
+  {% comment %} token(): una Promise col risultato della verifica (Turnstile: il token del riquadro; ALTCHA: la sfida risolta). Stringa vuota = non pronto. {% endcomment %}
+  function token() {
+    if (MODE === 'altcha') {
+      if (!pre || Date.now() - preT > 480000) prepara();
+      return pre.then(function (v) { if (v) return v; prepara(); return pre; });
+    }
+    return Promise.resolve(window.turnstile && wid !== null ? window.turnstile.getResponse(wid) : '');
+  }
+  {% comment %} Dopo ogni invio il token e' consumato: Turnstile lo rigenera con reset, ALTCHA ne calcola un'altra sfida. {% endcomment %}
+  function rinnova() { if (MODE === 'altcha') prepara(); else if (window.turnstile) window.turnstile.reset(wid); }
   form.addEventListener('submit', function (ev) {
     ev.preventDefault();
     {% comment %} Controlli veloci lato browser (solo comodita': quelli veri sono nel Worker, perche' il browser si aggira). {% endcomment %}
     if (!form.checkValidity()) { mostra('Compila nome, email e messaggio.', false); return; }
-    var token = window.turnstile && wid !== null ? window.turnstile.getResponse(wid) : '';
-    if (!token) { mostra('Completa la verifica di sicurezza.', false); return; }
-    {% comment %} Corpo "x-www-form-urlencoded": e' una richiesta semplice, il browser non fa il controllo preventivo (preflight). Il Worker legge questi stessi nomi. {% endcomment %}
-    var d = new URLSearchParams(new FormData(form));
-    d.set('cf-turnstile-response', token);
-    d.set('t', String(t0));
-    d.set('tipo', 'contatto-web');
-    d.set('sito', location.hostname);
-    d.set('pagina', location.pathname);
     btn.disabled = true; mostra('Invio in corso...', true);
-    fetch(ENDPOINT, { method: 'POST', body: d })
-      .then(function (r) { return r.json(); })
-      .then(function (j) {
-        {% comment %} Risposta del Worker: status "ok" oppure "error". Dopo ogni invio il token Turnstile e' consumato, quindi lo si rigenera con reset. {% endcomment %}
-        if (j.status === 'ok') { form.reset(); mostra('Messaggio inviato, grazie! Ti risponderemo presto.', true); }
-        else { mostra('Invio non riuscito. Riprova tra poco.', false); }
-        if (window.turnstile) { window.turnstile.reset(wid); }
-        btn.disabled = false; t0 = Date.now();
-      })
-      .catch(function () {
-        mostra('Errore di rete. Riprova.', false);
-        if (window.turnstile) { window.turnstile.reset(wid); }
-        btn.disabled = false;
-      });
+    token().then(function (tk) {
+      if (!tk) { mostra(MODE === 'altcha' ? 'Verifica non riuscita. Riprova.' : 'Completa la verifica di sicurezza.', false); btn.disabled = false; return; }
+      {% comment %} Corpo "x-www-form-urlencoded": e' una richiesta semplice, il browser non fa il controllo preventivo (preflight). Il Worker legge questi stessi nomi. {% endcomment %}
+      var d = new URLSearchParams(new FormData(form));
+      d.set(MODE === 'altcha' ? 'altcha' : 'cf-turnstile-response', tk);
+      d.set('t', String(t0));
+      d.set('tipo', 'contatto-web');
+      d.set('sito', location.hostname);
+      d.set('pagina', location.pathname);
+      return fetch(ENDPOINT, { method: 'POST', body: d })
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          {% comment %} Risposta del Worker: status "ok" oppure "error". {% endcomment %}
+          if (j.status === 'ok') { form.reset(); mostra('Messaggio inviato, grazie! Ti risponderemo presto.', true); }
+          else { mostra('Invio non riuscito. Riprova tra poco.', false); }
+          rinnova();
+          btn.disabled = false; t0 = Date.now();
+        });
+    }).catch(function () {
+      mostra('Errore di rete. Riprova.', false);
+      rinnova();
+      btn.disabled = false;
+    });
   });
 })();
 </script>

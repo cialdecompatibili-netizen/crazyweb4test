@@ -156,6 +156,11 @@
   var PER_RE = /(^pagination:[ \t]*\r?\n(?:[ \t]+[^\r\n]*\r?\n)*?[ \t]+per_page:[ \t]*)(\d+)/m;
   function getPer(t) { var q = t.match(PER_RE); return q ? q[2] : ''; }
   function setPer(t, n) { return t.replace(PER_RE, function (_q, a) { return a + n; }); }
+  /* Captcha del form contatti: chiave ANNIDATA (contatti > captcha), come per_page non passa da getVal/setVal. Valori: turnstile | altcha, tra virgolette.
+     Se la riga manca nel config il menu mostra turnstile e al salvataggio non crea nulla (default del form: turnstile). */
+  var CAP_RE = /(^contatti:[ \t]*\r?\n(?:[ \t]+[^\r\n]*\r?\n)*?[ \t]+captcha:[ \t]*")(turnstile|altcha)(")/m;
+  function getCap(t) { var q = t.match(CAP_RE); return q ? q[2] : 'turnstile'; }
+  function setCap(t, v) { return t.replace(CAP_RE, function (_q, a, _o, c) { return a + v + c; }); }
   /* Copia a mano della regola del plugin _plugins/titolo_da_baseurl.rb (serve solo al segnaposto): tenerle uguali.
      Il nome viene dall'indirizzo del sito (utente.github.io/<repo>/), che e' quello che usa il deploy; ripiego: baseurl del config. */
   function autoTitle(t) {
@@ -224,6 +229,7 @@
         if (k[0] === 'title') h += '<small>Vuoto = automatico dal nome del sito (vedi anteprima nel campo). Scrivi un testo per cambiarlo.</small>';
       });
       h += '<h3>Home</h3><label style="display:flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" id="c_home_marte" style="width:auto"' + (getVal(f.text, 'home_marte').toLowerCase() === 'false' ? '' : ' checked') + '> Mostra Marte animato nella home</label><small>Spento = Marte non viene proprio caricato (nemmeno l\'immagine). Dopo Salva serve il deploy (2-3 minuti).</small>';
+      h += '<h3>Form contatti</h3><label>Protezione antispam</label><select id="c_captcha"><option value="turnstile"' + (getCap(f.text) === 'turnstile' ? ' selected' : '') + '>Turnstile (Cloudflare)</option><option value="altcha"' + (getCap(f.text) === 'altcha' ? ' selected' : '') + '>ALTCHA (calcolo nel browser, nessun servizio esterno)</option></select><small>ALTCHA funziona solo se nel Worker c\'è il secret ALTCHA_HMAC (script crea_altcha.ps1 + wrangler deploy). Se non c\'è, il form non invia finché non torni a Turnstile.</small>';
       h += '<h3>Lettura</h3>';
       var ts = getVal(f.text, 'toc_style') === 'side' ? 'side' : 'box';
       h += '<label>Indice articoli</label><select id="c_toc_style"><option value="box"' + (ts === 'box' ? ' selected' : '') + '>Cornice in alto</option><option value="side"' + (ts === 'side' ? ' selected' : '') + '>Laterale sinistro (su mobile va in alto)</option></select>';
@@ -242,6 +248,7 @@
       if (nv !== getVal(cfg.text, k[0])) t = setVal(t, k[0], nv);
     });
     var npp = $('c_per_page').value; if (npp !== getPer(cfg.text)) t = setPer(t, npp);
+    var ncap = $('c_captcha').value; if (ncap !== getCap(cfg.text)) t = setCap(t, ncap);
     /* PUNTO CRITICO (CLAUDE.md punto 27): home_marte e' una chiave in prima colonna di _config.yml, letta da _pages/home.md (condizione Liquid if su site.home_marte).
        Qui NON e' in KEYS/CFG_SAVE perche' e' una spunta, non un testo. Se la riga sparisce dal config setVal non la ricrea e Marte resta acceso. */
     /* Marte in home: interruttore home_marte (true/false). Se la riga manca nel config non la creo: setVal non fa nulla e il default resta acceso. */
