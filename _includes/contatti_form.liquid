@@ -26,6 +26,11 @@
         altrimenti il riquadro non compare. github.io e' gia' registrato; un dominio personalizzato va aggiunto (max 10 gratis per widget).
     (3) Usa una sola volta per pagina: gli id (cf-form, cf-ts, ...) sono fissi.
     (4) Non usare le parentesi graffe con la percentuale dentro i commenti: Liquid le eseguirebbe.
+    (5) Due modalita', scelte da _config.yml > contatti.captcha: turnstile (default, riquadro Cloudflare) e altcha (calcolo nel browser, funzioni
+        altcha/prepara/token/rinnova nello script). In altcha non serve la sitekey ne' il caricamento di api.js. Gli unici punti che dipendono
+        dalla modalita' sono: cf_ok (form attivo), il div cf-ts, il tag script di Turnstile, avvia(), token() e rinnova(). L'if/else del form
+        e' chiuso da endif (non unless): non cambiarlo in unless. Il campo inviato cambia: "altcha" oppure "cf-turnstile-response".
+    (6) Liquid non ha parentesi negli if: le condizioni composte si fanno a passi (vedi cf_ok), mai con "and/or" misti.
   Per togliere del tutto il sistema vedi le istruzioni in cima a claudetemp/contatti-worker/worker.js.
   =====================================================================================================================
 {% endcomment %}
