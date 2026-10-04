@@ -447,6 +447,14 @@ var A = (function () {
        bloccante (il caso d'uso e' il bottone Img della toolbar markdown, cliccato dall'utente ben
        dopo il caricamento), ma se in futuro serve BASEURL per costruire qualcosa a schermata gia'
        pronta, aspettare questa Promise invece di leggere A.baseurl() a freddo. */
+    /* BASEURL DALL'INDIRIZZO DELL'ADMIN (sincrono, nessun nome nel codice): l'admin vive sempre in <baseurl>/admin/,
+       quindi il sottopercorso del sito e' tutto cio' che precede l'ultimo '/admin' nel percorso della pagina
+       (/nome-repo/admin/ -> /nome-repo; sito in root /admin/ -> vuoto). E' la stessa regola di deploy.yml, che
+       sovrascrive url/baseurl solo in CI: il baseurl scritto in _config.yml dopo una clonazione e' quello
+       del sito d'origine, quindi NON e' affidabile (causava Img/anteprime con percorso sbagliato nei cloni).
+       Il valore di _config.yml resta solo come ripiego se la pagina non e' sotto /admin/ (non succede in pratica). */
+    var bm = location.pathname.match(/^(.*)\/admin(?:\/|$)/);
+    if (bm) BASEURL = bm[1];
     getFile('_config.yml').then(function (f) {
       /* baseurl: la riga in _config.yml ha un commento in coda ("baseurl: /nome-repo # the subpath...").
          Va tolto, altrimenti BASEURL diventa "/nome-repo # the subpath of your site..." e ogni percorso
@@ -454,7 +462,7 @@ var A = (function () {
          token reale: i test sulle singole funzioni non lo vedevano. Stessa regola del timezone sotto:
          il valore finisce al primo spazio o '#'. Un baseurl vuoto ("baseurl:" o "baseurl: ''") resta ''. */
       var m = f.text.match(/^baseurl:[ \t]*([^\s#]*)/m);
-      BASEURL = m ? m[1].replace(/^["']|["']$/g, '') : '';
+      if (!bm) BASEURL = m ? m[1].replace(/^["']|["']$/g, '') : ''; // con admin sotto /admin/ vince l'indirizzo (sopra)
       /* timezone del sito: e' quello che Jekyll usa per leggere le date dei post (sez. 0c). L'admin
          deve scrivere l'ora nello STESSO fuso, altrimenti il post nasce sfasato. Il commento in coda
          alla riga ("timezone: Europe/Rome # ...") va tolto, altrimenti Intl lo rifiuta. */
