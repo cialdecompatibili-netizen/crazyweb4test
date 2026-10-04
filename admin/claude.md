@@ -29,7 +29,7 @@ Vale per **tutto il sito**, non solo per l'admin. Deve essere possibile duplicar
 **Cosa e' gia' parametrico (non toccare, e' cosi' che deve restare):**
 - `url` e `baseurl` in `_config.yml`: unica fonte di verita' per hostname e sottopercorso. Tutto (footer.liquid, deploy.yml, admin) li deve leggere da li', mai duplicarli come stringa fissa altrove.
 - I workflow in `.github/workflows/` usano variabili GitHub (`${{ github.repository }}` ecc.), non nomi di repo scritti a mano: restano validi su qualsiasi fork/clone.
-- L'admin (`admin/*.js`) legge `REPO` dal login (localStorage) e `baseurl` da `_config.yml` via `A.baseurl()` â€” nessun repo o path scritto nel codice.
+- L'admin (`admin/*.js`) legge `REPO` dal login (localStorage) e `baseurl` dall'indirizzo della pagina admin (tutto cio' che precede l'ultimo `/admin`; ripiego `_config.yml`) via `A.baseurl()` â€” nessun repo o path scritto nel codice.
 
 **Regole per ogni nuova modifica (codice sito o admin):**
 - Mai scrivere in JS/HTML/CSS/Liquid nomi di repo, utenti GitHub, `baseurl`, URL assoluti del sito. Se serve un path verso il sito, costruirlo da `site.baseurl` (Liquid) o `A.baseurl()` (admin), mai concatenando una stringa fissa.
@@ -38,7 +38,7 @@ Vale per **tutto il sito**, non solo per l'admin. Deve essere possibile duplicar
 
 **Procedura per clonare il sito (nuovo progetto dallo stesso template):**
 1. Copiare l'intera cartella su un nuovo repo GitHub (nuovo nome).
-2. In `_config.yml` aggiornare SOLO `url` (hostname) e `baseurl` (sottopercorso, es. `/nuovo-repo`), oltre ai campi anagrafici (`title`, `first_name`/`last_name`, `description`, `footer_text`).
+2. (Dal 04/10/2026 url e baseurl sono automatici in deploy e admin: questo serve solo per `jekyll serve` in locale.) In `_config.yml` aggiornare SOLO `url` (hostname) e `baseurl` (sottopercorso, es. `/nuovo-repo`), oltre ai campi anagrafici (`title`, `first_name`/`last_name`, `description`, `footer_text`).
 3. Attivare GitHub Pages: source `gh-pages`, `build_type: legacy` (non `workflow`, altrimenti 404 â€” vedi sez. 2).
 4. Primo push su `main` fa partire `deploy.yml` in automatico.
 5. Aprire `admin/index.html`, fare login col nuovo `utente/repo` e un token con scope `repo`: l'admin si auto-configura, nessuna modifica al codice necessaria.
@@ -124,7 +124,7 @@ Ogni volta che scrivi o modifichi codice in `admin/` o nei template del sito, **
 Sessione 2026-09-20. Due siti GitHub Pages dello stesso utente (utente.github.io/sito-a/ e /sito-b/) hanno lo STESSO dominio, e il browser tiene localStorage PER DOMINIO. Con chiavi fisse (adm_tok, adm_repo) il secondo admin trovava token e repo del primo, mostrava i link Sito/Deploy del sito sbagliato e SCRIVEVA SUL REPO SBAGLIATO.
 **Regola:** le chiavi del browser NON sono fisse, contengono il percorso dell'admin: adm_tok:<percorso> e adm_repo:<percorso> (variabili K_TOK, K_REPO, SCOPE in admin.js). Ogni sito ha le sue. Il logout toglie solo il token di quel sito.
 **Campo repo precompilato:** se per questo sito non c'e' niente di salvato, il repo si ricava dall'indirizzo (utente.github.io/nome-repo/ diventa utente/nome-repo). Con dominio personalizzato o sito radice utente.github.io il campo resta vuoto e lo compila l'utente. Nessun nome di repo e' scritto nel codice.
-**Conseguenza per chi clona il sito:** dopo la copia bisogna cambiare SOLO baseurl in _config.yml; niente da toccare in admin/. Nota: chi aveva gia' fatto login con il vecchio formato (chiavi senza percorso) deve rifare il login una volta.
+**Conseguenza per chi clona il sito:** dopo la copia NON serve cambiare niente (dal 04/10/2026 l'admin ricava il baseurl dal proprio indirizzo, `deploy.yml` quello del build); niente da toccare in admin/. Nota: chi aveva gia' fatto login con il vecchio formato (chiavi senza percorso) deve rifare il login una volta.
 
 
 ### 0g. PALLINO DEPLOY: come intercettare davvero la pubblicazione (bug che non e' mai stato risolto fino al 2026-09-20)
@@ -421,3 +421,4 @@ Creato il 2026-09-20 copiando crazyweb3 senza la cronologia git (un solo commit 
 
 - Blog: `pagination.per_page` in `_config.yml`, select in Impostazioni (5/10/20/50/100). `getPer`/`setPer` in `admin-media.js` (chiave annidata, regex `PER_RE`). `_pages/blog.md` non deve avere `per_page`.
 - Liste Articoli/Progetti/News: `A.pgBar`, `A.pp`, `A.setPP`, `A.setPg` in `admin-views.js` (funzione `collection`). Scelta salvata in `localStorage.admin_pp` (default 20). Si leggono solo i file della pagina corrente.
+- 2026-10-04: `BASEURL` dell'admin ora sincrono dall'indirizzo (`/<repo>/admin/`), `_config.yml` solo ripiego. Motivo: nei cloni `_config.yml` ha il baseurl del sito di partenza e l'admin leggeva quello (Img/anteprime/URL pubblico sbagliati). Il deploy non era toccato (usa `_ci_config.yml`).

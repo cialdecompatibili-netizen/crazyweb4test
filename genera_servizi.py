@@ -5,7 +5,7 @@ Genera/aggiorna le pagine-servizio (una per ogni voce in servizi_data.py) nella
 cartella _servizi/ del repo LOCALE di TEST (collection "servizi", NON piu' _posts).
 Non tocca GitHub: scrive solo file locali. Il push va fatto a mano dopo aver
 controllato il risultato (git add / commit / push, oppure via pubblica_servizi.py).
-ATTENZIONE: _servizi/ esiste SOLO su TEST. Su PROD (crazyweb4) la collection non c'e':
+ATTENZIONE: _servizi/ esiste SOLO su TEST. Su un eventuale PROD la collection non c'e':
 i file creati la' non verrebbero pubblicati (vedi CLAUDE.md punti 10 e 21).
 
 USO:
@@ -18,8 +18,8 @@ USO:
                                             scrivere nulla
 
 REGOLE FISSE (decise nella chat, non cambiarle senza motivo):
-- Il repo di riferimento e' SEMPRE questa cartella locale (crazyweb4test_local),
-  quella di TEST. Lo script non tocca mai crazyweb4 (produzione).
+- Il repo di riferimento e' SEMPRE questa cartella del progetto,
+  quella di TEST. Lo script non tocca mai un eventuale PROD.
 - Ogni post usa SOLO titoli H2 (##), MAI H3, e sempre almeno 4 H2: il tema
   al-folio mostra l'indice automatico solo se ci sono >= 2 titoli H2 nella
   pagina. Con 4 siamo larghi e coerenti in tutti i post.

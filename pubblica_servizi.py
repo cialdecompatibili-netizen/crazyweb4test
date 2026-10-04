@@ -5,7 +5,7 @@ pubblica_servizi.py
 UNICO comando per pubblicare i servizi (post + card cliccabili). Sostituisce
 tutti i passaggi fatti a mano in chat: output brevissimo = pochi token.
 
-USO (dalla cartella crazyweb4test):
+USO (dalla cartella del progetto):
   python pubblica_servizi.py --primi 2 --dry-run      anteprima, non scrive
   python pubblica_servizi.py --slug consulenza-seo    solo quei servizi (virgola)
   python pubblica_servizi.py --tutti                  tutti i servizi
@@ -21,7 +21,7 @@ COSA FA (per ogni cartella scelta):
   5. con --push: git add SOLO i file toccati, commit (solo quelli), push
      (controlla che il remoto sia quello giusto; prod: si ferma se e' indietro)
 Idempotente: rilanciarlo non cambia nulla se e' gia' tutto a posto.
-Prod (crazyweb4) si tocca SOLO con --dove prod|entrambi, dopo il via dell'utente.
+Un eventuale PROD si tocca SOLO con --dove prod|entrambi, dopo il via dell'utente.
 Non tocca mai _config.yml, Agenzia.md o altri file.
 """
 

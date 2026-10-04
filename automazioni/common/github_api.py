@@ -1,6 +1,6 @@
 """
 Helper condivisi per leggere/scrivere file sul repo GitHub del sito
-(crazyweb4test) via API REST, senza duplicare requests.get/put in ogni
+(quello di questo progetto) via API REST, senza duplicare requests.get/put in ogni
 script (com'era prima in claudetemp/).
 
 Usa automazioni/common/config.py per owner/repo/branch/token.
