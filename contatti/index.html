@@ -61,6 +61,7 @@
   
   var ENDPOINT = "https://contatti-form.evabomboniere.workers.dev";
   var SITEKEY = "0x4AAAAAAFNJy_IB22gVYOuB";
+  var MODE = "turnstile";
   
   var t0 = Date.now();
   var wid = null;
@@ -68,38 +69,66 @@
   function mostra(m, ok) { esito.textContent = m; esito.style.color = ok ? '' : '#b00020'; }
   
   function avvia() {
+    if (MODE !== 'turnstile') return;
     if (window.turnstile) { wid = window.turnstile.render('#cf-ts', { sitekey: SITEKEY }); }
     else { setTimeout(avvia, 200); }
   }
   avvia();
+  
+  var pre = null, preT = 0;
+  function hex(b) { return Array.prototype.map.call(new Uint8Array(b), function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); }
+  async function altcha() {
+    var sep = ENDPOINT.indexOf('?') < 0 ? '?' : '&';
+    var c = await (await fetch(ENDPOINT + sep + 'challenge=1')).json();
+    if (!c.challenge) throw new Error('altcha');
+    var enc = new TextEncoder();
+    for (var n = 0; n <= c.maxnumber; n++) {
+      if (hex(await crypto.subtle.digest('SHA-256', enc.encode(c.salt + n))) === c.challenge) {
+        return btoa(JSON.stringify({ algorithm: c.algorithm, challenge: c.challenge, number: n, salt: c.salt, signature: c.signature }));
+      }
+    }
+    throw new Error('altcha');
+  }
+  function prepara() { preT = Date.now(); pre = altcha().catch(function () { return ''; }); }
+  if (MODE === 'altcha') prepara();
+  
+  function token() {
+    if (MODE === 'altcha') {
+      if (!pre || Date.now() - preT > 480000) prepara();
+      return pre.then(function (v) { if (v) return v; prepara(); return pre; });
+    }
+    return Promise.resolve(window.turnstile && wid !== null ? window.turnstile.getResponse(wid) : '');
+  }
+  
+  function rinnova() { if (MODE === 'altcha') prepara(); else if (window.turnstile) window.turnstile.reset(wid); }
   form.addEventListener('submit', function (ev) {
     ev.preventDefault();
     
     if (!form.checkValidity()) { mostra('Compila nome, email e messaggio.', false); return; }
-    var token = window.turnstile && wid !== null ? window.turnstile.getResponse(wid) : '';
-    if (!token) { mostra('Completa la verifica di sicurezza.', false); return; }
-    
-    var d = new URLSearchParams(new FormData(form));
-    d.set('cf-turnstile-response', token);
-    d.set('t', String(t0));
-    d.set('tipo', 'contatto-web');
-    d.set('sito', location.hostname);
-    d.set('pagina', location.pathname);
     btn.disabled = true; mostra('Invio in corso...', true);
-    fetch(ENDPOINT, { method: 'POST', body: d })
-      .then(function (r) { return r.json(); })
-      .then(function (j) {
-        
-        if (j.status === 'ok') { form.reset(); mostra('Messaggio inviato, grazie! Ti risponderemo presto.', true); }
-        else { mostra('Invio non riuscito. Riprova tra poco.', false); }
-        if (window.turnstile) { window.turnstile.reset(wid); }
-        btn.disabled = false; t0 = Date.now();
-      })
-      .catch(function () {
-        mostra('Errore di rete. Riprova.', false);
-        if (window.turnstile) { window.turnstile.reset(wid); }
-        btn.disabled = false;
-      });
+    token().then(function (tk) {
+      if (!tk) { mostra(MODE === 'altcha' ? 'Verifica non riuscita. Riprova.' : 'Completa la verifica di sicurezza.', false); btn.disabled = false; return; }
+      
+      var d = new URLSearchParams(new FormData(form));
+      d.set(MODE === 'altcha' ? 'altcha' : 'cf-turnstile-response', tk);
+      d.set('t', String(t0));
+      d.set('tipo', 'contatto-web');
+      d.set('sito', location.hostname);
+      d.set('pagina', location.pathname);
+      return fetch(ENDPOINT, { method: 'POST', body: d })
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          
+          if (j.status === 'ok') { form.reset(); mostra('Messaggio inviato, grazie! Ti risponderemo presto.', true); }
+          else { mostra('Invio non riuscito. Riprova tra poco.', false); }
+          rinnova();
+          btn.disabled = false; t0 = Date.now();
+        });
+    }).catch(function () {
+      mostra('Errore di rete. Riprova.', false);
+      rinnova();
+      btn.disabled = false;
+    });
   });
 })();
 </script> </article> </div> </div> <footer class="fixed-bottom" role="contentinfo"> <div class="container mt-0"> © Copyright 2026 Crazyweb4test. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>. Photos from <a href="https://unsplash.com" target="_blank" rel="external nofollow noopener">Unsplash</a>. </div> </footer> <style>
