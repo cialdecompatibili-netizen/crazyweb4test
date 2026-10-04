@@ -159,7 +159,8 @@ def genera_post(servizio, dry_run=False):
             m = re.match(r"---\r?\n(.*?)\r?\n---", f.read(), re.S)
         if m:
             for riga in m.group(1).splitlines():
-                if re.match(r"^(in_home|seo_title|seo_description):", riga):
+                # gruppo/ordine/sottotitolo: posizione nella pagina /servizi/ dinamica (vedi _pages/servizi.md): se non si conservano, rigenerare un servizio lo sposta in "Altri servizi"
+                if re.match(r"^(in_home|seo_title|seo_description|gruppo|ordine|sottotitolo):", riga):
                     extra += riga + "\n"
 
     front_matter = f"""---
