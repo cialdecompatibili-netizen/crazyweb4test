@@ -109,7 +109,7 @@
                   <a
                     class="nav-link dropdown-toggle"
                     href="#"
-                    id="navbarDropdown"
+                    id="navbarDropdown-{{ forloop.index }}"
                     role="button"
                     data-nav-dropdown-toggle="true"
                     aria-haspopup="true"
@@ -120,7 +120,7 @@
                       <span class="sr-only">(pagina attuale)</span>
                     {% endif %}
                   </a>
-                  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown-{{ forloop.index }}">
                     {% for child in p.children %}
                       {% if child.title == 'divider' %}
                         <div class="dropdown-divider"></div>
