@@ -18,6 +18,7 @@ label{display:block;margin:10px 0 4px;font-weight:600;font-size:13px}
 .side{position:fixed;top:0;left:0;bottom:0;width:200px;background:#1d2327;color:#c3c4c7;overflow:auto;z-index:50}
 .side .brand{padding:16px;color:#fff;font-weight:700;font-size:16px}
 .side .brand small{display:block;font-weight:400;font-size:11px;color:#9ca2a7;word-break:break-all}
+.side .brand small b{background:#ffe600;color:#1d2327;padding:1px 6px;border-radius:3px;font-weight:700;font-size:13px}
 .side a{display:block;padding:11px 16px;color:#c3c4c7;text-decoration:none}
 .side a:hover{background:#2c3338;color:#72aee6}
 .side a.on{background:#2271b1;color:#fff}

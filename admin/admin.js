@@ -431,7 +431,7 @@ var A = (function () {
   /* start: eseguita dopo il login. Qui si leggono da _config.yml (async) baseurl e timezone. Finche' la Promise non e' risolta BASEURL e SITE_TZ sono vuoti: vedi commento piu' sotto e sez. 0e claude.md. */
   function start() {
     $('login').style.display = 'none'; $('app').style.display = 'block';
-    $('repoName').textContent = REPO; main = $('main'); go('dash');
+    var rn = $('repoName'), rp = REPO.split('/'); rn.textContent = ''; rn.appendChild(document.createTextNode(rp[0] + '/')); var hl = document.createElement('b'); hl.textContent = rp[1] || ''; rn.appendChild(hl); /* nome repo in giallo: si vede subito su quale sito si sta lavorando (evita errori tra siti cloni) */ main = $('main'); go('dash');
     var parts = REPO.split('/'), user = parts[0], repoName = parts[1];
     SITEURL = 'https://' + user + '.github.io/' + repoName + '/'; // vedi A.siteUrl(): usato dai moduli con file root/ (es. sitemap.xml) per mostrare l'URL pubblico completo
     $('siteLink').href = SITEURL;
