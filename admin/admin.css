@@ -102,3 +102,11 @@ label{display:block;margin:10px 0 4px;font-weight:600;font-size:13px}
 
 .btn.eye{background:none;border:0;padding:0 4px;line-height:1;cursor:pointer;color:#2271b1;display:inline-flex;align-items:center}.btn.eye:hover{color:#135e96}.btn.eye.off{color:#b32d2e}
 .list .it.hid{opacity:.6}.list .it.hid>span::after{content:' \00b7  nascosto';color:#b32d2e;font-size:.85em;font-weight:600}
+/* Menu a gruppi comprimibili (admin-gruppi.js). Senza JS i gruppi restano aperti: si nascondono solo con .side.js */
+.side .gh{display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid #3c434a;color:#9ca2a7;font:600 11px/1 inherit;letter-spacing:.06em;text-transform:uppercase;padding:13px 16px;cursor:pointer}
+.side .gh:hover{color:#72aee6}
+.side.js .gh::after{content:"\25B8";float:right}
+.side.js .grp.open .gh::after{content:"\25BE"}
+.side.js .gb{display:none}
+.side.js .grp.open .gb{display:block}
+.side .gb a{padding-left:24px}
