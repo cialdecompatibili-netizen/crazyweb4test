@@ -19,6 +19,8 @@ lang: it # the language of your site (for example: en, fr, cn, ru, etc.)
 icon: 📈 # the emoji used as the favicon (alternatively, provide image name in /assets/img/)
 apple_touch_icon: # image name in /assets/img/ (or a rooted path / absolute URL) used for iOS home-screen bookmarks; needs a real 180x180 PNG, since Safari ignores the emoji favicon above. Left empty, iOS falls back to a screenshot of the page.
 
+# PUNTO CRITICO: url e baseurl qui valgono SOLO in locale (jekyll serve). Online li ricava deploy.yml dal nome del
+# repo (_ci_config.yml): NON cambiarli per pubblicare un clone, non serve. Tenere la riga "baseurl:" sempre presente.
 url: https://cialdecompatibili-netizen.github.io # the base hostname & protocol for your site
 baseurl: /crazyweb4test # the subpath of your site, e.g. /blog/. Leave blank for root
 last_updated: false # set to true if you want to display last updated in the footer

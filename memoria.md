@@ -36,3 +36,11 @@ Prossimo passo, quando Mirco lo chiede: scheletro minimo (catalogo statico, chec
      * Regole da mantenere uguali: front matter come oggi (slug, slug_precedenti, published, featured, in_home, thumbnail, thumbnail_alt, categories), URL /blog/<categoria>/<slug>/ e /servizi/<slug>/, redirect dai vecchi slug, controllo doppioni, test e verifica_permalink.py come rete di sicurezza.
      * Fonti da leggere per ricostruire il comportamento: questo CLAUDE.md (punti numerati), admin/*.js, _plugins/permalink_da_categoria.rb, _layouts, _includes, verifica_permalink.py.
      * Idea di partenza (da rivalutare): contenuti ancora in file Markdown nel repo, motore Node al posto di Jekyll, stesso admin riusato; il backend lato server risolve token, anteprime e 301.
+
+## 3. Script nuovo_sito.py per clonare in un colpo (idea, NIENTE DA FARE ORA)
+
+Motivo: la procedura del punto 'NUOVO SITO DA QUESTO' nel blocco 'Questo progetto' di CLAUDE.md e' stata fatta a mano due volte (italfuni, edilextreme2). Mirco vuole renderla piu' veloce la prossima volta. Quando lo chiede, farla come UNO script Python idempotente (regola risparmio token), con `--dry-run` e output di poche righe:
+- Input: nome del nuovo repo (e opzionalmente la cartella sorgente, default questa). Controlli prima di scrivere: cartella di destinazione inesistente, repo non gia' esistente su GitHub, sorgente senza modifiche non committate.
+- Passi: creare la repo vuota con `gh repo create`, copiare con robocopy (esclusi `.git`, `_site`, `node_modules`, `.jekyll-cache`, `automazioni/.env`), `git init -b main`, commit, push, attendere il primo deploy, abilitare Pages, verificare l'HTML online.
+- Da riscrivere nel clone: solo il blocco 'Questo progetto' di CLAUDE.md (nome, repo, URL, cartella). Tutto il resto e' gia' automatico.
+- Lo script va documentato in CLAUDE.md (comando e opzioni) appena funziona.

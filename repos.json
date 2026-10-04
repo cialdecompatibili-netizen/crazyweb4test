@@ -1,11 +1,11 @@
 {
-  "_nota": "Unica fonte di verita' per pubblica_servizi.py. Per un nuovo repo basta aggiungere un blocco qui: niente da cambiare nel codice. 'dir' relativa alla cartella padre di questo progetto (o assoluta).",
+  "_nota": "Unica fonte di verita' per pubblica_servizi.py e pubblica_chi_siamo.py. 'remoto' e 'baseurl' = 'auto': ricavati dal git origin della cartella (stessa regola di deploy.yml), quindi un clone funziona senza toccare niente. Il blocco 'prod' tiene remoto e baseurl SCRITTI A MANO apposta: e' il controllo di sicurezza (un origin sbagliato blocca il push). Per un secondo repo basta aggiungere un blocco qui. 'dir' relativa alla cartella di questo progetto (o assoluta).",
   "default": "test",
   "repos": {
     "test": {
       "dir": ".",
-      "remoto": "cialdecompatibili-netizen/crazyweb4test",
-      "baseurl": "/crazyweb4test",
+      "remoto": "auto",
+      "baseurl": "auto",
       "etichetta": "TEST",
       "protetto": false
     },

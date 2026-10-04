@@ -19,6 +19,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from repos_auto import completa
+
 QUI = Path(__file__).resolve().parent
 REPOS_JSON = QUI / "repos.json"
 CONTENUTO_JSON = QUI / "chi_siamo.json"
@@ -40,7 +42,10 @@ def risolvi_repos(cfg: dict) -> dict:
         d = Path(r["dir"])
         if not d.is_absolute():
             d = (QUI / d).resolve()
-        out[nome] = {**r, "dir": d}
+        # PUNTO CRITICO: remoto/baseurl "auto" o mancanti = ricavati dal git origin (repos_auto.py, stessa
+        # regola di deploy.yml). Con "auto" il remoto non e' un controllo di sicurezza: per un repo protetto
+        # (prod) scrivilo esplicito in repos.json. Non scrivere mai nomi/URL nel codice.
+        out[nome] = completa({**r, "dir": d})
     return out
 
 

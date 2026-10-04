@@ -106,6 +106,8 @@ jobs:
           # URL e baseurl ricavati dal repo in cui gira il workflow: un clone si pubblica da solo col proprio nome.
           # Dominio personalizzato: se esiste il file CNAME nella root si usa quello (baseurl vuoto).
           # Repo <utente>.github.io: sito in root (baseurl vuoto). In locale valgono url/baseurl di _config.yml.
+          # PUNTO CRITICO: la STESSA regola e' copiata in repos_auto.py e automazioni/common/config.py (script Python).
+          # Se la cambi qui, cambiala anche li, altrimenti gli script pubblicano su indirizzi diversi dal deploy.
           OWNER="${GITHUB_REPOSITORY%%/*}"; REPO="${GITHUB_REPOSITORY#*/}"
           if [ -s CNAME ]; then SITE_URL="https://$(head -n1 CNAME | tr -d '[:space:]')"; BASE=""
           elif [ "${REPO,,}" = "${OWNER,,}.github.io" ]; then SITE_URL="https://${OWNER}.github.io"; BASE=""
