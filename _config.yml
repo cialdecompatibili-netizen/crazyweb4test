@@ -783,8 +783,9 @@ jsonresume:
 performance:
   enabled: true
 
-# Form contatti (include contatti_form.liquid). Endpoint = URL Apps Script, sitekey = chiave PUBBLICA Turnstile.
-# La chiave segreta sta SOLO nelle proprieta' dello Apps Script, mai qui. Vuoti = il form non compare.
+# Form contatti (include contatti_form.liquid). Endpoint = Worker Cloudflare 'contatti-form' (claudetemp/contatti-worker), sitekey = chiave PUBBLICA Turnstile.
+# La chiave segreta sta SOLO nel Worker (wrangler secret TURNSTILE_SECRET), mai qui. Vuoti = il form non compare.
+# Il Worker verifica Turnstile e inoltra al tracker Google esistente (TRACKER_URL in wrangler.toml).
 contatti:
-  endpoint: "https://script.google.com/macros/s/AKfycbzS_BXbhdL5lonAPSMcLF0d0zxBgf4L38mxBrhGMSsKrDKp-vlYMCxuWmcUURnu6Vxn/exec"
-  turnstile_sitekey: ""
+  endpoint: "https://contatti-form.evabomboniere.workers.dev"
+  turnstile_sitekey: "0x4AAAAAAFNJy_IB22gVYOuB"
