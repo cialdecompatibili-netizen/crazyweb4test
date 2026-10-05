@@ -82,7 +82,7 @@
   }
   /* Desktop: la miniatura riempie TUTTA l'altezza del blocco di testo (adattiva: piu' testo = piu' alta), a filo con il bordo; tra un articolo e l'altro resta solo una sottile riga bianca (border-bottom del li). Per cambiare lo spessore: 2px qui sotto. Altezza minima 9rem se il testo e' corto. */
   @media (min-width: 576px) {
-    .post .post-list > li { margin: 0; padding: 0; border-bottom: 2px solid #fff; }
+    .post .post-list > li { margin: 0; padding: 0; border-bottom: 1px solid var(--global-divider-color); }
     .post .post-list > li > .row { align-items: stretch; margin: 0; }
     .post .post-list > li > .row > .col-sm-9 { padding-top: .6rem; padding-bottom: .4rem; }
     .post .post-list > li > .row > .col-sm-3 { position: relative; min-height: 9rem; padding: 0; }
