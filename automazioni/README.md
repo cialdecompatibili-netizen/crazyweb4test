@@ -24,6 +24,7 @@ di AGENTS.md — questi script servono solo per i task ripetibili.
 - `post.py` — wrapper su genera_servizi.py per creare/aggiornare post di
   servizio in _posts/ mantenendo lo stile già validato (3-4 H2, niente
   sezione "Richiedi una consulenza", vedi commit e4b9b12).
+- `aggiorna_home_nicchie.py` — sostituisce 6 righe di testo in _pages/home.md dei cloni di nicchia (--dry-run, --push, --solo); vedi docstring per i limiti.
 
 ## Regola per ogni nuovo script
 
