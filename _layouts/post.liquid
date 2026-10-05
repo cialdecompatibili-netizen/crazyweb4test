@@ -96,7 +96,22 @@ layout: default
     {% if page.collection == 'posts' and page.thumbnail and page.thumbnail_hide != true and page.thumbnail_hide != 'true' %}
       {% assign cop_alt = page.thumbnail_alt | default: page.title %}
       <style>.post-cover{margin:0 0 1.5rem}.post-cover img{display:block;width:100%;aspect-ratio:16/9;max-height:420px;object-fit:cover;object-position:center 30%;border-radius:.375rem}@media(max-width:575.98px){.post-cover img{aspect-ratio:4/3}}</style>
-      <figure class="post-cover"><img src="{{ page.thumbnail | relative_url }}" alt="{{ cop_alt | escape }}" loading="eager"></figure>
+      {% comment %}
+        MINIATURA LEGGERA: l'admin crea assets/img/cover/<nome>.jpg (1200 px, JPEG ~80%) quando scegli l'immagine in evidenza. Qui si usa quella;
+        se non esiste (articoli vecchi) si ripiega sull'originale. "thumbnail_hd: true" (spunta admin) forza l'originale in alta definizione.
+      {% endcomment %}
+      {% assign cop_src = page.thumbnail %}
+      {% unless page.thumbnail_hd == true or page.thumbnail_hd == 'true' %}
+        {% assign cop_fn = page.thumbnail | split: '/' | last %}
+        {% assign cop_ext = cop_fn | split: '.' | last %}
+        {% assign cop_n = cop_fn.size | minus: cop_ext.size | minus: 1 %}
+        {% assign cop_base = cop_fn | slice: 0, cop_n %}
+        {% assign cop_rel = 'assets/img/cover/' | append: cop_base | append: '.jpg' %}
+        {% assign cop_abs = '/' | append: cop_rel %}
+        {% assign cop_file = site.static_files | where: 'path', cop_abs | first %}
+        {% if cop_file %}{% assign cop_src = cop_rel %}{% endif %}
+      {% endunless %}
+      <figure class="post-cover"><img src="{{ cop_src | relative_url }}" alt="{{ cop_alt | escape }}" loading="eager" decoding="async"></figure>
     {% endif %}
     {% if page.toc and page.toc.beginning %}
       <div id="table-of-contents">

@@ -25,6 +25,26 @@
     e.innerHTML = v ? '<img src="' + esc(A.rawUrl(v)) + '" style="max-width:240px;max-height:150px;border-radius:4px;border:1px solid #a7aaad;display:block;margin:6px 0"><small>' + esc(v) + '</small>' : '<small>Nessuna immagine impostata</small>';
   };
   A.imgClr = function (fid) { $(fid).value = ''; A.imgPrev(fid); };
+  /* MINIATURA LEGGERA per l'immagine in evidenza: assets/img/cover/<nome>.jpg, larghezza max 1200 px, JPEG 80%, ritaglio verticale max 4:3 (l'articolo la mostra in 16:9).
+     Si crea quando nel selettore si preme 'Imposta immagine' sul campo f_thumbnail, solo se non esiste gia'. L'originale non si tocca (serve per thumbnail_hd). */
+  A.mkCover = function (p) {
+    var fn = String(p).replace(/^.*\//, ''), base = fn.replace(/\.[a-z0-9]+$/i, ''), dst = 'assets/img/cover/' + base + '.jpg';
+    return A.getFile(dst).then(function () { return true; }, function () { return false; }).then(function (ex) {
+      if (ex) return;
+      return new Promise(function (ok, ko) {
+        var im = new Image(); im.crossOrigin = 'anonymous';
+        im.onload = function () {
+          var w = Math.min(im.naturalWidth, 1200), s = w / im.naturalWidth, h = Math.round(im.naturalHeight * s), ch = Math.min(h, Math.round(w * 0.75));
+          var cv = document.createElement('canvas'); cv.width = w; cv.height = ch; var cx = cv.getContext('2d');
+          cx.fillStyle = '#fff'; cx.fillRect(0, 0, w, ch);
+          cx.drawImage(im, 0, -Math.round((h - ch) * 0.3), w, h);
+          ok(cv.toDataURL('image/jpeg', 0.8).split(',')[1]);
+        };
+        im.onerror = function () { ko(new Error('miniatura: immagine non leggibile')); };
+        im.src = A.rawUrl(p) + '?t=' + Date.now();
+      }).then(function (b64) { return A.putFile(dst, b64, '', 'admin: miniatura ' + base + '.jpg', true); });
+    });
+  };
   function shrink(f) {
     return new Promise(function (ok, ko) {
       function rd(b) { var r = new FileReader(); r.onload = function () { ok(r.result.split(',')[1]); }; r.onerror = ko; r.readAsDataURL(b); }
@@ -72,7 +92,7 @@
       if (t && t !== ov) { sel = t.getAttribute('data-p'); paint(); }
     });
     $('ip_x').onclick = close;
-    $('ip_ok').onclick = function () { if (!sel) return A.toast('Scegli o carica un\'immagine', true); if (opts.onPick) { opts.onPick(sel, { align: al, alt: (($('ip_alt') || {}).value || '').trim() }); close(); return; } $(fid).value = sel; A.imgPrev(fid); close(); };
+    $('ip_ok').onclick = function () { if (!sel) return A.toast('Scegli o carica un\'immagine', true); if (opts.onPick) { opts.onPick(sel, { align: al, alt: (($('ip_alt') || {}).value || '').trim() }); close(); return; } if (fid === 'f_thumbnail') { A.toast('Preparo la miniatura leggera...'); A.mkCover(sel).then(function () { $(fid).value = sel; A.imgPrev(fid); close(); }, function (e) { A.toast(A.errMsg(e), true); $(fid).value = sel; A.imgPrev(fid); close(); }); return; } $(fid).value = sel; A.imgPrev(fid); close(); };
     $('ip_f').onchange = function () {
       var fs = Array.prototype.slice.call(this.files); if (!fs.length) return;
       var inp = this, st = $('ip_s');
@@ -116,6 +136,7 @@
   A.delImg = A.wrap(function (n) {
     if (!confirm('Eliminare ' + n + '?')) return;
     return A.getFile('assets/img/' + n).then(function (f) { return A.delFile('assets/img/' + n, f.sha); })
+      .then(function () { var cp = 'assets/img/cover/' + n.replace(/\.[a-z0-9]+$/i, '') + '.jpg'; return A.getFile(cp).then(function (c) { return A.delFile(cp, c.sha); }, function () {}); })
       .then(function () { A.toast('Eliminata'); A.go('media'); });
   });
 

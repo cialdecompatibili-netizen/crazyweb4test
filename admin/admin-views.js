@@ -536,7 +536,7 @@
   /* IMMAGINE IN EVIDENZA (solo articoli): 'thumbnail' e 'thumbnail_alt' sono letti da _pages/blog.md (elenco blog e articoli in evidenza).
      Vuoti = la riga sparisce (A.save usa fmDel) e il blog non mostra l'immagine; alt vuoto = il blog usa il titolo. Il percorso e' relativo al sito (relative_url nel template). */
   var FIELDS = {
-    posts: [['title', 'Titolo', 'text'], ['slug', 'Indirizzo (slug)', 'slug'], ['date', 'Data', 'date'], ['description', 'Descrizione', 'text'], ['thumbnail', 'Immagine in evidenza', 'img'], ['thumbnail_alt', 'Testo alternativo immagine (vuoto = usa il titolo)', 'text'], ['thumbnail_hide', 'Non visualizzarla nell\'articolo', 'chk'], ['tags', 'Tag (separati da spazio)', 'text'], ['categories', 'Categoria', 'cat']].concat(SEO),
+    posts: [['title', 'Titolo', 'text'], ['slug', 'Indirizzo (slug)', 'slug'], ['date', 'Data', 'date'], ['description', 'Descrizione', 'text'], ['thumbnail', 'Immagine in evidenza', 'img'], ['thumbnail_alt', 'Testo alternativo immagine (vuoto = usa il titolo)', 'text'], ['thumbnail_hide', 'Non visualizzarla nell\'articolo', 'chk'], ['thumbnail_hd', 'Usa l\'originale in alta definizione nell\'articolo (piu\' pesante, quasi mai serve)', 'chk'], ['tags', 'Tag (separati da spazio)', 'text'], ['categories', 'Categoria', 'cat']].concat(SEO),
     projects: [['title', 'Titolo', 'text'], ['slug', 'Indirizzo (slug)', 'slug'], ['description', 'Descrizione', 'text'], ['img', 'Immagine', 'img'], ['importance', 'Ordine (numero)', 'text'], ['category', 'Categoria (deve stare in display_categories di projects)', 'cat'], ['redirect', 'Redirect esterno (opzionale)', 'text']].concat(SEO),
     /* gruppo/sottotitolo/ordine: pagina /servizi/ DINAMICA (_pages/servizi.md + _includes/servizi_tabella.liquid). 'gruppo' = sezione, scelta dall'elenco di _data/servizi_gruppi.yml
        (tipo 'grp', vedi grpField e loadCats); vuoto = finisce in "Altri servizi". 'ordine' = numero (scritto SENZA virgolette, vedi A.save: quotato diventerebbe testo e l'ordinamento Liquid sbaglierebbe). */
@@ -691,7 +691,7 @@
       /* inline/importance/date vanno scritti SENZA virgolette (fmSet diretto, non yq()):
          "inline: true" deve restare booleano, "importance: 2" numero, "date: 2026-09-20 14:47:00"
          un timestamp YAML che Jekyll legge come Time. Quotarli li trasformerebbe in stringhe. */
-      if (k === 'inline' || k === 'importance' || k === 'date' || k === 'ordine' || k === 'thumbnail_hide') fm = A.fmSet(fm, k, v);
+      if (k === 'inline' || k === 'importance' || k === 'date' || k === 'ordine' || k === 'thumbnail_hide' || k === 'thumbnail_hd') fm = A.fmSet(fm, k, v);
       else fm = A.fmSet(fm, k, A.yq(v));
     });
     var hc = $('f__hidden'), hid = !!(hc && hc.checked); /* nascosto = published: false (vedi A.pub) */
