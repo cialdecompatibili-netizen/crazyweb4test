@@ -112,12 +112,13 @@ layout: default
         {% if cop_file %}{% assign cop_src = cop_rel %}{% endif %}
       {% endunless %}
       {% comment %}
-        INGRANDIMENTO AL CLIC: la copertina in pagina e' ritagliata (16:9) e leggera; al clic si apre a tutto schermo l'immagine INTERA
-        (page.thumbnail = originale, senza ritaglio). Si vede subito la versione leggera (gia' in cache), poi subentra l'originale quando
-        e' scaricato; se non si scarica resta la leggera. Chiusura: clic, Esc. Niente librerie: vale anche se enable_medium_zoom cambia.
+        INGRANDIMENTO AL CLIC: la copertina in pagina e' ritagliata (16:9); al clic si apre a tutto schermo la STESSA immagine LEGGERA
+        (assets/img/cover/<nome>.jpg, 1200 px) ma INTERA, senza ritaglio. PUNTO CRITICO: NON caricare l'originale (anche 12 MB: lento,
+        specie da cellulare); l'originale si usa solo se l'autore spunta thumbnail_hd (allora cop_src e' gia' l'originale).
+        Chiusura: clic, Esc. Niente librerie: vale anche se enable_medium_zoom cambia.
         PUNTO CRITICO: nello script NON scrivere graffe doppie ne' graffa+percento: Liquid le leggerebbe come codice.
       {% endcomment %}
-      <figure class="post-cover"><img src="{{ cop_src | relative_url }}" data-full="{{ page.thumbnail | relative_url }}" alt="{{ cop_alt | escape }}" loading="eager" decoding="async" tabindex="0" role="button" title="Clicca per ingrandire"></figure>
+      <figure class="post-cover"><img src="{{ cop_src | relative_url }}" alt="{{ cop_alt | escape }}" loading="eager" decoding="async" tabindex="0" role="button" title="Clicca per ingrandire"></figure>
       <script>
       (function () {
         var im = document.querySelector('.post-cover img');
@@ -130,8 +131,6 @@ layout: default
           var g = document.createElement('img');
           g.alt = im.alt;
           g.src = im.currentSrc || im.src;
-          var full = im.getAttribute('data-full');
-          if (full) { var h = new Image(); h.onload = function () { g.src = h.src; }; h.src = full; }
           o.appendChild(g);
           function chiudi() { o.remove(); document.removeEventListener('keydown', tasto); document.documentElement.style.overflow = ''; }
           function tasto(e) { if (e.key === 'Escape') chiudi(); }
