@@ -12,19 +12,37 @@ di AGENTS.md — questi script servono solo per i task ripetibili.
 
 ## Struttura
 
-- `common/github_api.py` — helper condivisi per leggere/scrivere file sul
-  repo GitHub (get contents, create_or_update, get sha corrente). Ogni
-  script sotto usa questo, non richieste dirette duplicate.
-- `common/config.py` — costanti: owner, repo, branch di default.
-- `menu.py` — gestione voci del menu di navigazione (_data o _config.yml,
-  da verificare dove al-folio lo definisce).
-- `contenuto_pagine.py` — editing contenuto pagine in _pages/.
-- `footer.py` — editing _includes/footer.liquid (override locale già
-  esistente, es. stile #table-of-contents modificato il 22/09/2026).
-- `post.py` — wrapper su genera_servizi.py per creare/aggiornare post di
-  servizio in _posts/ mantenendo lo stile già validato (3-4 H2, niente
-  sezione "Richiedi una consulenza", vedi commit e4b9b12).
-- `aggiorna_home_nicchie.py` — sostituisce 6 righe di testo in _pages/home.md dei cloni di nicchia (--dry-run, --push, --solo); vedi docstring per i limiti.
+Si lancia dalla cartella del sito: `python -m automazioni <modulo> <comando> [opzioni]`
+(`python -m automazioni` senza argomenti elenca i moduli; `-h` dopo ogni comando mostra le opzioni).
+
+Opzioni comuni a TUTTI i comandi che scrivono: `--sito <cartella>` (default: questo sito; accetta anche il nome
+di una cartella accanto, es. `trasporticorp`), `--dry-run` (mostra, non scrive), `--push` (commit + pull --rebase
++ push), `--conferma` (obbligatorio sui repo protetti, prod). Sono idempotenti: rilanciati non fanno danni.
+
+- `common/sito.py` - base comune: trova il sito, legge/scrive in binario (CRLF preservati, niente BOM),
+  front matter e righe, checkpoint `checkpoint-AAAA-MM-GG`, commit/push. Tutti i moduli usano questa.
+- `common/config.py`, `common/github_api.py` - costanti e chiamate GitHub API (usate dagli script che lavorano via API).
+- `menu.py` - menu di navigazione: `elenco`, `voce` (nav/ordine/titolo di una pagina), `figlio` / `rimuovi-figlio`
+  (voci nelle tendine, con `--divider`), `link-aggiungi` / `link-rimuovi` (voci-link esterne).
+- `pagine.py` - front matter e testi delle pagine: `elenco`, `leggi`, `imposta` (campi del front matter) e
+  `testi <file.json>` (cambia SOLO le righe indicate di una pagina). I testi delle home dei cloni stanno in
+  `testi/home_<sito>.json` (dati, non codice): per un clone nuovo si copia un JSON e si cambiano i testi.
+- `footer.py` - footer del sito: `leggi`, `testo`, `fisso on|off`, `aggiornamento on|off`, `note-legali`.
+- `config_sito.py` - `_config.yml`: `leggi`, `imposta chiave=valore` (titolo, lingua, favicon, articoli per pagina, ...).
+- `post.py` - articoli del blog in `_posts/`: `elenco`, `crea`, `campo`, `nascondi` / `mostra`, `testo`.
+- `testi/` - file JSON con i testi delle pagine (uno per sito). Formato nel docstring di `pagine.py`.
+- `__main__.py` - dispatcher dei moduli.
+
+Esempi:
+
+    python -m automazioni pagine testi --dry-run automazioni/testi/home_trasporticorp.json
+    python -m automazioni pagine testi automazioni/testi/home_trasporticorp.json --push
+    python -m automazioni menu figlio Agenzia --titolo "Prezzi" --permalink /prezzi/ --dry-run
+    python -m automazioni footer fisso off --sito pannellisolari --push
+    python -m automazioni post crea --titolo "Nuovo articolo" --categoria sample-posts --dry-run
+
+Limite: non toccano `_layouts/`, `_includes/`, `_sass/` (vietati da AGENTS.md, vedi "Stop sign"); il footer si
+modifica solo tramite le chiavi di `_config.yml` che il tema gia' legge.
 
 ## Regola per ogni nuovo script
 
