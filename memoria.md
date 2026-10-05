@@ -1,6 +1,6 @@
 # MEMORIA DEL PROGETTO: idee future (NIENTE DA FARE ORA)
 
-Qui stanno le idee che Mirco vuole riprendere in futuro. Non iniziarle senza che lo chieda. Aggiornato il 04/10/2026.
+Qui stanno le idee che Mirco vuole riprendere in futuro. Non iniziarle senza che lo chieda. Aggiornato il 05/10/2026.
 Per le regole del sito e dell'admin vedi CLAUDE.md (punti numerati).
 
 ## 1. E-commerce gratis e stabile (da provare in futuro)
@@ -44,3 +44,16 @@ Motivo: la procedura del punto 'NUOVO SITO DA QUESTO' nel blocco 'Questo progett
 - Passi: creare la repo vuota con `gh repo create`, copiare con robocopy (esclusi `.git`, `_site`, `node_modules`, `.jekyll-cache`, `automazioni/.env`), `git init -b main`, commit, push, attendere il primo deploy, abilitare Pages, verificare l'HTML online.
 - Da riscrivere nel clone: solo il blocco 'Questo progetto' di CLAUDE.md (nome, repo, URL, cartella). Tutto il resto e' gia' automatico.
 - Lo script va documentato in CLAUDE.md (comando e opzioni) appena funziona.
+
+## 4. Automazioni: contenuti ancora da coprire (idea, NIENTE DA FARE ORA)
+
+Contesto: il 05/10/2026 sono nati i moduli di `automazioni/` (`python -m automazioni <modulo> <comando>`: menu, pagine, footer, config_sito, post; vedi `automazioni/README.md` e il blocco AUTOMAZIONI PYTHON in CLAUDE.md). Mirco vuole svilupparli ancora, ma NON adesso: iniziare solo quando lo chiede. Cosa manca, in ordine di utilita' probabile:
+- Creare una pagina nuova da zero: `pagine` oggi modifica solo le pagine esistenti (front matter e singole righe). Manca un comando `crea`.
+- Riscrivere il corpo intero di una pagina lunga: oggi si sostituiscono solo righe indicate una per una.
+- Servizi dei cloni: `pubblica_servizi.py` e `pubblica_chi_siamo.py` esistono gia' (vedi CLAUDE.md) e NON fanno parte di `automazioni/`. DA VERIFICARE: se i cloni (trasporticorp, pannellisolari, mobilitaelettrica) hanno ancora servizi, chi-siamo e pagine con il testo della web agency romana copiato dal modello. Primo passo utile: scansione in sola lettura di un clone che elenchi i testi ancora da cambiare.
+- Progetti (`/projects/`, sezione in home) e altre collection: NON ancora esaminati, non si sa come siano fatti ne' se servano moduli.
+- Immagini (copertine, thumbnail, gallerie): nessun modulo. Per i post esiste solo il campo `--thumbnail` di `post crea`.
+- Non coperti e fuori ambito per ora: pannello admin, redirect, sitemap.
+- Da provare prima di fidarsi: i moduli `menu`, `footer`, `config_sito`, `post` sono stati provati solo in lettura; `pagine testi` solo in dry-run. Fare una prima scrittura vera su un clone (es. `footer fisso off --sito pannellisolari --dry-run`, poi senza `--dry-run`) e controllare `git diff --stat`.
+- DA VERIFICARE: se `_config.yml` esclude `automazioni/` dal sito pubblicato (`exclude:`). Se non la esclude, i file `.py` e `.json` potrebbero essere raggiungibili online come file statici (non contengono password o token, ma conviene escluderli).
+Regole da mantenere: ogni modulo nuovo con docstring dei 4 dati e una riga nel README di `automazioni/`; `--dry-run` prima di scrivere; testi in file JSON, mai scritti nel codice.
