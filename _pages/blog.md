@@ -62,6 +62,15 @@ pagination:
     .post-list > li > .row > .col-sm-3 { order: -1; width: 100%; max-width: 100%; flex: none; margin-bottom: .75rem; }
     .post-list > li > .row > .col-sm-9 { width: 100%; max-width: 100%; flex: none; }
   }
+  /* Desktop: la miniatura riempie TUTTA l'altezza del blocco di testo (adattiva: piu' testo = piu' alta), a filo con il bordo; tra un articolo e l'altro resta solo una sottile riga bianca (border-bottom del li). Per cambiare lo spessore: 2px qui sotto. Altezza minima 9rem se il testo e' corto. */
+  @media (min-width: 576px) {
+    .post .post-list > li { margin: 0; padding: 0; border-bottom: 2px solid #fff; }
+    .post .post-list > li > .row { align-items: stretch; margin: 0; }
+    .post .post-list > li > .row > .col-sm-9 { padding-top: .6rem; padding-bottom: .4rem; }
+    .post .post-list > li > .row > .col-sm-3 { position: relative; min-height: 9rem; padding: 0; }
+    .post .post-list > li > .row > .col-sm-3 .thumb-link { position: absolute; inset: 0; }
+    .post .post-list > li > .row > .col-sm-3 .card-img { width: 100%; height: 100% !important; aspect-ratio: auto; object-fit: cover; border-radius: 0; }
+  }
   .post > .tag-category-list li + li::before { content: "\00b7"; margin-right: .35rem; color: var(--global-text-color-light); }
 </style>
 {% assign blog_desc = site.blog_description | strip %}
