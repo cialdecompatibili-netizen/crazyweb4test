@@ -47,7 +47,10 @@ RIFIUTATE = {"permalink", "slug", "slug_precedenti", "layout", "date"}
 RE_DATA = re.compile(r"^\d{4}-\d{2}-\d{2}( \d{2}:\d{2}(:\d{2})?)?$")
 RE_SLUG = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 RE_PREFISSO_DATA = re.compile(r"^\d{4}-\d{2}-\d{2}-")
-DEFAULT = dict(data_nel_nome=False, usa_data=False, titolo="richiesto", categoria=None, categoria_default=None,
+# CRITICO: stessa mappa di `SUB` in admin/admin-cestino.js. L'admin ripristina dal cestino cercando
+# _cestino/<sotto>/<AAAAMMGGHHMM>__<nome>: formato e nomi NON si cambiano da una parte sola.
+CESTINO = {"_posts": "posts", "_projects": "projects", "_servizi": "servizi", "_news": "news", "_pages": "pages"}
+DEFAULT = dict(rifiutate_extra=set(), flag_categoria="categoria", avviso=None, data_nel_nome=False, usa_data=False, titolo="richiesto", categoria=None, categoria_default=None,
                categoria_re=RE_SLUG, categoria_cambia_url=False, img_key=None, descrizione=True,
                campi_testo={"title", "description"}, non_togliere={"title"}, opzioni=[], solo_lettura=False)
 
@@ -70,6 +73,14 @@ def trova(base, cfg, ident):
     return f"{cfg['cartella']}/{cand[0].name}"
 
 
+def _avvisa(cfg, base, voce, chiavi):
+    """Hook opzionale di una raccolta: puo' stampare un ATTENZIONE (es. servizi presenti in servizi_data.py)."""
+    if cfg["avviso"]:
+        m = cfg["avviso"](base, _slug_file(cfg, voce), chiavi)
+        if m:
+            print("ATTENZIONE: " + m)
+
+
 def cmd_elenco(cfg):
     def f(a):
         base = sito.trova_sito(a.sito)
@@ -88,6 +99,9 @@ def cmd_elenco(cfg):
             corpo = next((r.rstrip(b"\r").decode("utf-8", "replace").strip() for r in righe[fine + 1:] if r.strip()), "")
             etichetta = (tit or corpo or file.name)[:60]
             n += 1
+            if getattr(a, "titoli", False):  # solo i titoli, uno per riga (per elenchi lunghi: meno token)
+                print("  " + (tit or corpo or file.name))
+                continue
             print(f"  {data:<10} {(cat or '-'):<14} {'NASCOSTO ' if pub == 'false' else ''}{etichetta}  [{_slug_file(cfg, file.name)}]")
         print(f"{n} {cfg['nome']}")
     return f
@@ -121,6 +135,8 @@ def cmd_crea(cfg):
         if img and not (base / img).is_file():
             print(f"ATTENZIONE: immagine {img} non esiste nel sito")
         # CRITICO: mai `permalink:` nel front matter: in questo sito il permalink sta in _config.yml.
+        if not corpo and not a.nascosto:
+            print("ATTENZIONE: testo vuoto, la pagina uscira' vuota: aggiungilo con `testo` o crea con --nascosto")
         righe = ["---"] + cfg["costruisci"](cfg, a, titolo, data, s)
         if a.nascosto:
             righe.append("published: false")
@@ -138,8 +154,10 @@ def cmd_campo(cfg):
         rel = trova(base, cfg, a.voce)
         originale = (base / rel).read_bytes()
         dati = originale
-        for k, v in sito.coppie_cli(a.coppie, cfg["campi_testo"]):
-            if k in RIFIUTATE:
+        coppie = sito.coppie_cli(a.coppie, cfg["campi_testo"])
+        _avvisa(cfg, base, a.voce, [k for k, _ in coppie])
+        for k, v in coppie:
+            if k in RIFIUTATE or k in cfg["rifiutate_extra"]:
                 raise Errore(f"'{k}' non si imposta da qui (URL/date): usa l'admin")
             if k == cfg["categoria"]:
                 if not cfg["categoria_re"].match(str(v)):
@@ -179,6 +197,7 @@ def cmd_testo(cfg):
         corpo = sito.corpo_da_args(a)
         if not corpo:
             raise Errore("testo vuoto: passa --testo-file o --testo")
+        _avvisa(cfg, base, a.voce, ["testo"])
         # CRITICO: si riscrive SOLO il corpo; il front matter resta identico, byte per byte (CRLF compresi).
         testa = sito.unisci(righe[:fine + 1])  # gli '\r' sono gia' dentro le righe: non usare nl per unirle
         nuovo = testa + b"\n" + nl + sito.con_eol(corpo, nl) + nl
@@ -194,7 +213,16 @@ def cmd_elimina(cfg):
         if not a.si:  # senza --si: solo anteprima (come --dry-run)
             a.dry_run = True
             print("ANTEPRIMA: per eliminare davvero rilancia con --si")
-        sito.applica(base, a, {rel: None}, [rel], f"{cfg['nome']}: eliminato {a.voce}")
+        # CRITICO: come l'admin, NON si cancella: il file va in _cestino/<tipo>/<AAAAMMGGHHMM>__<nome> (si ripristina
+        # dall'admin > Cestino) e _cestino/ deve essere in `exclude` di _config.yml, altrimenti compare nel sito.
+        cambi = {rel: None}
+        sub = CESTINO.get(cfg["cartella"])
+        if sub:
+            if b"_cestino" not in (base / "_config.yml").read_bytes():
+                raise Errore("_cestino/ non risulta in exclude di _config.yml: i file eliminati comparirebbero nel sito")
+            ts = datetime.datetime.now().strftime("%Y%m%d%H%M")
+            cambi[f"_cestino/{sub}/{ts}__{pathlib.Path(rel).name}"] = (base / rel).read_bytes()
+        sito.applica(base, a, cambi, list(cambi), f"{cfg['nome']}: eliminato {a.voce} (nel cestino)")
     return f
 
 
@@ -203,8 +231,9 @@ def costruisci_parser(cfg):
     sp = ap.add_subparsers(dest="cmd", required=True)
     p = sp.add_parser("elenco")
     p.add_argument("--sito")
+    p.add_argument("--titoli", action="store_true", help="solo i titoli, uno per riga")
     if cfg["categoria"]:
-        p.add_argument("--categoria")
+        p.add_argument("--" + cfg["flag_categoria"], dest="categoria")
     p.set_defaults(fn=cmd_elenco(cfg))
     if cfg["solo_lettura"]:
         return ap
@@ -222,7 +251,7 @@ def costruisci_parser(cfg):
     if cfg["usa_data"]:
         p.add_argument("--data")
     if cfg["categoria"]:
-        p.add_argument("--categoria", default=cfg["categoria_default"])
+        p.add_argument("--" + cfg["flag_categoria"], dest="categoria", default=cfg["categoria_default"])
     if cfg["img_key"]:
         p.add_argument("--" + cfg["img_key"].replace("_", "-"), dest=cfg["img_key"])
     for flag, kw in cfg["opzioni"]:
