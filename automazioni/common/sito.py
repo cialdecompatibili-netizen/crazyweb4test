@@ -356,12 +356,14 @@ def pubblica(base, rels, messaggio):
     ramo = git(base, "rev-parse", "--abbrev-ref", "HEAD").stdout.strip()
     if ramo != "main":
         raise Errore(f"ramo corrente '{ramo}': il push automatico e' solo su main")
-    esistenti = [r for r in rels if (base / r).exists()]
-    git(base, "add", "--", *esistenti)
+    esistenti = [r for r in rels if (base / r).exists() or git(base, "ls-files", "--", r).stdout.strip()]
+    if not esistenti:  # `git add -A --` SENZA percorsi aggiungerebbe TUTTO il repo: mai chiamarlo vuoto
+        return "push: nulla da committare"
+    git(base, "add", "-A", "--", *esistenti)
     toccati = git(base, "diff", "--cached", "--name-only", "--", *esistenti).stdout.split()
     if not toccati:
         return "push: nulla da committare"
-    c = git(base, "commit", "-m", messaggio, "--", *esistenti)
+    c = git(base, "commit", "-m", messaggio, "--", *toccati)
     if c.returncode != 0:
         raise Errore("commit fallito: " + (c.stderr or c.stdout).strip()[:200])
     if git(base, "remote").stdout.strip() == "":
@@ -388,6 +390,11 @@ def applica(base, args, cambi, bersagli, messaggio):
     for rel, nuovo in cambi.items():
         p = base / rel
         vecchio = p.read_bytes() if p.exists() else b""
+        if nuovo is None:  # eliminazione del file (valore None in `cambi`)
+            if not p.exists():
+                raise Errore(f"{rel}: non esiste, niente da eliminare")
+            print(f"{prefisso}{rel}: ELIMINATO ({len(vecchio.splitlines())} righe)")
+            continue
         if nuovo.startswith(BOM):
             raise Errore(f"{rel}: BOM nel risultato, mi fermo")
         if vecchio and eol(vecchio) == b"\r\n" and nuovo.count(b"\n") != nuovo.count(b"\r\n"):
@@ -400,8 +407,46 @@ def applica(base, args, cambi, bersagli, messaggio):
         ck = checkpoint(base, args.push)
         for rel, nuovo in cambi.items():
             p = base / rel
+            if nuovo is None:
+                p.unlink()
+                continue
             p.parent.mkdir(parents=True, exist_ok=True)
             p.write_bytes(nuovo)
         print(f"scritti {len(cambi)} file (checkpoint {ck}); controlla con: git diff --stat")
     if args.push:
         print(pubblica(base, sorted(set(bersagli) | set(cambi)), messaggio))
+
+
+# ---------------------------------------------------------------- aiuti condivisi tra i moduli
+
+def eol_sito(base):
+    """Gli a-capo che usa il sito (da _config.yml): i file NUOVI si scrivono cosi'."""
+    return eol((base / "_config.yml").read_bytes())
+
+
+def corpo_da_args(a):
+    """Testo del corpo da --testo-file OPPURE --testo (mai con front matter). Stringa senza a-capo ai bordi."""
+    if a.testo_file and a.testo:
+        raise Errore("usa --testo-file OPPURE --testo, non entrambi")
+    if a.testo_file:
+        p = pathlib.Path(a.testo_file)
+        if not p.is_file():
+            raise Errore(f"file non trovato: {a.testo_file}")
+        t = p.read_text(encoding="utf-8-sig")
+    else:
+        t = a.testo or ""
+    if t.lstrip().startswith("---"):
+        raise Errore("il testo deve essere solo il corpo: togli il front matter (---)")
+    return t.strip("\r\n")
+
+
+def coppie_cli(coppie, testuali=()):
+    """['k=v', ...] -> [(k, valore)]. I campi in `testuali` restano testo anche se sembrano numeri o true/false."""
+    out = []
+    for c in coppie:
+        if "=" not in c:
+            raise Errore(f"'{c}': usa chiave=valore")
+        k, _, v = c.partition("=")
+        k = k.strip()
+        out.append((k, v if k in testuali else valore_cli(v)))
+    return out

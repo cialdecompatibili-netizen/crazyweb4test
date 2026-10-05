@@ -29,7 +29,13 @@ di una cartella accanto, es. `trasporticorp`), `--dry-run` (mostra, non scrive),
   `testi/home_<sito>.json` (dati, non codice): per un clone nuovo si copia un JSON e si cambiano i testi.
 - `footer.py` - footer del sito: `leggi`, `testo`, `fisso on|off`, `aggiornamento on|off`, `note-legali`.
 - `config_sito.py` - `_config.yml`: `leggi`, `imposta chiave=valore` (titolo, lingua, favicon, articoli per pagina, ...).
-- `post.py` - articoli del blog in `_posts/`: `elenco`, `crea`, `campo`, `nascondi` / `mostra`, `testo`.
+- `common/collezione.py` - MOTORE CONDIVISO delle raccolte di contenuti: implementa una volta sola `elenco`, `crea`,
+  `campo`, `nascondi` / `mostra`, `testo`, `elimina` (senza `--si` mostra solo l'anteprima). Ogni raccolta e' un file
+  da ~25-50 righe che passa SOLO la configurazione (cartella, layout, campi, front matter): niente copia-incolla.
+- `post.py` - articoli del blog in `_posts/` (usa il motore). `crea --titolo ... --categoria ... [--thumbnail]`.
+- `progetti.py` - progetti del portfolio in `_projects/` (usa il motore). `crea --titolo ... [--img] [--importanza] [--in-home]`.
+- `news.py` - annunci brevi in `_news/` (usa il motore, senza titolo). `crea --testo "..."`.
+- `servizi.py` - SOLO `elenco` dei servizi in `_servizi/`: si pubblicano con `pubblica_servizi.py` (CLAUDE.md).
 - `testi/` - file JSON con i testi delle pagine (uno per sito). Formato nel docstring di `pagine.py`.
 - `__main__.py` - dispatcher dei moduli.
 
@@ -40,6 +46,9 @@ Esempi:
     python -m automazioni menu figlio Agenzia --titolo "Prezzi" --permalink /prezzi/ --dry-run
     python -m automazioni footer fisso off --sito pannellisolari --push
     python -m automazioni post crea --titolo "Nuovo articolo" --categoria sample-posts --dry-run
+    python -m automazioni progetti crea --titolo "Nuovo progetto" --in-home --testo-file corpo.md --dry-run
+    python -m automazioni news crea --testo "Nuovo annuncio" --dry-run
+    python -m automazioni progetti elimina nuovo-progetto --si --push
 
 Limite: non toccano `_layouts/`, `_includes/`, `_sass/` (vietati da AGENTS.md, vedi "Stop sign"); il footer si
 modifica solo tramite le chiavi di `_config.yml` che il tema gia' legge.
@@ -54,3 +63,29 @@ Ogni script deve avere in testa un docstring con:
 
 Quando si aggiunge un modulo nuovo, aggiornare anche questo README con una
 riga nella lista sopra.
+
+Per una RACCOLTA nuova (cartella di .md con front matter) non scrivere codice nuovo: copiare `news.py` (la piu' corta),
+cambiare `cartella`, il front matter in `_front_matter()` e le opzioni, aggiungerla a `MODULI` in `__main__.py`.
+Il codice che serve a piu' moduli va SEMPRE in `common/` (mai copiato): regola per risparmiare token e righe.
+
+## Cosa manca ancora (controllo del 06/10/2026)
+
+Confronto tra l'admin (`admin/*.js`) e i moduli di questa cartella. Fatto leggendo il codice, NON provando i comandi
+sui siti: prima di fidarsi di un modulo, lanciarlo con `--dry-run`.
+
+Da fare, in ordine di priorita':
+1. `pagine crea` / `elimina` / `duplica`: oggi `pagine.py` modifica solo pagine che esistono gia' in `_pages/`.
+2. Servizi (`_servizi/`): `servizi.py` fa solo `elenco`; crea/modifica/elimina di un singolo servizio non c'e'
+   (si pubblicano da `servizi_data.py` con `pubblica_servizi.py`, che tocca anche menu e card).
+   FATTI il 06/10/2026 con il motore condiviso: progetti, news (e post spostato sul motore).
+3. Categorie e tag (`admin-categories.js`): rinomina, unisci, elimina.
+4. Media e gallerie (`admin-media.js`, `admin-gallerie.js`): caricare, eliminare, cercare immagini non usate.
+5. Tema e colori (`admin-tema.js`).
+6. Moduli attivabili e gruppi (`admin-modules.js`, `admin-gruppi.js`).
+7. Cestino e backup (`admin-cestino.js`, `admin-backup.js`).
+8. Azioni su tanti elementi insieme (`admin-bulk.js`).
+
+Da verificare (non controllato): `_teachings/`, `_books/`, `_bibliography/` e i dati in `_data/` (es. menu, social).
+Esistono come cartelle del tema ma non so se il sito li usa: se non servono, non fare moduli.
+
+Prima di aggiungere un modulo seguire "Regola per ogni nuovo script" qui sopra e togliere la voce da questa lista.
