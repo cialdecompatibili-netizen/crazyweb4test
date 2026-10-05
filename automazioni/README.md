@@ -55,6 +55,75 @@ Esempi:
 Limite: non toccano `_layouts/`, `_includes/`, `_sass/` (vietati da AGENTS.md, vedi "Stop sign"); il footer si
 modifica solo tramite le chiavi di `_config.yml` che il tema gia' legge.
 
+## Istruzioni rapide: servizi, progetti, blog, news
+
+Tutte e quattro le raccolte hanno gli STESSI comandi (motore `common/collezione.py`). Si lancia dalla cartella del sito;
+per un clone si aggiunge `--sito <cartella>` (es. `--sito trasporticorp`). Prima di scrivere si puo' sempre aggiungere
+`--dry-run` (mostra, non scrive); per pubblicare su GitHub si aggiunge `--push`.
+
+| Cosa | Comando (modulo = `servizi`, `progetti`, `post` o `news`) |
+|---|---|
+| Elencare | `python -m automazioni <modulo> elenco` (con `--titoli` solo i titoli) |
+| Creare | `python -m automazioni <modulo> crea --titolo "..." [opzioni]` |
+| Cambiare campi | `python -m automazioni <modulo> campo <slug> chiave=valore ...` (`--rimuovi chiave` per toglierne uno) |
+| Cambiare il testo | `python -m automazioni <modulo> testo <slug> --testo-file corpo.md` |
+| Nascondere / mostrare | `python -m automazioni <modulo> nascondi <slug>` / `mostra <slug>` |
+| Eliminare | `python -m automazioni <modulo> elimina <slug> --si` (senza `--si` solo anteprima; il file va in `_cestino/`) |
+
+Lo `<slug>` e' il nome del file senza `.md` (e senza la data per i post): lo vedi tra parentesi quadre in `elenco`.
+Il testo (`--testo-file`) e' SOLO il corpo, senza il front matter `---`. Se non lo dai, la pagina esce vuota (lo script avvisa).
+
+### Servizi (`_servizi/`)
+
+    python -m automazioni servizi elenco --titoli
+    python -m automazioni servizi elenco --gruppo "Sviluppo web"
+    python -m automazioni servizi crea --titolo "Manutenzione WordPress" --gruppo "Sviluppo web" \
+        --descrizione "Aggiornamenti, backup e sicurezza." --in-home --testo-file manutenzione.md --dry-run
+    python -m automazioni servizi campo manutenzione-wordpress ordine=3 description="Nuova descrizione"
+    python -m automazioni servizi campo manutenzione-wordpress --rimuovi in_home
+    python -m automazioni servizi nascondi manutenzione-wordpress
+    python -m automazioni servizi elimina manutenzione-wordpress --si --push
+
+Opzioni di `crea`: `--gruppo` (dove sta in /servizi/; se manca va in "Altri servizi"), `--ordine` (se manca va in fondo al
+gruppo), `--in-home` (appare in home), `--sottotitolo`, `--seo-title`, `--seo-description`, `--slug`, `--nascosto`.
+Il FILE in `_servizi/` e' la fonte di verita' (come l'admin); card di /servizi/ e home sono cicli Liquid, non serve altro.
+ATTENZIONE: se lo slug e' anche in `servizi_data.py`, rilanciare `genera_servizi.py`/`pubblica_servizi.py` per quello slug
+riscrive testo, titolo e descrizione dal file dati (lo script avvisa).
+
+### Progetti (`_projects/`)
+
+    python -m automazioni progetti elenco --titoli
+    python -m automazioni progetti crea --titolo "Nuovo progetto" --descrizione "..." --img assets/img/12.jpg \
+        --importanza 2 --in-home --testo-file progetto.md
+    python -m automazioni progetti campo nuovo-progetto importance=1 category=work
+    python -m automazioni progetti nascondi nuovo-progetto
+
+### Blog (`_posts/`)
+
+    python -m automazioni post elenco --titoli
+    python -m automazioni post elenco --categoria seo
+    python -m automazioni post crea --titolo "Titolo articolo" --categoria seo --descrizione "..." \
+        --thumbnail assets/img/foto.png --testo-file articolo.md
+    python -m automazioni post campo titolo-articolo description="Nuova descrizione"
+    python -m automazioni post testo titolo-articolo --testo-file articolo-nuovo.md
+
+Cambiare `categories` cambia l'URL e i vecchi indirizzi NON reindirizzano (lo script lo ricorda).
+
+### News (`_news/`)
+
+    python -m automazioni news elenco
+    python -m automazioni news crea --testo "Nuovo annuncio" --data "2026-10-06 09:00"
+
+### Cosa NON si puo' cambiare da qui (si rifiuta, e' voluto)
+
+`permalink`, `slug`, `slug_precedenti`, `layout`, `date` (cambierebbero l'URL senza redirect: usa l'admin) e, nei servizi,
+`categories`. `title`, `gruppo` e `ordine` dei servizi si cambiano ma non si tolgono.
+
+### Se qualcosa va storto
+
+Ogni scrittura crea prima il branch `checkpoint-AAAA-MM-GG`: per tornare indietro `git checkout checkpoint-AAAA-MM-GG -- <file>`.
+Un file eliminato per sbaglio si ripristina dal cestino dell'admin o da `_cestino/<tipo>/` (togliendo il prefisso `AAAAMMGGHHMM__`).
+
 ## Regola per ogni nuovo script
 
 Ogni script deve avere in testa un docstring con:
