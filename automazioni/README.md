@@ -30,12 +30,14 @@ di una cartella accanto, es. `trasporticorp`), `--dry-run` (mostra, non scrive),
 - `footer.py` - footer del sito: `leggi`, `testo`, `fisso on|off`, `aggiornamento on|off`, `note-legali`.
 - `config_sito.py` - `_config.yml`: `leggi`, `imposta chiave=valore` (titolo, lingua, favicon, articoli per pagina, ...).
 - `common/collezione.py` - MOTORE CONDIVISO delle raccolte di contenuti: implementa una volta sola `elenco`, `crea`,
-  `campo`, `nascondi` / `mostra`, `testo`, `elimina` (senza `--si` mostra solo l'anteprima). Ogni raccolta e' un file
+  `campo`, `nascondi` / `mostra`, `testo`, `elimina` (senza `--si` mostra solo l'anteprima; con `--si` il file va in `_cestino/<tipo>/`, ripristinabile dall'admin). Ogni raccolta e' un file
   da ~25-50 righe che passa SOLO la configurazione (cartella, layout, campi, front matter): niente copia-incolla.
 - `post.py` - articoli del blog in `_posts/` (usa il motore). `crea --titolo ... --categoria ... [--thumbnail]`.
 - `progetti.py` - progetti del portfolio in `_projects/` (usa il motore). `crea --titolo ... [--img] [--importanza] [--in-home]`.
 - `news.py` - annunci brevi in `_news/` (usa il motore, senza titolo). `crea --testo "..."`.
-- `servizi.py` - SOLO `elenco` dei servizi in `_servizi/`: si pubblicano con `pubblica_servizi.py` (CLAUDE.md).
+- `servizi.py` - servizi in `_servizi/` (usa il motore): `elenco [--titoli] [--gruppo]`, `crea --titolo --gruppo [--ordine]
+  [--in-home]`, `campo`, `nascondi` / `mostra`, `testo`, `elimina`. Il FILE e' la fonte di verita' (come l'admin):
+  `pubblica_servizi.py` serve solo per rigenerare dai dati di `servizi_data.py`.
 - `testi/` - file JSON con i testi delle pagine (uno per sito). Formato nel docstring di `pagine.py`.
 - `__main__.py` - dispatcher dei moduli.
 
@@ -75,15 +77,13 @@ sui siti: prima di fidarsi di un modulo, lanciarlo con `--dry-run`.
 
 Da fare, in ordine di priorita':
 1. `pagine crea` / `elimina` / `duplica`: oggi `pagine.py` modifica solo pagine che esistono gia' in `_pages/`.
-2. Servizi (`_servizi/`): `servizi.py` fa solo `elenco`; crea/modifica/elimina di un singolo servizio non c'e'
-   (si pubblicano da `servizi_data.py` con `pubblica_servizi.py`, che tocca anche menu e card).
-   FATTI il 06/10/2026 con il motore condiviso: progetti, news (e post spostato sul motore).
-3. Categorie e tag (`admin-categories.js`): rinomina, unisci, elimina.
-4. Media e gallerie (`admin-media.js`, `admin-gallerie.js`): caricare, eliminare, cercare immagini non usate.
-5. Tema e colori (`admin-tema.js`).
-6. Moduli attivabili e gruppi (`admin-modules.js`, `admin-gruppi.js`).
-7. Cestino e backup (`admin-cestino.js`, `admin-backup.js`).
-8. Azioni su tanti elementi insieme (`admin-bulk.js`).
+FATTI il 06/10/2026 con il motore condiviso: progetti, news, servizi (e post spostato sul motore).
+2. Categorie e tag (`admin-categories.js`): rinomina, unisci, elimina.
+3. Media e gallerie (`admin-media.js`, `admin-gallerie.js`): caricare, eliminare, cercare immagini non usate.
+4. Tema e colori (`admin-tema.js`).
+5. Moduli attivabili e gruppi (`admin-modules.js`, `admin-gruppi.js`).
+6. Cestino e backup (`admin-cestino.js`, `admin-backup.js`).
+7. Azioni su tanti elementi insieme (`admin-bulk.js`).
 
 Da verificare (non controllato): `_teachings/`, `_books/`, `_bibliography/` e i dati in `_data/` (es. menu, social).
 Esistono come cartelle del tema ma non so se il sito li usa: se non servono, non fare moduli.
