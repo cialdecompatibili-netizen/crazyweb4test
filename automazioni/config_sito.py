@@ -30,6 +30,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 from automazioni.common import sito  # noqa: E402
 from automazioni.common.sito import Errore  # noqa: E402
 
+# CRITICO: lista BIANCA: una chiave che non e' qui non si tocca (evita refusi che rompono il config).
 PERMESSE = ["title", "description", "lang", "icon", "footer_text", "footer_fixed", "last_updated",
             "impressum_path", "home_marte", "pagination.per_page", "contatti.captcha"]
 BOOLEANE = {"footer_fixed", "last_updated", "home_marte"}
@@ -37,6 +38,7 @@ VIETATE = {"url", "baseurl"}
 
 
 def _valida(chiave, valore):
+    # CRITICO (CLAUDE.md 19): url/baseurl sono AUTOMATICI (deploy.yml li ricava dal repo): toccarli rompe asset e link.
     if chiave in VIETATE:
         raise Errore(f"'{chiave}' e' automatico (deploy.yml): non si cambia da qui")
     if chiave not in PERMESSE:
@@ -69,6 +71,7 @@ def imposta_config(dati, chiave, valore):
             raise Errore(f"chiave '{padre}' non presente nel config")
         esito = sito.imposta_riga(righe, figlio, valore, i + 1, sito.fine_blocco(righe, i, n), False, annidata=True)
     else:
+        # CRITICO: crea=False: una chiave mancante NON viene creata (l'admin non la ricrea).
         esito = sito.imposta_riga(righe, chiave, valore, 0, n, False)
     return sito.unisci(righe), esito
 
@@ -114,6 +117,7 @@ def cmd_imposta(a):
         k = k.strip()
         # chiavi di testo: restano testo anche se sembrano numeri o true/false
         coppie.append((k, v if k in ("title", "description", "footer_text", "icon") else sito.valore_cli(v)))
+    # CRITICO: --vuoto scrive `chiave:` (falsa in Liquid). Una stringa vuota "" e' VERA e lascerebbe l'elemento acceso.
     coppie += [(k, None) for k in a.vuoto or []]
     if not coppie:
         raise Errore("niente da fare: passa chiave=valore oppure --vuoto chiave")

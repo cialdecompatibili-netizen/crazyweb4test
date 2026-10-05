@@ -41,6 +41,8 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 from automazioni.common import sito  # noqa: E402
 from automazioni.common.sito import Errore  # noqa: E402
 
+# CRITICO (CLAUDE.md 3, 6, 11): questi campi NON si cambiano da `campo`. permalink/slug/slug_precedenti cambiano l'URL
+# senza redirect (li gestisce l'admin); layout rompe la pagina; date va scritta senza virgolette/fuso e yq() la quoterebbe.
 RIFIUTATE = {"permalink", "slug", "slug_precedenti", "layout", "date"}
 RE_DATA = re.compile(r"^\d{4}-\d{2}-\d{2}( \d{2}:\d{2}(:\d{2})?)?$")
 RE_SLUG = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
@@ -101,6 +103,7 @@ def cmd_crea(cfg):
         s = a.slug or sito.slug(titolo or corpo[:40])
         if sito.slug(s) != s:
             raise Errore("slug: solo minuscole, numeri e trattini")
+        # CRITICO: slug unico nella raccolta. Due pagine sullo stesso URL = Jekyll ne tiene una, SENZA errore.
         for file in _lista(base, cfg):
             if _slug_file(cfg, file.name) == s:
                 raise Errore(f"esiste gia' (slug '{s}'): {file.name}")
@@ -108,6 +111,8 @@ def cmd_crea(cfg):
             raise Errore("categoria non valida (minuscole, numeri e trattini, es. senza-categoria)")
         data = None
         if cfg["usa_data"]:
+            # CRITICO: data senza fuso orario e senza virgolette (Jekyll usa Europe/Rome da _config.yml).
+            # Data futura = il contenuto NON esce (salvo `future: true`).
             data = a.data or datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             if not RE_DATA.match(data):
                 raise Errore("data: formato AAAA-MM-GG oppure 'AAAA-MM-GG HH:MM'")
@@ -115,6 +120,7 @@ def cmd_crea(cfg):
         img = getattr(a, cfg["img_key"], None) if cfg["img_key"] else None
         if img and not (base / img).is_file():
             print(f"ATTENZIONE: immagine {img} non esiste nel sito")
+        # CRITICO: mai `permalink:` nel front matter: in questo sito il permalink sta in _config.yml.
         righe = ["---"] + cfg["costruisci"](cfg, a, titolo, data, s)
         if a.nascosto:
             righe.append("published: false")
@@ -138,6 +144,7 @@ def cmd_campo(cfg):
             if k == cfg["categoria"]:
                 if not cfg["categoria_re"].match(str(v)):
                     raise Errore(f"{k}: valore non valido (una sola categoria, minuscole/numeri/trattini)")
+                # CRITICO: nei post la categoria e' nell'URL e i vecchi indirizzi NON reindirizzano.
                 if cfg["categoria_cambia_url"]:
                     print("ATTENZIONE: cambiare categoria cambia l'URL e i vecchi indirizzi NON reindirizzano")
             dati, _ = sito.fm_imposta(dati, k, v)
@@ -154,6 +161,7 @@ def cmd_visibilita(cfg, nascondi):
         base = sito.prepara(a)
         rel = trova(base, cfg, a.voce)
         originale = (base / rel).read_bytes()
+        # CRITICO: nascondere = `published: false` (NON `draft`): sparisce da URL, sitemap, elenchi e ricerca.
         dati = sito.fm_imposta(originale, "published", False)[0] if nascondi else sito.fm_rimuovi(originale, "published")[0]
         sito.applica(base, a, {rel: dati} if dati != originale else {}, [rel],
                      f"{cfg['nome']}: {'nascosto' if nascondi else 'mostrato'} {a.voce}")
@@ -171,6 +179,7 @@ def cmd_testo(cfg):
         corpo = sito.corpo_da_args(a)
         if not corpo:
             raise Errore("testo vuoto: passa --testo-file o --testo")
+        # CRITICO: si riscrive SOLO il corpo; il front matter resta identico, byte per byte (CRLF compresi).
         testa = sito.unisci(righe[:fine + 1])  # gli '\r' sono gia' dentro le righe: non usare nl per unirle
         nuovo = testa + b"\n" + nl + sito.con_eol(corpo, nl) + nl
         sito.applica(base, a, {rel: nuovo} if nuovo != originale else {}, [rel], f"{cfg['nome']}: testo di {a.voce}")
@@ -181,6 +190,7 @@ def cmd_elimina(cfg):
     def f(a):
         base = sito.prepara(a)
         rel = trova(base, cfg, a.voce)
+        # CRITICO: eliminare e' irreversibile senza il checkpoint-AAAA-MM-GG (git): senza --si mostra solo l'anteprima.
         if not a.si:  # senza --si: solo anteprima (come --dry-run)
             a.dry_run = True
             print("ANTEPRIMA: per eliminare davvero rilancia con --si")

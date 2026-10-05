@@ -44,6 +44,8 @@ def cmd_leggi(a):
 
 def cmd_testo(a):
     base = sito.prepara(a)
+    # CRITICO: niente telefoni, indirizzi o P.IVA inventati: solo dati reali. Il footer NON si cambia in
+    # _includes/footer.liquid (vietato da AGENTS.md): si cambia solo footer_text di _config.yml.
     if not a.testo.strip():
         raise Errore("testo vuoto")
     config_sito.cambia(base, a, [("footer_text", a.testo)], "footer: testo")
@@ -60,6 +62,7 @@ def cmd_note_legali(a):
     base = sito.prepara(a)
     if a.nessuna == bool(a.percorso):
         raise Errore("usa un percorso (es. /note-legali/) OPPURE --nessuna")
+    # CRITICO: None = chiave vuota (falsa in Liquid: il link sparisce). Una stringa vuota sarebbe VERA e il link resterebbe.
     coppia = ("impressum_path", None if a.nessuna else a.percorso)
     config_sito.cambia(base, a, [coppia], "footer: note legali")
 
