@@ -199,8 +199,9 @@ pagination:
 
   <div class="col-sm-3">
     {% comment %} alt = thumbnail_alt (campo dell'admin) o, se vuoto, il titolo: mai alt="immagine" generico (SEO/accessibilita). {% endcomment %}
+    {% comment %} MINIATURA LEGGERA come in _layouts/post.liquid: se esiste assets/img/cover/nome.jpg (1200 px, creata dall'admin) si usa quella, altrimenti l'originale. thumbnail_hd: true forza l'originale. Tutto su una riga con trattini: niente righe vuote dentro il blocco HTML. {% endcomment %}{%- assign th_src = post.thumbnail -%}{%- unless post.thumbnail_hd == true or post.thumbnail_hd == 'true' -%}{%- assign th_fn = post.thumbnail | split: '/' | last -%}{%- assign th_ext = th_fn | split: '.' | last -%}{%- assign th_n = th_fn.size | minus: th_ext.size | minus: 1 -%}{%- assign th_base = th_fn | slice: 0, th_n -%}{%- assign th_rel = 'assets/img/cover/' | append: th_base | append: '.jpg' -%}{%- assign th_abs = '/' | append: th_rel -%}{%- assign th_file = site.static_files | where: 'path', th_abs | first -%}{%- if th_file -%}{%- assign th_src = th_rel -%}{%- endif -%}{%- endunless -%}
     {% if post.redirect == blank %}{% assign thumb_href = post.url | relative_url %}{% elsif post.redirect contains '://' %}{% assign thumb_href = post.redirect %}{% else %}{% assign thumb_href = post.redirect | relative_url %}{% endif %}
-    <a class="thumb-link" href="{{ thumb_href }}"{% if post.redirect contains '://' %} target="_blank" rel="noopener"{% endif %} tabindex="-1" aria-hidden="true"><img class="card-img" src="{{ post.thumbnail | relative_url }}" loading="lazy" alt="{{ post.thumbnail_alt | default: post.title | escape }}"></a>
+    <a class="thumb-link" href="{{ thumb_href }}"{% if post.redirect contains '://' %} target="_blank" rel="noopener"{% endif %} tabindex="-1" aria-hidden="true"><img class="card-img" src="{{ th_src | relative_url }}" loading="lazy" alt="{{ post.thumbnail_alt | default: post.title | escape }}"></a>
   </div>
 </div>
 {% endif %}
