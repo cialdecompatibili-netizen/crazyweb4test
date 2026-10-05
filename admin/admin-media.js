@@ -34,15 +34,15 @@
       return new Promise(function (ok, ko) {
         var im = new Image(); im.crossOrigin = 'anonymous';
         im.onload = function () {
-          var w = Math.min(im.naturalWidth, 1200), s = w / im.naturalWidth, h = Math.round(im.naturalHeight * s), ch = Math.min(h, Math.round(w * 0.75));
+          if ((im._sz || 1e9) < 300000 && im.naturalWidth <= 1200 && im.naturalHeight <= im.naturalWidth * 0.75) return ok(null); /* gia' leggera: niente ricompressione, l'articolo usa l'originale */ var w = Math.min(im.naturalWidth, 1200), s = w / im.naturalWidth, h = Math.round(im.naturalHeight * s), ch = Math.min(h, Math.round(w * 0.75));
           var cv = document.createElement('canvas'); cv.width = w; cv.height = ch; var cx = cv.getContext('2d');
           cx.fillStyle = '#fff'; cx.fillRect(0, 0, w, ch);
           cx.drawImage(im, 0, -Math.round((h - ch) * 0.3), w, h);
           ok(cv.toDataURL('image/jpeg', 0.8).split(',')[1]);
         };
         im.onerror = function () { ko(new Error('miniatura: immagine non leggibile')); };
-        im.src = A.rawUrl(p) + '?t=' + Date.now();
-      }).then(function (b64) { return A.putFile(dst, b64, '', 'admin: miniatura ' + base + '.jpg', true); });
+        fetch(A.rawUrl(p) + '?t=' + Date.now()).then(function (r) { return r.blob(); }).then(function (b) { im._sz = b.size; im.src = URL.createObjectURL(b); }, function () { im.src = A.rawUrl(p) + '?t=' + Date.now(); });
+      }).then(function (b64) { if (!b64) return; return A.putFile(dst, b64, '', 'admin: miniatura ' + base + '.jpg', true); });
     });
   };
   function shrink(f) {
