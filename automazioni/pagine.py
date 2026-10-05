@@ -41,6 +41,7 @@ from automazioni.common.sito import Errore  # noqa: E402
 
 def riga_corpo_sostituisci(righe, inizio_corpo, prefissi, nuova):
     """Sostituisce in place UNA riga del corpo. Ritorna 'cambiata' o 'gia'."""
+    # CRITICO: 'nuova' su UNA riga: a-capo dentro sposterebbero le righe e il CRLF per riga non sarebbe piu' valido.
     if "\n" in nuova or "\r" in nuova:
         raise Errore("'nuova' deve stare su una sola riga")
     nb = nuova.encode("utf-8")
@@ -50,6 +51,8 @@ def riga_corpo_sostituisci(righe, inizio_corpo, prefissi, nuova):
         r = righe[i].rstrip(b"\r")
         if r == nb or any(r.startswith(p) for p in pb):
             cand.append(i)
+    # CRITICO: la regola deve trovare ESATTAMENTE una riga, altrimenti non si scrive niente. Un prefisso troppo
+    # corto trova piu' righe: senza questo controllo si sovrascriverebbero CSS/JS/Liquid/Marte del corpo.
     if len(cand) != 1:
         raise Errore(f"{prefissi!r}: trovate {len(cand)} righe (atteso 1)")
     i = cand[0]
@@ -114,6 +117,7 @@ def cmd_imposta(a):
         if "=" not in coppia:
             raise Errore(f"'{coppia}': usa chiave=valore")
         k, _, v = coppia.partition("=")
+        # CRITICO: cambiare il permalink cambia l'URL e i vecchi indirizzi NON reindirizzano.
         if k == "permalink":
             print("ATTENZIONE: cambi il permalink di una pagina: i vecchi indirizzi non reindirizzano")
         dati, _ = sito.fm_imposta(dati, k.strip(), sito.valore_cli(v))
@@ -137,6 +141,7 @@ def cmd_testi(a):
         for pag in descr.get("pagine") or []:
             rel, n = applica_pagina(base, pag, correnti)
             conteggio += n
+        # CRITICO: se una regola fallisce l'errore arriva PRIMA di questo punto: nessun file viene scritto a meta'.
         cambi = {rel: d for rel, d in correnti.items() if d != (base / rel).read_bytes()}
         print(f"[{base.name}] {f.name}: {conteggio} modifiche")
         sito.applica(base, a, cambi, list(correnti), f"pagine: testi da {f.name}")

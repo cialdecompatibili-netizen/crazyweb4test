@@ -66,7 +66,7 @@ riga nella lista sopra.
 
 Per una RACCOLTA nuova (cartella di .md con front matter) non scrivere codice nuovo: copiare `news.py` (la piu' corta),
 cambiare `cartella`, il front matter in `_front_matter()` e le opzioni, aggiungerla a `MODULI` in `__main__.py`.
-Il codice che serve a piu' moduli va SEMPRE in `common/` (mai copiato): regola per risparmiare token e righe.
+Il codice che serve a piu' moduli va SEMPRE in `common/` (mai copiato): regola per risparmiare token e righe. I PUNTI CRITICI (cosa rompe il sito se sbagli) sono commentati nel codice con `# CRITICO:` accanto alla riga che li protegge: prima di modificare un modulo, `Get-ChildItem automazioni -Recurse -Include *.py | Select-String CRITICO`; quando scopri un nuovo punto critico, aggiungi il commento nel codice, non solo qui.
 
 ## Cosa manca ancora (controllo del 06/10/2026)
 

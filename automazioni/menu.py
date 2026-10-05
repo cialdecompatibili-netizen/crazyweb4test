@@ -64,6 +64,8 @@ def leggi_figli(righe, i, j):
             continue
         m = re.match(r"^\s*-\s+title:\s*(.*?)\s*$", t)
         if m:
+            # CRITICO: il blocco children viene RISCRITTO: cio' che non sa riscrivere (commenti, chiavi extra) lo rifiuta
+            # invece di perderlo in silenzio.
             if re.search(r"\s#", m.group(1)):
                 raise Errore(f"children: commento sulla riga {t.strip()!r}, non lo riscrivo")
             corr = {"title": sito.dequota(m.group(1)), "permalink": None}
@@ -90,6 +92,7 @@ def normalizza(figli):
     """Divider validi: mai in testa, mai doppi, mai in coda."""
     ris = []
     for f in figli:
+        # CRITICO (CLAUDE.md 34): divider mai in testa, mai doppi, mai in coda: il tema mostrerebbe righe orfane.
         if f["title"] == "divider" and (not ris or ris[-1]["title"] == "divider"):
             continue
         ris.append(f)
@@ -172,9 +175,12 @@ def cmd_voce(a):
             raise Errore("--ordine deve essere un numero (es. 3 oppure 0.5)")
         dati, _ = sito.fm_imposta(dati, "nav_order", v)
         for p in _pagine(base):
+            # CRITICO: stesso nav_order su due pagine = ordine casuale nel menu: si avvisa.
             if p["rel"] != rel and p["nav"] == "true" and p["ordine"] not in (None, "") and float(p["ordine"]) == float(v):
                 print(f"ATTENZIONE: anche '{p['title']}' ha nav_order {v}: l'ordine sara' casuale")
     if a.titolo:
+        # CRITICO (CLAUDE.md 34): il titolo del figlio nella tendina deve essere IDENTICO al title della pagina
+        # (il tema evidenzia cosi' la voce attiva): rinominando qui, va rinominato anche li'.
         vecchio = sito.fm_leggi(originale, "title")
         dati, _ = sito.fm_imposta(dati, "title", a.titolo)
         for p in _pagine(base):
@@ -194,6 +200,7 @@ def _controlla_permalink(base, perm):
     bu = sito.leggi_valore(sito.righe_di(cfg), "baseurl", 0, len(sito.righe_di(cfg)))
     if bu:
         nomi.add(bu.rstrip("/") + "/")
+    # CRITICO (CLAUDE.md 34): permalink del figlio SENZA baseurl: il tema lo aggiunge, altrimenti il link si raddoppia.
     if any(perm.startswith(n) for n in nomi):
         raise Errore(f"permalink {perm}: non scrivere il baseurl, il tema lo aggiunge da solo")
 
@@ -239,6 +246,7 @@ def cmd_rimuovi_figlio(a):
         return [f for f in figli if f["title"] != a.titolo]
 
     dati, finali = modifica_figli(originale, togli)
+    # CRITICO: una tendina vuota rompe il menu: si tolgono children e dropdown insieme.
     if not finali:  # tendina vuota: torna voce semplice
         righe = sito.righe_di(dati)
         fine = sito.fm_fine(righe)

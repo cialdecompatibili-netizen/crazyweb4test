@@ -101,8 +101,11 @@ def prepara(args, predefinito=None):
     """Trova il sito e applica i controlli di sicurezza. Ritorna la cartella."""
     base = trova_sito(args.sito or predefinito)
     nome, r = _blocco_repo(base)
+    # CRITICO: repo PROTETTO (prod) = solo con --conferma E il via esplicito di Mirco. Mai aggirarlo.
     if r.get("protetto") and not args.conferma and not args.dry_run:
         raise Errore(f"{base.name} e' un repo PROTETTO ({nome}): serve --conferma e il via esplicito di Mirco")
+    # CRITICO: se origin non e' il repo atteso da repos.json ci si ferma: evita di scrivere/pushare sul sito
+    # sbagliato (succede con le cartelle copiate o clonate).
     atteso = r.get("remoto")
     if atteso and atteso != "auto" and not args.dry_run:
         reale = _remoto_da_git(base)
@@ -146,6 +149,8 @@ _PLAIN = re.compile(r"^[A-Za-z0-9_./][A-Za-z0-9_./ \-]*$")
 _RISERVATE = {"true", "false", "null", "yes", "no", "on", "off", "~"}
 
 
+# CRITICO: i valori vanno quotati se YAML li leggerebbe come bool/numero/null ('no', '2026', 'true'):
+# senza virgolette il TIPO cambia in silenzio. Una sola riga: mai valori multi-riga.
 def yq(v):
     """Valore Python -> testo YAML su una riga (tra virgolette se serve)."""
     if isinstance(v, bool):
@@ -235,6 +240,7 @@ def trova_chiave(righe, chiave, a, b, minimo_indent=0):
         m = pat.match(righe[i])
         if m and ((minimo_indent == 0 and len(m.group(1)) == 0) or (minimo_indent > 0 and len(m.group(1)) >= minimo_indent)):
             ris.append(i)
+    # CRITICO: chiave duplicata = ambiguo: ci si ferma invece di indovinare (regola 'univoco' di CLAUDE.md).
     if len(ris) > 1:
         raise Errore(f"chiave duplicata: {chiave}")
     return ris[0] if ris else None
@@ -280,6 +286,7 @@ def imposta_riga(righe, chiave, valore, a, b, crea, annidata=False):
     val, comm = _valore_e_commento(riga[len(ind) + len(chiave) + 1:])
     fine = fine_blocco(righe, i, b)
     scalare_blocco = val[:1] in (b">", b"|")
+    # CRITICO: mai sostituire una lista/mappa (es. children:) con un valore semplice: si perderebbero i figli.
     if fine > i + 1 and not scalare_blocco:
         raise Errore(f"'{chiave}' e' un blocco (lista/mappa): non lo sostituisco con un valore semplice")
     if not scalare_blocco and dequota(val.decode("utf-8")) == dequota(nuovo.decode("utf-8")):
@@ -354,11 +361,13 @@ def checkpoint(base, push=False):
 def pubblica(base, rels, messaggio):
     """Commit SOLO dei file indicati + pull --rebase + push. Ritorna una riga di riepilogo."""
     ramo = git(base, "rev-parse", "--abbrev-ref", "HEAD").stdout.strip()
+    # CRITICO: push automatico solo da main (il deploy parte dal push). Piu' push ravvicinati = run 'cancelled': normale.
     if ramo != "main":
         raise Errore(f"ramo corrente '{ramo}': il push automatico e' solo su main")
     esistenti = [r for r in rels if (base / r).exists() or git(base, "ls-files", "--", r).stdout.strip()]
     if not esistenti:  # `git add -A --` SENZA percorsi aggiungerebbe TUTTO il repo: mai chiamarlo vuoto
         return "push: nulla da committare"
+    # CRITICO: add/commit SOLO dei file toccati, mai `git add -A` del repo intero (porterebbe dentro lavoro altrui).
     git(base, "add", "-A", "--", *esistenti)
     toccati = git(base, "diff", "--cached", "--name-only", "--", *esistenti).stdout.split()
     if not toccati:
@@ -368,6 +377,7 @@ def pubblica(base, rels, messaggio):
         raise Errore("commit fallito: " + (c.stderr or c.stdout).strip()[:200])
     if git(base, "remote").stdout.strip() == "":
         return f"commit ok ({len(toccati)} file), nessun remote: push saltato"
+    # CRITICO: pull --rebase prima del push: l'admin su GitHub scrive sullo stesso repo.
     p = git(base, "pull", "--rebase", "origin", "main")
     if p.returncode != 0:
         raise Errore("pull --rebase fallito, risolvi a mano: " + (p.stderr or p.stdout).strip()[:200])
@@ -395,8 +405,10 @@ def applica(base, args, cambi, bersagli, messaggio):
                 raise Errore(f"{rel}: non esiste, niente da eliminare")
             print(f"{prefisso}{rel}: ELIMINATO ({len(vecchio.splitlines())} righe)")
             continue
+        # CRITICO (CLAUDE.md): MAI BOM. Set-Content/Out-File di PowerShell lo aggiungono: si scrive solo in binario.
         if nuovo.startswith(BOM):
             raise Errore(f"{rel}: BOM nel risultato, mi fermo")
+        # CRITICO: file CRLF = TUTTE le righe CRLF. A-capo misti sporcano il diff di tutto il file.
         if vecchio and eol(vecchio) == b"\r\n" and nuovo.count(b"\n") != nuovo.count(b"\r\n"):
             raise Errore(f"{rel}: a-capo misti nel risultato (il file e' CRLF), mi fermo")
         n = righe_diverse(vecchio, nuovo)
@@ -404,6 +416,7 @@ def applica(base, args, cambi, bersagli, messaggio):
     if args.dry_run:
         return
     if cambi:
+        # CRITICO: il checkpoint-AAAA-MM-GG (branch) si crea PRIMA di scrivere: e' il modo di tornare indietro.
         ck = checkpoint(base, args.push)
         for rel, nuovo in cambi.items():
             p = base / rel
